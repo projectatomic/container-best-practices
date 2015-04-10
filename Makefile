@@ -1,44 +1,29 @@
 LABS=labs.adoc \
-    content/lab1/lab1.labs.adoc \
-    content/lab2/lab2.labs.adoc \
-    content/lab3/lab3.labs.adoc \
-    content/lab4/lab4.labs.adoc \
-    content/lab5/lab5.labs.adoc \
-    content/lab6/lab6.labs.adoc \
-    content/lab7/lab7.labs.adoc
+    content/chapter1/chapter1.adoc \
+    content/chapter2/chapter2.adoc \
+    content/chapter3/chapter3.adoc \
+    content/chapter4/chapter4.adoc \
+    content/chapter5/chapter5.adoc \
+    content/chapter6/chapter6.adoc \
+    content/chapter7/chapter7.adoc
 
-# SLIDES=slides.adoc \
-    content/lab1/lab1.slides.adoc \
-    content/lab2/lab2.slides.adoc \
-    content/lab3/lab3.slides.adoc \
-    content/lab4/lab4.slides.adoc \
-    content/lab5/lab5.slides.adoc 
-
-all: $(LABS) $(SLIDES) labs slides 
+all: $(LABS) labs
 
 labs: $(LABS)
 	asciidoc -v labs.adoc
 	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
 	$(foreach lab,$(LABS), asciidoc -v $(lab);)
 
-slides: $(SLIDES)
-	asciidoc --backend slidy -v slides.adoc
-	$(foreach slide,$(SLIDES), asciidoc --backend slidy -v $(slide);)
-#	a2x -fpdf -dbook --fop --no-xmllint -v slides.adoc	# commented out as SVG causes compile fail
-
-html: $(LABS) $(SLIDES)
+html: $(LABS) 
 	asciidoc -v labs.adoc
-	asciidoc --backend slidy -v slides.adoc
+	asciidoc --backend 
 	$(foreach lab,$(LABS), asciidoc -v $(lab);)
-	$(foreach slide,$(SLIDES), asciidoc --backend slidy -v $(slide);)
 
-pdf: $(LABS) $(SLIDES)
+pdf: $(LABS) 
 	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
-#	a2x -fpdf -dbook --fop --no-xmllint -v slides.adoc	# commented out as SVG causes compile fail
 
 epub: $(LABS) $(SLIDES)
 	a2x -fepub -dbook --no-xmllint -v labs.adoc
-	a2x -fepub -dbook --no-xmllint -v slides.adoc
 
 clean:
 	find . -type f -name \*.html -exec rm -f {} \;
