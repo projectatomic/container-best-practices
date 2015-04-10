@@ -1,11 +1,13 @@
 LABS=labs.adoc \
+    content/overview/overview.adoc \
     content/chapter1/chapter1.adoc \
     content/chapter2/chapter2.adoc \
     content/chapter3/chapter3.adoc \
     content/chapter4/chapter4.adoc \
     content/chapter5/chapter5.adoc \
     content/chapter6/chapter6.adoc \
-    content/chapter7/chapter7.adoc
+    content/chapter7/chapter7.adoc \
+    content/appendix/appendix.adoc
 
 all: $(LABS) labs
 
