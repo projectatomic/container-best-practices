@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
 [[Chapter_1]]
-= Need to Name
+= Location of Dockerfiles and Docker Images
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,12 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
+== Dockerfile (Image Source) Location
+Where Dockerfiles should be available.
 
+== Image Location
+Where images should be available.
+
+=== CentOS Images
+
+=== Fedora Images

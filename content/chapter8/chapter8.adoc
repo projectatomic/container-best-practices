@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
-[[Chapter_5]]
-= Dockerfile Instructions
+[[Chapter_8]]
+= References
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,5 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-List of Docker Instructions with short explanation and preffered usage.
+References to external sites and project-specific guidelines.
 

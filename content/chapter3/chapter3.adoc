@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
 [[Chapter_3]]
-= Need to Name
+= Image Naming
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
-
+Image naming standards.

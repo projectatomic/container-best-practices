@@ -8,5 +8,5 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
-
+This document provides guidance and recommendations for creating
+Dockerfiles and building Docker images.
