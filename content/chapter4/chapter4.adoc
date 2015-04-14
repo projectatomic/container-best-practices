@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
 [[Chapter_4]]
-= Need to Name
+= General Guidelines
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,20 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
+== Content
+TBD
+
+== Users
+TBD
+
+== Working Directory
+TBD
+
+== Exposing Ports
+TBD
+
+== Logging
+TBD
+
+...
 

@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
 [[Chapter_6]]
-= Need to Name
+= Layered Image Specific Guidelines
 :data-uri:
 :icons:
 :toc:
