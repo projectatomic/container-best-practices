@@ -1,5 +1,5 @@
 // vim: set syntax=asciidoc:
-[[Chapter_1]]
+[[location_images_dockerfiles]]
 = Location of Dockerfiles and Docker Images
 :data-uri:
 :icons:

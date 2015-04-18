@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
-[[Chapter_7]]
-= Base Image Specific Guidelines
+[[dockerfile_instructions]]
+= Dockerfile Instructions
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,5 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
+List of Docker Instructions with short explanation and preffered usage.
 
