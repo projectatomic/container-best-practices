@@ -29,6 +29,8 @@ include::content/spc/spc.adoc[]
 
 include::content/atomic_app/atomic_app.adoc[]
 
+include::content/openshift/openshift.adoc[]
+
 include::content/references/references.adoc[]
 
 include::content/appendix/appendix.adoc[]
