@@ -31,4 +31,6 @@ include::content/atomic_app/atomic_app.adoc[]
 
 include::content/references/references.adoc[]
 
+include::content/middleware/middleware.adoc[]
+
 include::content/appendix/appendix.adoc[]
