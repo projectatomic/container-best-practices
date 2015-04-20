@@ -11,20 +11,22 @@
 
 include::content/overview/overview.adoc[]
 
-include::content/chapter1/chapter1.adoc[]
+include::content/location_images_dockerfiles/location_images_dockerfiles.adoc[]
 
-include::content/chapter3/chapter3.adoc[]
+include::content/image_naming/image_naming.adoc[]
 
-include::content/chapter2/chapter2.adoc[]
+include::content/layering/layering.adoc[]
 
-include::content/chapter4/chapter4.adoc[]
+include::content/general_guidelines/general_guidelines.adoc[]
 
-include::content/chapter5/chapter5.adoc[]
+include::content/dockerfile_instructions/dockerfile_instructions.adoc[]
 
-include::content/chapter6/chapter6.adoc[]
+include::content/layered_image_spec/layered_image_spec.adoc[]
 
-include::content/chapter7/chapter7.adoc[]
+include::content/base_image_spec/base_image_spec.adoc[]
 
-include::content/chapter8/chapter8.adoc[]
+include::content/spc/spc.adoc[]
+
+include::content/references/references.adoc[]
 
 include::content/appendix/appendix.adoc[]

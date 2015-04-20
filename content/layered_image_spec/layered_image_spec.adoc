@@ -1,0 +1,12 @@
+// vim: set syntax=asciidoc:
+[[layered_image_spec]]
+= Layered Image Specific Guidelines
+:data-uri:
+:icons:
+:toc:
+:toclevels 4:
+:numbered:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+Test Text.
+

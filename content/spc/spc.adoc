@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
-[[Chapter_6]]
-= Layered Image Specific Guidelines
+[[spc]]
+= Super Privileged Containers
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,5 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
-
+This document provides guidance and recommendations for creating
+Dockerfiles and building Docker images.

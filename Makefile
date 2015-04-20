@@ -1,13 +1,15 @@
 LABS=labs.adoc \
     content/overview/overview.adoc \
-    content/chapter1/chapter1.adoc \
-    content/chapter2/chapter2.adoc \
-    content/chapter3/chapter3.adoc \
-    content/chapter4/chapter4.adoc \
-    content/chapter5/chapter5.adoc \
-    content/chapter6/chapter6.adoc \
-    content/chapter7/chapter7.adoc \
-    content/appendix/appendix.adoc
+    content/location_images_dockerfiles/location_images_dockerfiles.adoc \
+    content/layering/layering.adoc \
+    content/image_naming/image_naming.adoc \
+    content/general_guidelines/general_guidelines.adoc \
+    content/dockerfile_instructions/dockerfile_instructions.adoc \
+    content/layered_image_spec/layered_image_spec.adoc \
+    content/base_image_spec/base_image_spec.adoc \
+    content/spc/spc.adoc \
+    content/appendix/appendix.adoc \
+    content/references/references.adoc
 
 all: $(LABS) labs
 

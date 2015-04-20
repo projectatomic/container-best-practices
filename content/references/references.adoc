@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
-[[Chapter_4]]
-= General Guidelines
+[[references]]
+= References
 :data-uri:
 :icons:
 :toc:
@@ -8,20 +8,5 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-== Content
-TBD
-
-== Users
-TBD
-
-== Working Directory
-TBD
-
-== Exposing Ports
-TBD
-
-== Logging
-TBD
-
-...
+References to external sites and project-specific guidelines.
 

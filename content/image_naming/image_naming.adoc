@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
-[[Chapter_5]]
-= Dockerfile Instructions
+[[image_naming]]
+= Image Naming
 :data-uri:
 :icons:
 :toc:
@@ -8,5 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-List of Docker Instructions with short explanation and preffered usage.
-
+Image naming standards.
