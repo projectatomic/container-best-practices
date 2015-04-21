@@ -8,6 +8,7 @@ LABS=labs.adoc \
     content/layered_image_spec/layered_image_spec.adoc \
     content/base_image_spec/base_image_spec.adoc \
     content/spc/spc.adoc \
+    content/atomic_app/atomic_app.adoc \
     content/appendix/appendix.adoc \
     content/references/references.adoc
 

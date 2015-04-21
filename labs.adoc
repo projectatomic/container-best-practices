@@ -27,6 +27,8 @@ include::content/base_image_spec/base_image_spec.adoc[]
 
 include::content/spc/spc.adoc[]
 
+include::content/atomic_app/atomic_app.adoc[]
+
 include::content/references/references.adoc[]
 
 include::content/appendix/appendix.adoc[]
