@@ -33,4 +33,6 @@ include::content/openshift/openshift.adoc[]
 
 include::content/references/references.adoc[]
 
+include::content/middleware/middleware.adoc[]
+
 include::content/appendix/appendix.adoc[]
