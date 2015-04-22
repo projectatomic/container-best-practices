@@ -7,3 +7,9 @@
 :toclevels 4:
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
+
+tbd
+
+== Squashing Layers
+
+tbd

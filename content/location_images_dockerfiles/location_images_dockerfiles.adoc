@@ -8,11 +8,13 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-== Dockerfile (Image Source) Location
-Where Dockerfiles should be available.
+== Dockerfile Location
+
+Upstream Dockerfiles should be hosted in a public GIT repository, for example https://github.com[GitHub]. Ideally, the repository should be created under the organization relevant to a particular project. For example, http://www.softwarecollections.org[Software Collections] Dockerfiles are available under the GitHub https://github.com/sclorg[sclorg] organization.
 
 == Image Location
-Where images should be available.
+
+Upstream Docker images should be available on https://registry.hub.docker.com/[Docker Hub].
 
 === CentOS Images
 
