@@ -11,6 +11,10 @@
 == Content
 TBD
 
+== Updating Base Image Software
+TBD
+// aka yum update in Dockerfiles. Different policy for Fedora and CentOS?
+
 == Users
 TBD
 
@@ -24,4 +28,3 @@ TBD
 TBD
 
 ...
-

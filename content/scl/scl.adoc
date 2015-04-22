@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
-[[Chapter_2]]
-= Layering
+[[software_collections]]
+= Software Collections
 :data-uri:
 :icons:
 :toc:
@@ -8,8 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-tbd
 
-== Squashing Layers
-
-tbd

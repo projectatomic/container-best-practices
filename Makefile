@@ -10,6 +10,7 @@ LABS=labs.adoc \
     content/spc/spc.adoc \
     content/middleware/middleware.adoc \
     content/openshift/openshift.adoc \
+    content/scl/scl.adoc \
     content/atomic_app/atomic_app.adoc \
     content/appendix/appendix.adoc \
     content/references/references.adoc
