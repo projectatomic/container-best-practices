@@ -8,4 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Docker is a platform for developers and sysadmins to build, ship and run distributed applications. This document provides guidance and recommendations for creating Dockerfiles and building Docker images.
+Docker is a platform for developers and system administrators to build, ship and run distributed applications. This document provides guidance and recommendations for creating Dockerfiles and building Docker images.

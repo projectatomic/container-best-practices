@@ -12,8 +12,17 @@
 TBD
 
 == Updating Base Image Software
-TBD
-// aka yum update in Dockerfiles. Different policy for Fedora and CentOS?
+
+Updating base-image software is a common practice in many Dockerfiles:
+
+----
+yum -y update && yum -y clean all
+----
+
+However, before doing so, you should first consider whether updating base-image software would be really beneficial and bring any added value. 
+Updating software can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size. Base images themselves are meant to be updated on a regular basis and provide software that has been tested for the particular environment, so there is no need for running additional updates.
+
+TBD: different recommendations for Fedora, CentOS/RHEL base images?
 
 == Users
 TBD
