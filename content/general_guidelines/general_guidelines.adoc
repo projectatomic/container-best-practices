@@ -22,7 +22,14 @@ TBD
 TBD
 
 == Exposing Ports
-TBD
+
+Important ports should always be exposed using the +EXPOSE+ instruction in a Dockerfile. The +EXPOSE+ instruction declares the ports on which a container will listen for connections. You should specify ports your application commonly uses, for example the Dockerfile for an image containing MongoDB would use:
+
+----
+EXPOSE 27017
+----
+
+// For information on exposing ports in Software Collection images, see the xref:software_collections[Software Collections] chapter.
 
 == Logging
 TBD
