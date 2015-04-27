@@ -11,6 +11,14 @@
 == Content
 TBD
 
+=== Documentation
+
+Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
+
+----
+RUN yum -y update --setopt=tsflags=nodocs
+----
+
 == Updating Base Image Software
 
 Updating base-image software is a common practice in many Dockerfiles:
@@ -20,9 +28,9 @@ yum -y update && yum -y clean all
 ----
 
 However, before doing so, you should first consider whether updating base-image software would be really beneficial and bring any added value. 
-Updating software can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size. Base images themselves are meant to be updated on a regular basis and provide software that has been tested for the particular environment, so there is no need for running additional updates.
+Updating software can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for the particular environment, so there is no need for running additional updates.
 
-TBD: different recommendations for Fedora, CentOS/RHEL base images?
+TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
 == Users
 TBD
@@ -32,11 +40,16 @@ TBD
 
 == Exposing Ports
 
-Important ports should always be exposed using the +EXPOSE+ instruction in a Dockerfile. The +EXPOSE+ instruction declares the ports on which a container will listen for connections. You should specify ports your application commonly uses, for example the Dockerfile for an image containing MongoDB would use:
+The +EXPOSE+ instruction declares the ports on which a container will listen for incoming connections. You should specify ports your application commonly uses; for example, as seen in this https://github.com/openshift/mysql/blob/master/5.5/Dockerfile[mysql] example:
 
 ----
-EXPOSE 27017
+EXPOSE 3306
 ----
+
+IMPORTANT: The TCP/IP port numbers below 1024 are special in that normal users are not allowed to run servers on them.
+
+Therefore, for example for Apache server, ports 8080 or 8433 (HTTP or HTTPS) should be exposed. Otherwise, only the root user will be allowed to run Apache server inside a container.
+
 
 // For information on exposing ports in Software Collection images, see the xref:software_collections[Software Collections] chapter.
 
