@@ -14,13 +14,7 @@ This chapter provides a list of Docker Instructions with a short explanation and
 
 === MAINTAINER
 
-Use the +MAINTAINER+ instruction to set the _Auhtor_ field of the generated images. This instruction should contain a real person's name rather than the name of a project or organizations. This way, it is easier for the image consumer to reach out to the image owner and address potential problems.
-
-For example:
-
-----
-MAINTAINER  Jane Doe <jdoe@redhat.com>
-----
+Use the +MAINTAINER+ instruction to set the _Author_ field of the generated images. As most projects are maintained by more than one person, it is preferable to use a universal contact, such as _mailing list address_, _bug tracking mechanism URL_ or _URL of a project_ rather than a real person's name. Generic contact ensures consistency, allows for addressing problems in an appropriate manner and does not discourage potential contributors from collaborating by being too specific.
 
 === LABEL
 

@@ -24,7 +24,7 @@ RUN yum -y update --setopt=tsflags=nodocs
 Updating base-image software is a common practice in many Dockerfiles:
 
 ----
-yum -y update && yum -y clean all
+RUN yum -y update && yum -y clean all
 ----
 
 However, before doing so, you should first consider whether updating base-image software would be really beneficial and bring any added value. 
