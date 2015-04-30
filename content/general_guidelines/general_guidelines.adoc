@@ -19,18 +19,19 @@ Because you want to keep the image as small as possible, you can avoid installin
 RUN yum -y update --setopt=tsflags=nodocs
 ----
 
-== Updating Base Image Software
+== Updating Base-Image Software
 
-Updating base-image software is a common practice in many Dockerfiles:
+Avoid updating base-image software unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
+
+Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size.
+
+In other words, avoid using instructions similar to this one:
 
 ----
-RUN yum -y update && yum -y clean all
+RUN yum -y update
 ----
 
-However, before doing so, you should first consider whether updating base-image software would be really beneficial and bring any added value. 
-Updating software can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for the particular environment, so there is no need for running additional updates.
-
-TBD: different recommendations for Fedora and CentOS/RHEL base images?
+// TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
 == Users
 TBD
@@ -46,7 +47,7 @@ The +EXPOSE+ instruction declares the ports on which a container will listen for
 EXPOSE 3306
 ----
 
-IMPORTANT: The TCP/IP port numbers below 1024 are special in that normal users are not allowed to run servers on them.
+IMPORTANT: The TCP/IP port numbers below 1024 are special in that normal users are not allowed to bind on them.
 
 Therefore, for example for Apache server, ports 8080 or 8433 (HTTP or HTTPS) should be exposed. Otherwise, only the root user will be allowed to run Apache server inside a container.
 
