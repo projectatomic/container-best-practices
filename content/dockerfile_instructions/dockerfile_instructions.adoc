@@ -8,8 +8,43 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-List of Docker Instructions with short explanation and preffered usage.
+This chapter provides a list of Docker Instructions with a short explanation and preferred usage.
+
+== General Usage
+
+=== MAINTAINER
+
+Use the +MAINTAINER+ instruction to set the _Author_ field of the generated images. As most projects are maintained by more than one person, it is preferable to use a universal contact, such as _mailing list address_, _bug tracking mechanism URL_ or _URL of a project_ rather than a real person's name. Generic contact ensures consistency, allows for addressing problems in an appropriate manner and does not discourage potential contributors from collaborating by being too specific.
+
+=== LABEL
+
+Supported in Docker 1.6 and later, +LABEL+ is meant to store metadata about images and containers in key-value pairs. +LABELs+ should provide additional information about images and containers, indexing, searching and should be used to annotate the Docker images and containers. +LABEL+ can also be used to provide useful information to projects that catalogize or utilize Docker images, such as Satellite, OpenShift or Atomic.
+
+NOTE: Do not get +LABEL+ mistaken with +ENV+ -- some projects, for example OpenShift, might use +ENV+ to provide metadata temporarily, until +LABEL+ is not fully supported across operating systems.
+
+The following snippet shows usage of +LABEL+:
+
+----
+LABEL MYSQL_VERSION           5.5
+LABEL IMAGE_DESCRIPTION       MySQL 5.5
+LABEL IMAGE_TAGS              mysql,mysql55
+LABEL IMAGE_EXPOSE_SERVICES   3306:mysql
+----
+
+==== Mandatory LABELs
+
+The following +LABELs+ should always be part of your Dockerfile. TBD
+
+
+=== ENTRYPOINT vs CMD
+
+tbd
+
 
 == systemd
 
+tbd
+
 == non-systemd
+
+tbd
