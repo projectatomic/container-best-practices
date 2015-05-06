@@ -8,4 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-
+This chapter covers OpenShift-related topics, such as STI images. 

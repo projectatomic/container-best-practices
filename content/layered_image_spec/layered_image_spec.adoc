@@ -8,5 +8,6 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
+Specifics of creating layered images common for various projects, such as features provided by an image, content, layering rules, etc.
 
+// Might be covered in other chapters eventually  

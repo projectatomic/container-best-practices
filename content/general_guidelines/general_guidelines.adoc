@@ -13,7 +13,9 @@ TBD
 
 == Enabling Necessary Repositories
 
-// TBD - is this necessary? Something with secrets..
+TBD
+
+// maybe move somewhere RHEL-specific
 
 == Clearing the yum Caches
 
@@ -26,7 +28,7 @@ As an example of **yum clean** usage in a Dockerfile, see https://github.com/ope
 Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
 
 ----
-RUN yum -y update --setopt=tsflags=nodocs
+RUN yum -y mysql --setopt=tsflags=nodocs
 ----
 
 == Updating Base-Image Software

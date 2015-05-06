@@ -8,7 +8,7 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-tbd
+Guidelines on creating layers.
 
 == Squashing Layers
 

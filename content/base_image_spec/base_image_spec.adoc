@@ -8,5 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Test Text.
-
+Specifics of creating base images common for various projects.

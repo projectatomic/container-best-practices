@@ -8,5 +8,5 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-This document provides guidance and recommendations for creating
+This chapter provides guidance and recommendations for creating
 Dockerfiles and building Docker images.
