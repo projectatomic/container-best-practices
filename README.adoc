@@ -29,6 +29,12 @@ To:
 iconsdir=/etc/asciidoc/images/icons
 ----
 
+== Running the tools from a container
+
+. Please see the authorative README included in the Fedora-Dockerfiles repo here.
+
+https://github.com/fedora-cloud/Fedora-Dockerfiles/blob/master/container-best-practices/README.md[Fedora-Dockerfiles]
+
 == Asciidoc Compiling
 * To create a single HTML document: 
 +
