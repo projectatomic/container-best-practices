@@ -33,6 +33,8 @@ include::content/openshift/openshift.adoc[]
 
 include::content/middleware/middleware.adoc[]
 
+include::content/docker_lint/docker_lint.adoc[]
+
 include::content/scl/scl.adoc[]
 
 include::content/references/references.adoc[]
