@@ -37,11 +37,9 @@ https://github.com/fedora-cloud/Fedora-Dockerfiles/blob/master/container-best-pr
 
 * To use the trusted build from the Docker registry.  Note that you will need to change your path of the workdir below.
 
-----
-sudo docker run --privileged -dt -v /home/path_to/git_projects/container-best-practices/:/workdir fedora/container-best-practices make
+ sudo docker run --privileged -dt -v /home/path_to/git_projects/container-best-practices/:/workdir fedora/container-best-practices make
 
-sudo docker run --privileged -dt -v /home/path_to/git_projects/container-best-practices/:/workdir fedora/container-best-practices make clean
-----
+ sudo docker run --privileged -dt -v /home/path_to/git_projects/container-best-practices/:/workdir fedora/container-best-practices make clean
 
 
 == Asciidoc Compiling
