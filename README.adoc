@@ -35,7 +35,7 @@ iconsdir=/etc/asciidoc/images/icons
 
 https://github.com/fedora-cloud/Fedora-Dockerfiles/blob/master/container-best-practices/README.md[Fedora-Dockerfiles]
 
-* To use the trusted build from the Docker registry.
+* To use the trusted build from the Docker registry.  Note that you will need to change your path of the workdir below.
 
 ----
 sudo docker run --privileged -dt -v /home/path_to/git_projects/container-best-practices/:/workdir fedora/container-best-practices make
