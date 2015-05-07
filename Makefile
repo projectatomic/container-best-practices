@@ -9,6 +9,7 @@ LABS=labs.adoc \
     content/base_image_spec/base_image_spec.adoc \
     content/spc/spc.adoc \
     content/middleware/middleware.adoc \
+    content/docker_lint/docker_lint.adoc \
     content/openshift/openshift.adoc \
     content/scl/scl.adoc \
     content/atomic_app/atomic_app.adoc \
