@@ -47,7 +47,7 @@ docker run -i -t fedora /bin/bash
 Here +/bin/bash+ is passed as argument to the +ENTRYPOINT+ which is +/bin/sh -c+. Docker also provides a way to override the entrypoint by providing a --entrypoint flag.
 
 ----
-docker run -entrypoint /bin/cat -i -t fedora /etc/redhat-release
+docker run --entrypoint /bin/cat -i -t fedora /etc/redhat-release
 ----
 
 In the example above, the default +ENTRYPOINT+ is overridden by the flag and +/etc/redhat-release+ is passed as a parameter to +/bin/cat+.
