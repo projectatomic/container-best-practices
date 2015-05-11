@@ -34,6 +34,15 @@ pdf: $(LABS)
 epub: $(LABS) $(SLIDES)
 	a2x -fepub -dbook --no-xmllint -v labs.adoc
 
+check:
+	@for docsrc in $(LABS); do \
+		echo -n "Processing '$$docsrc' ..."; \
+		cat $$docsrc | aspell -a --lang=en \
+					 --dont-backup \
+					 --personal=./containers.dict | grep -e '^&'; \
+		[ "$$?" == "0" ] && exit 1 || echo ' no errors.'; \
+	done
+
 clean:
 	find . -type f -name \*.html -exec rm -f {} \;
 	find . -type f -name \*.pdf -exec rm -f {} \;
