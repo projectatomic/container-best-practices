@@ -38,7 +38,31 @@ The following +LABELs+ should always be part of your Dockerfile. TBD
 
 === ENTRYPOINT vs CMD
 
-tbd
++ENTRYPOINT+ defines the default binary with which the Docker container will start. In other words, it makes the container behave like a binary. The default +ENTRYPOINT+ for Docker is +/bin/sh -c+. Consider the following example:
+
+----
+docker run -i -t fedora /bin/bash
+----
+
+Here +/bin/bash+ is passed as argument to the +ENTRYPOINT+ which is +/bin/sh -c+. Docker also provides a way to override the entrypoint by providing the --entrypoint flag.
+
+----
+docker run --entrypoint /bin/cat -i -t fedora /etc/redhat-release
+----
+
+In the example above, the default +ENTRYPOINT+ is overridden by the flag and +/etc/redhat-release+ is passed as a parameter to +/bin/cat+.
+
++CMD+ is used to execute the supplied command as a parameter to the +ENTRYPOINT+. It is advisable to use +CMD+ unless you are absolutely sure about changing the +ENTRYPOINT+ since all the execution will run as the parameter to the +ENTRYPOINT+. Using +ENTRYPOINT+ can easily confuse the other users who are not familiar with the image and can make debugging or even obtaining a shell difficult since everything will be a parameter to the +ENTRYPOINT+
+
+CMD Example:
+----
+CMD ["python","myscript.py"]
+----
+
+ENTRYPOINT Example:
+----
+ENTRYPOINT ["/usr/bin/python"]
+----
 
 
 == systemd
