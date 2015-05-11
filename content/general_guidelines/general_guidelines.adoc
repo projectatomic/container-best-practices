@@ -21,7 +21,27 @@ TBD
 
 To keep images as small as possible, it is beneficial to clear the temporary yum cache files after installing or updating packages. To remove unnecessary cache files, use the **yum clean** command. The command is described in detail in the +yum(8)+ man page.
 
-As an example of **yum clean** usage in a Dockerfile, see https://github.com/openshift/mysql/blob/master/5.5/Dockerfile[this] mysql Dockerfile.
+Cache needs to be cleaned out of every layer that updates or installs software. That means if you perform multiple install operations within one layer, you need to run **yum clean** at the end of it. For example:
+
+----
+RUN yum install -y epel-release && \
+    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+    v8314 mongodb24-mongodb mongodb24 && \
+    yum clean all
+----
+
+On the other hand, if you perform multiple install/update operations on multiple layers, **yum clean** must be run on each layer. For example:
+
+----
+RUN yum install -y epel-release && \
+    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    yum clean all
+
+RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+    v8314 mongodb24-mongodb mongodb24 && \
+    yum clean all
+----
 
 == Documentation
 
