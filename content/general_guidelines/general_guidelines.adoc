@@ -11,12 +11,44 @@
 == Content
 TBD
 
-=== Documentation
+== Enabling Necessary Repositories
+
+TBD
+
+// maybe move somewhere RHEL-specific
+
+== Clearing the yum Caches
+
+To keep images as small as possible, it is beneficial to clear the temporary yum cache files after installing or updating packages. To remove unnecessary cache files, use the **yum clean** command. The command is described in detail in the +yum(8)+ man page.
+
+Cache needs to be cleaned out of every layer that updates or installs software. That means if you perform multiple install operations within one layer, you need to run **yum clean** at the end of it. For example:
+
+----
+RUN yum install -y epel-release && \
+    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+    v8314 mongodb24-mongodb mongodb24 && \
+    yum clean all
+----
+
+On the other hand, if you perform multiple install/update operations on multiple layers, **yum clean** must be run on each layer. For example:
+
+----
+RUN yum install -y epel-release && \
+    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    yum clean all
+
+RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+    v8314 mongodb24-mongodb mongodb24 && \
+    yum clean all
+----
+
+== Documentation
 
 Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
 
 ----
-RUN yum -y update --setopt=tsflags=nodocs
+RUN yum -y mysql --setopt=tsflags=nodocs
 ----
 
 == Updating Base-Image Software

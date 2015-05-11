@@ -8,3 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
+This chapter describes practices typical for creating Middleware Docker images.

@@ -8,4 +8,4 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-
+Software Collections specific guidelines.
