@@ -14,8 +14,6 @@ Upstream Dockerfiles should be hosted in a public GIT repository, for example ht
 
 == Image Location
 
-Upstream Docker images should be available on https://registry.hub.docker.com/[Docker Hub].
+Upstream Docker images, such as CentOS and Fedora base images and layered images based on these, should be publicly available on https://registry.hub.docker.com/[Docker Hub].
 
-=== CentOS Images
-
-=== Fedora Images
+For details on using the Docker Hub registry, see https://docs.docker.com/userguide/dockerimages/[Docker User Guide].
