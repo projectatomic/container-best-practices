@@ -8,7 +8,32 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Guidelines on creating layers.
+This chapter provides guidelines on creating layers.
+
+== Minimizing the Number of Layers
+
+Not having too many layers does not necessarily ensure good readability as for minimizing the number of layers you will need to chain groups of commands. In order to find balance between the number of layers and easy readability, you will have to find the best strategy.
+
+In general, a new layer is created for every new instruction defined. However, this does not necessarily mean that one instruction should be associated with only one command or definition.
+
+To ensure transparency and good overview of the layer content, it is preferable to group related operations in one layer. For example, take this snippet from the OpenShift Python 3.3 Dockerfile:
+
+----
+RUN yum install -y \
+    https://www.softwarecollections.org/en/scls/rhscl/python33/epel-7-x86_64/download/rhscl-python33-epel-7-x86_64.noarch.rpm && \
+    yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus \
+    python33 python33-python-devel python33-python-setuptools \
+    epel-release && \
+    yum install -y --setopt=tsflags=nodocs install nss_wrapper && \
+    yum clean all -y && \
+    scl enable python33 "easy_install pip" && \
+    chown -R default:default /opt/openshift && \
+    chmod -R og+rwx /opt/openshift
+----
+
+Rather than executing every single command as a separate instruction, they are all part of one layer as they are all closely related to installation and configuration of `sti-python`. With this approach, you save a few layers and readability is still preserved since the operations are grouped together meaningfully.
+
+// Find a good example for the opposite case, when we want to have similar operations split into multiple instructions.
 
 == Squashing Layers
 
