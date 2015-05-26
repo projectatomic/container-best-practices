@@ -48,7 +48,7 @@ RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
 Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
 
 ----
-RUN yum -y mysql --setopt=tsflags=nodocs
+RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
 == Updating Base-Image Software
