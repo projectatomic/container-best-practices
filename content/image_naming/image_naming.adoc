@@ -8,4 +8,10 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Image naming standards.
+This section describes the image naming standards for Docker images.
+
+Docker URLs are similar to github repository names. Their structure is:
+
+  REGISTRY:PORT/USER/REPO:TAG
+
+The implicit default registry is `docker.io`. This means that relative URLs, such as `redhat/rhel` resolve to `docker.io/redhat/rhel`.
