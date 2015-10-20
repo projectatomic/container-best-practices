@@ -51,9 +51,9 @@ Because you want to keep the image as small as possible, you can avoid installin
 RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
-== Updating Base-Image Software
+== Updating Software supplied by Base-Image
 
-Avoid updating base-image software unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
+Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
 
 Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size.
 
