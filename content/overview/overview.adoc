@@ -8,4 +8,28 @@
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Docker is a platform for developers and system administrators to build, ship and run distributed applications. This document provides guidance and recommendations for creating Dockerfiles and building Docker images.
+Container technology is a popular packaging method for developers and system administrators to build, ship and run distributed applications. Production use of image-based container technology requires a disciplined approach to development. This document provides guidance and recommendations for creating and managing image to control application lifecycle.
+
+Application Planning
+
+- [ ] Deconstructing Applications
+- [ ] Types of Images
+- [ ] Deployment Platforms
+
+Creating Images
+
+- [ ] Source Repositories
+- [ ] Dockerfile Best Practices
+- [ ] Tools
+
+Build a Pipeline
+
+- [ ] Workflow Overview
+- [ ] Build environment
+- [ ] Automation Triggers
+- [ ] Planning a Test Environment
+- [ ] Types of Testing
+- [ ] Certification
+
+Delivery
+
