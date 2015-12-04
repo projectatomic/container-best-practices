@@ -15,4 +15,4 @@ install:
 
 script:
   - make check
-  - make labs
+  - make html
