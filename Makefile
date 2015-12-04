@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 LABS=labs.adoc \
     content/overview/overview.adoc \
     content/location_images_dockerfiles/location_images_dockerfiles.adoc \
