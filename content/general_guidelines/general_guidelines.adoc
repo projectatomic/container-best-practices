@@ -9,7 +9,12 @@
 :homepage https://github.com/projectatomic/container-best-practices:
 
 == Content
-TBD
+
+Docker is a platform that enables applications to be quickly assembled from components. When creating Docker images, think about the added value you can provide potential users with. The intention should always be bringing some added functionality on top of plain package installation.
+
+As an example, take this https://github.com/docker-library/wordpress/blob/618490d4bdff6c5774b84b717979bfe3d6ba8ad1/apache/Dockerfile[WordPress Dockerfile]. After running the image and linking it with a database image such as mysql, you will get a fully operational WordPress instance. In addition, you can also specify an external database.
+
+This exactly is the purpose of using Docker images; instead of laborious installation and configuration of separate components, you simply pull an image from a registry, acquiring a set of tools ready to be used right out-of-the-box.
 
 == Enabling Necessary Repositories
 
