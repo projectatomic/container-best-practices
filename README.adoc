@@ -12,115 +12,17 @@
 
 Please refer to the asciidoc user's guide: http://asciidoctor.org/docs/asciidoc-writers-guide/
 
-This cheat sheet is also very helpful: http://powerman.name/doc/asciidoc
+== Compiling
 
-=== Linux
+=== From a container
 
-. yum install git asciidoc docbook-xsl fop
-. Edit /etc/asciidoc/asciidoc.conf and change the following
-+
-----
-iconsdir=./images/icons
-----
-+
-To:
-+
-----
-iconsdir=/etc/asciidoc/images/icons
-----
+1. Create HTML
 
-== Running the tools from a container
+ sudo docker run -it -v `pwd`:/documents/:Z asciidoctor/docker-asciidoctor make html
 
-* To build your own container, see the authorative README included in the Fedora-Dockerfiles repo here.  
-
-https://github.com/fedora-cloud/Fedora-Dockerfiles/blob/master/container-best-practices/README.md[Fedora-Dockerfiles]
-
-* To use the automated build from the Docker registry.  Note that you will need to run this from the base of this repository.
-
- sudo docker run --rm -v `pwd`:/workdir:Z fedora/container-best-practices make
+1. Clean up files
 
  sudo docker run --rm -v `pwd`:/workdir:Z fedora/container-best-practices make clean
-
-
-== Asciidoc Compiling
-* To create a single HTML document: 
-+
-----
-asciidoc <text file>
-----
-+
-* To create HTML Slides:
-+
-----
-asciidoc --backend slidy <text file>
-----
-+
-* To create a PDF:
-+
-----
-a2x -fpdf -dbook --fop --no-xmllint -v <asciidoc file>
-----
-+
-* To create an EPUB:
-+
-----
-a2x -fepub -dbook --no-xmllint -v <asciidoc file>
-----
-
-=== Hello World
-Create a simple asciidoc document:
-
-.hello_world.adoc
-****
-----
-= My Document Title
-:data-uri:
-:icons:
-:toc2:
-:numbered:
-
-== Chapter 1
-some content
-
-== Chapter 2
-some more content
-
-.Some Table
-|====
-^| Heading1 ^| Heading2
-| row1 column1 content |
-| | row2 column2 content
-|====
-
-.Some Figure
-image::screenshot.png[Screenshot Text]
-
-----
-****
-
-Take a screenshot of something and put it in the same directory as this .adoc and name it +screenshot.png+
-
-=== Automatic Compiling
-Use a Makefile to compile the asciidoc into HTML and PDF.
-
-Makefile
-----
-DOCS=hello_world.adoc
-
-all: $(DOCS) html pdf epub
-
-html: $(DOCS)
-    asciidoc -v hello_world.adoc
-
-pdf: $(DOCS)
-    a2x -fpdf -dbook --fop --no-xmllint -v hello_world.adoc
-
-epub: $(DOCS)
-    a2x -fepub -dbook --no-xmllint -v hello_world.adoc
-
-clean:
-    rm -f *.html *.pdf *.epub
-----
 
 
 Compile the doc

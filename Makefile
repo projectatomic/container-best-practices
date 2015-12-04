@@ -19,14 +19,14 @@ LABS=labs.adoc \
 all: $(LABS) labs
 
 labs: $(LABS)
-	asciidoc -v labs.adoc
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css labs.adoc
 	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
-	$(foreach lab,$(LABS), asciidoc -v $(lab);)
+	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
-html: $(LABS) 
-	asciidoc -v labs.adoc
-	asciidoc --backend 
-	$(foreach lab,$(LABS), asciidoc -v $(lab);)
+html: $(LABS)
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css labs.adoc
+	#asciidoc --backend
+	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
 pdf: $(LABS) 
 	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
