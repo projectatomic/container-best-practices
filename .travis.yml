@@ -1,8 +1,17 @@
-language: c
+language: ruby
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
+
+rvm: 2.0.0
 
 install:
-  - sudo apt-get install -qq --no-install-recommends rubygems aspell aspell-en
-  - sudo gem install asciidoctor
+  - gem install asciidoctor
 
 script:
   - make check
