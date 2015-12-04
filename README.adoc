@@ -8,7 +8,7 @@
 :numbered:
 :homepage https://github.com/scollier/openshiftsummit2015:
 
-image:https://travis-ci.org/projectatomic/container-best-practices.svg["Build Status", link="https://travis-ci.org/projectatomic/container-best-practices"]
+image:https://travis-ci.org/projectatomic/container-best-practices.svg["Build Status", link="https://travis-ci.org/projectatomic/container-best-practices"] image:https://img.shields.io/badge/docs-asciidoc-blue.svg[link="http://aweiteka.github.io/container-best-practices"]
 
 == Asciidoc Setup
 
