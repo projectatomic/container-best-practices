@@ -8,6 +8,8 @@
 :numbered:
 :homepage https://github.com/scollier/openshiftsummit2015:
 
+image:https://travis-ci.org/projectatomic/container-best-practices.svg["Build Status", link="https://travis-ci.org/projectatomic/container-best-practices"]
+
 == Asciidoc Setup
 
 Please refer to the asciidoc user's guide: http://asciidoctor.org/docs/asciidoc-writers-guide/
@@ -24,9 +26,4 @@ Please refer to the asciidoc user's guide: http://asciidoctor.org/docs/asciidoc-
 
  sudo docker run --rm -v `pwd`:/workdir:Z fedora/container-best-practices make clean
 
-
-Compile the doc
-----
-make clean && make
-----
 

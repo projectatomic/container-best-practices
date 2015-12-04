@@ -1,7 +1,18 @@
-language: c
+language: ruby
 
-install: sudo apt-get install -qq --no-install-recommends asciidoc aspell aspell-en
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
+
+rvm: 2.0.0
+
+install:
+  - gem install asciidoctor
 
 script:
   - make check
-  - make labs
+  - make html
