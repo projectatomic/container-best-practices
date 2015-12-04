@@ -25,8 +25,3 @@ Please refer to the asciidoc user's guide: http://asciidoctor.org/docs/asciidoc-
  sudo docker run --rm -v `pwd`:/workdir:Z fedora/container-best-practices make clean
 
 
-Compile the doc
-----
-make clean && make
-----
-
