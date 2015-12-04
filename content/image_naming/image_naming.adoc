@@ -10,7 +10,7 @@
 
 This section describes the image naming standards for Docker images.
 
-Docker URLs are similar to github repository names. Their structure is:
+Docker URLs are similar to GitHub repository names. Their structure is:
 
   REGISTRY:PORT/USER/REPO:TAG
 
