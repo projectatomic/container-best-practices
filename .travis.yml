@@ -1,6 +1,8 @@
 language: c
 
-install: sudo apt-get install -qq --no-install-recommends asciidoctor aspell aspell-en
+install:
+  - sudo apt-get install -qq --no-install-recommends rubygems aspell aspell-en
+  - sudo gem install asciidoctor
 
 script:
   - make check
