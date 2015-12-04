@@ -1,6 +1,5 @@
 SHELL := /bin/bash
-LABS=labs.adoc \
-    content/overview/overview.adoc \
+LABS=content/overview/overview.adoc \
     content/location_images_dockerfiles/location_images_dockerfiles.adoc \
     content/layering/layering.adoc \
     content/image_naming/image_naming.adoc \
@@ -20,19 +19,28 @@ LABS=labs.adoc \
 all: $(LABS) labs
 
 labs: $(LABS)
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css -o index.html labs.adoc
-	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
 	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
 html: $(LABS)
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css -o index.html labs.adoc
-	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	# remove until document structure is sorted out
+	#$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
+
+publish: $(LABS)
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	git stash
+	git checkout gh-pages
+	git stash pop
+	git commit index.html -m "Update"
+	git push origin gh-pages
 
 pdf: $(LABS) 
-	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
+	a2x -fpdf -dbook --fop --no-xmllint -v index.asciidoc
 
 epub: $(LABS) $(SLIDES)
-	a2x -fepub -dbook --no-xmllint -v labs.adoc
+	a2x -fepub -dbook --no-xmllint -v index.asciidoc
 
 check:
 	@for docsrc in $(LABS); do \
