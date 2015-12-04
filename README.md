@@ -1,1 +1,0 @@
-# container-best-practices
