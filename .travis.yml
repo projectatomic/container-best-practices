@@ -1,6 +1,6 @@
 language: c
 
-install: sudo apt-get install -qq --no-install-recommends asciidoc aspell aspell-en
+install: sudo apt-get install -qq --no-install-recommends asciidoctor aspell aspell-en
 
 script:
   - make check
