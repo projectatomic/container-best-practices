@@ -1,10 +1,8 @@
 // vim: set syntax=asciidoc:
 [[Overview]]
-= Overview
+== Overview
 :data-uri:
 :icons:
-:toc:
-:toclevels 4:
 :numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
