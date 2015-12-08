@@ -29,12 +29,11 @@ html: $(LABS)
 	#$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
 publish: $(LABS)
+	git branch -D gh-pages
 	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
-	git stash
-	git checkout gh-pages
-	git stash pop
+	git checkout -b gh-pages
 	git commit index.html -m "Update"
-	git push origin gh-pages
+	git push origin gh-pages -f
 
 pdf: $(LABS) 
 	a2x -fpdf -dbook --fop --no-xmllint -v index.asciidoc
