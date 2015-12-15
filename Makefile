@@ -2,8 +2,7 @@ SHELL := /bin/bash
 LABS=index.asciidoc \
     overview/overview.adoc \
     plan/index.adoc \
-	create/general_guidelines.adoc \
-	create/references.adoc
+	create/guidelines.adoc
 
 all: $(LABS) labs
 

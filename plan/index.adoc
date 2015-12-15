@@ -1,5 +1,5 @@
 // vim: set syntax=asciidoc:
-[[planning]]
+[[plan]]
 = Application Planning
 :data-uri:
 :icons:

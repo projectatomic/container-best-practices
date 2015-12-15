@@ -13,8 +13,7 @@ include::overview/overview.adoc[]
 include::plan/index.adoc[]
 
 // Create
-include::create/general_guidelines.adoc[]
-include::create/references.adoc[]
+include::create/guidelines.adoc[]
 
 // Build and Test
 //include::build_test/

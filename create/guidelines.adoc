@@ -1,23 +1,25 @@
 // vim: set syntax=asciidoc:
-[[general_guidelines]]
-= General Guidelines
+[[create]]
+= Creating Images
 :data-uri:
 :icons:
 :toc:
 :toclevels 4:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-== Dockerfile Location
+== Dockerfiles
+
+=== Location
 
 Upstream Dockerfiles should be hosted in a public GIT repository, for example https://github.com[GitHub]. Ideally, the repository should be created under the organization relevant to a particular project. For example, http://www.softwarecollections.org[Software Collections] Dockerfiles are available under the GitHub https://github.com/sclorg[sclorg] organization.
 
-== Image Location
+=== Images
 
 Upstream Docker images, such as CentOS and Fedora base images and layered images based on these, should be publicly available on https://registry.hub.docker.com/[Docker Hub].
 
 For details on using the Docker Hub registry, see https://docs.docker.com/userguide/dockerimages/[Docker User Guide].
 
-== Content
+=== Content
 
 Docker is a platform that enables applications to be quickly assembled from components. When creating Docker images, think about the added value you can provide potential users with. The intention should always be bringing some added functionality on top of plain package installation.
 
@@ -25,13 +27,13 @@ As an example, take this https://github.com/docker-library/wordpress/blob/618490
 
 This exactly is the purpose of using Docker images; instead of laborious installation and configuration of separate components, you simply pull an image from a registry, acquiring a set of tools ready to be used right out-of-the-box.
 
-== Enabling Necessary Repositories
+=== Enabling Necessary Repositories
 
 TBD
 
 // maybe move somewhere RHEL-specific
 
-== Clearing the yum Caches
+=== Clearing the yum Caches
 
 To keep images as small as possible, it is beneficial to clear the temporary yum cache files after installing or updating packages. To remove unnecessary cache files, use the **yum clean** command. The command is described in detail in the +yum(8)+ man page.
 
@@ -57,7 +59,7 @@ RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
     yum clean all
 ----
 
-== Documentation
+=== Installing Documentation
 
 Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
 
@@ -65,7 +67,7 @@ Because you want to keep the image as small as possible, you can avoid installin
 RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
-== Updating Software supplied by Base-Image
+=== Updating Software supplied by Base-Image
 
 Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
 
@@ -79,13 +81,13 @@ RUN yum -y update
 
 // TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
-== Users
+=== Users
 TBD
 
-== Working Directory
+=== Working Directory
 TBD
 
-== Exposing Ports
+=== Exposing Ports
 
 The +EXPOSE+ instruction declares the ports on which a container will listen for incoming connections. You should specify ports your application commonly uses; for example, as seen in this https://github.com/openshift/mysql/blob/master/5.5/Dockerfile[mysql] example:
 
@@ -100,22 +102,22 @@ Therefore, for example for Apache server, ports 8080 or 8433 (HTTP or HTTPS) sho
 
 // For information on exposing ports in Software Collection images, see the xref:software_collections[Software Collections] chapter.
 
-== Logging
+=== Logging
 TBD
 
 ...
 
-= Dockerfile Instructions
+== Dockerfile Instructions
 
 This chapter provides a list of Docker Instructions with a short explanation and preferred usage.
 
-== General Usage
+=== General Usage
 
-=== MAINTAINER
+==== MAINTAINER
 
 Use the +MAINTAINER+ instruction to set the _Author_ field of the generated images. As most projects are maintained by more than one person, it is preferable to use a universal contact, such as _mailing list address_, _bug tracking mechanism URL_ or _URL of a project_ rather than a real person's name. Generic contact ensures consistency, allows for addressing problems in an appropriate manner and does not discourage potential contributors from collaborating by being too specific.
 
-=== LABEL
+==== LABEL
 
 Supported in Docker 1.6 and later, +LABEL+ is meant to store metadata about images and containers in key-value pairs. +LABELs+ should provide additional information about images and containers, indexing, searching and should be used to annotate the Docker images and containers. +LABEL+ can also be used to provide useful information to projects that catalogize or utilize Docker images, such as Satellite, OpenShift or Atomic.
 
@@ -130,12 +132,12 @@ LABEL IMAGE_TAGS              mysql,mysql55
 LABEL IMAGE_EXPOSE_SERVICES   3306:mysql
 ----
 
-==== Mandatory LABELs
+===== Mandatory LABELs
 
 The following +LABELs+ should always be part of your Dockerfile. TBD
 
 
-=== ENTRYPOINT vs CMD
+==== ENTRYPOINT vs CMD
 
 +ENTRYPOINT+ defines the default binary with which the Docker container will start. In other words, it makes the container behave like a binary. The default +ENTRYPOINT+ for Docker is +/bin/sh -c+. Consider the following example:
 
@@ -164,19 +166,19 @@ ENTRYPOINT ["/usr/bin/python"]
 ----
 
 
-== systemd
+=== systemd
 
 tbd
 
-== non-systemd
+=== non-systemd
 
 tbd
 
-= Layering
+== Layering
 
 This chapter provides guidelines on creating layers.
 
-== Minimizing the Number of Layers
+=== Minimizing the Number of Layers
 
 In general, having fewer layers improves readability. Commands that are chained together become a part of the same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
 
@@ -201,6 +203,16 @@ Each command that is related to the installation and configuration of `sti-pytho
 
 // Find a good example for the opposite case, when we want to have similar operations split into multiple instructions.
 
-== Squashing Layers
+=== Squashing Layers
 
 tbd
+
+== References
+
+// References to external sites and project-specific guidelines.
+
+Please see the following resources for more information on the Docker container technology and project-specific guidelines.
+
+http://docs.docker.com/[Docker Documentation] -- Detailed information about the Docker platform.
+
+https://github.com/openshift/openshift-docs/blob/master/creating_images/guidelines.adoc#openshift-specific-guidelines[OpenShift Guidelines] -- Guidelines for creating images specific to the OpenShift project.
