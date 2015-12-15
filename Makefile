@@ -2,7 +2,8 @@ SHELL := /bin/bash
 LABS=index.asciidoc \
     overview/overview.adoc \
     plan/index.adoc \
-	create/guidelines.adoc
+	create/guidelines.adoc \
+	build/index.adoc
 
 all: $(LABS) labs
 
@@ -12,7 +13,7 @@ labs: $(LABS)
 	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
 html: $(LABS)
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
 	# remove until document structure is sorted out
 	#$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 

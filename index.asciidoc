@@ -1,7 +1,7 @@
 // vim: set syntax=asciidoc:
 = Container Best Practices
 :description: A guide for creating and managing container-based applications.
-:icons: font
+//:icons: font
 :toc:
 :toclevels: 0
 :homepage https://github.com/projectatomic/container-best-practices:
@@ -16,7 +16,7 @@ include::plan/index.adoc[]
 include::create/guidelines.adoc[]
 
 // Build and Test
-//include::build_test/
+include::build/index.adoc[]
 
 // Deliver
 //include::deliver/image_naming.adoc[]
