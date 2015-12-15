@@ -1,5 +1,7 @@
 SHELL := /bin/bash
-LABS=overview/overview.adoc \
+LABS=index.asciidoc \
+    overview/overview.adoc \
+    plan/index.adoc \
 	create/general_guidelines.adoc \
 	create/references.adoc
 
