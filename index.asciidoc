@@ -10,7 +10,7 @@
 include::overview/overview.adoc[]
 
 // Plan
-//include::plan/
+include::plan/index.adoc[]
 
 // Create
 include::create/general_guidelines.adoc[]
