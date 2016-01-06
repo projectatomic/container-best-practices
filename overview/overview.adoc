@@ -1,8 +1,7 @@
 // vim: set syntax=asciidoc:
 [[Overview]]
-== Overview
+= Overview
 :data-uri:
-:icons:
 :homepage https://github.com/projectatomic/container-best-practices:
 
 Container technology is a popular packaging method for developers and system administrators to build, ship and run distributed applications. Production use of image-based container technology requires a disciplined approach to development. This document provides guidance and recommendations for creating and managing image to control application lifecycle.
@@ -11,7 +10,7 @@ In link:#planning[*Application Planning*] we discuss how to deconstruct applicat
 
 link:#general_guidelines[*Creating Images*] discusses the details about how to work with Dockerfiles, best practices, tips and tricks, and tools available to developers.
 
-The *Build* section discusses the importance of automation in building, testing and maintaining images. We discuss ideal workflows, how to plan a test environment, types of testing and image certification.
+The link:#build[*Build*] section discusses the importance of automation in building, testing and maintaining images. We discuss ideal workflows, how to plan a test environment, types of testing and image certification.
 
 Finally, *Delivery* covers how to get images and updates to the end-users, whether that's inside an enterprise or public infrastructure. A key consideration is access control.
 

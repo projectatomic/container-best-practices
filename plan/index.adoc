@@ -1,8 +1,7 @@
 // vim: set syntax=asciidoc:
-[[planning]]
+[[plan]]
 = Application Planning
 :data-uri:
-:icons:
 :homepage https://github.com/projectatomic/container-best-practices:
 
 Careful planning is important when working with container technology.

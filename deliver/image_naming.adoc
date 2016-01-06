@@ -2,7 +2,6 @@
 [[image_naming]]
 = Image Naming
 :data-uri:
-:icons:
 :homepage https://github.com/projectatomic/container-best-practices:
 
 This section describes the image naming standards for Docker images.
