@@ -1,19 +1,23 @@
 SHELL := /bin/bash
 LABS=index.asciidoc \
-    overview/overview.adoc \
-    plan/index.adoc \
-	create/guidelines.adoc \
-	build/index.adoc
+    overview/overview_index.adoc \
+	goals/goals_index.adoc \
+    planning/planning_index.adoc \
+	creating/creating_index.adoc \
+	building/building_index.adoc \
+	maintaining/maintaining_index.adoc \
+	appendix/appendix_index.adoc
 
 all: $(LABS) labs
 
 labs: $(LABS)
 	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
-	a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
+	#a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
 	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
 html: $(LABS)
-	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	#asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	#asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css help.adoc
 	# remove until document structure is sorted out
 	#$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
