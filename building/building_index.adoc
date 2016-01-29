@@ -1,6 +1,6 @@
 // vim: set syntax=asciidoc:
 [[build]]
-= Building Applications
+== Building Applications
 :data-uri:
 :homepage https://github.com/projectatomic/container-best-practices:
 
@@ -14,7 +14,7 @@ This will build the image which could then be pushed to a registry location. Don
 
 Serious work with container technology should automate builds. While there are some unique challenges specific to container automation, generally following continuous integration and delivery best practices is recommended.
 
-== Build Environment
+=== Build Environment
 A build environment should have the following characteristics
 
 - is secure by limiting direct access to the build environment

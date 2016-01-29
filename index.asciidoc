@@ -6,17 +6,26 @@
 :toclevels: 0
 :homepage https://github.com/projectatomic/container-best-practices:
 
+// Overview
+include::overview/overview_index.adoc[]
 
-include::overview/overview.adoc[]
+// Goals
+include::goals/goals_index.adoc[]
 
-// Plan
-include::plan/index.adoc[]
+// Planning
+include::planning/planning_index.adoc[]
 
-// Create
-include::create/guidelines.adoc[]
+// Creating
+include::creating/creating_index.adoc[]
 
 // Build and Test
-include::build/index.adoc[]
+include::building/building_index.adoc[]
+
+// Maintaining
+include::maintaining/maintaining_index.adoc[]
+
+// Appendix
+include::appendix/appendix_index.adoc[]
 
 // Deliver
 //include::deliver/image_naming.adoc[]
