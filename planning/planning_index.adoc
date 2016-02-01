@@ -6,6 +6,41 @@
 
 Careful planning is important when working with container technology.
 
+=== Deconstructing an application for containers
+
+==== Security and user requirements
+
+==== Persistent vs ephemeral storage
+
+=== Considerations for images on AH and OpenShift
+
+=== Where to store related components
+
+==== scripts
+
+==== tar files
+
+==== help files
+
+=== Best way to start your application
+
+==== Should you use systemd within your container
+
+==== Should you construct an init script?
+
+=== Plan your network
+
+==== single host
+
+==== multi-host
+
+==== AEP / OSE / Docker considerations
+
+=== Passing credentials and secrets
+
+
+OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD
+
 === Application Classes
 
 There are many different kinds of applications that may be candidates for porting to container technology.

@@ -1,0 +1,268 @@
+You can now provide a man-like help file with your images that allow for users to have a deeper understanding of your
+image.  This function now allows you to provide a:
+
+- more verbose description of the what the images is and does
+- understanding of how the image should be run
+- description of the security implications inherent in running the image
+- requirement if the image needs to be installed
+
+The atomic application will allow you to display this help file trivially like so:
+[source, none]
+----
+# atomic help <image or container name>
+----
+==== Required headings
+
+The following headings are strongly encouraged in the help file for an image.
+
+===== DESCRIPTION
+Describe in greater detail the role or purpose of the image.  This can include more specifics about the
+packages that make up the image.  You can also describe whether image is meant to be interactive
+or more service oriented.
+
+==== USAGE
+Describe how to run the image as a container and what factors might influence the behaviour of the image
+itself.
+
+==== HISTORY
+Similar to a Changelog of sorts which can be as detailed as the maintainer desires.
+
+==== Optional headings
+
+Use the following sections in your help file when applicable.
+
+===== Labels
+Describe the labels you use and why when applicable.  Specifically focus any action-oriented labels like RUN, INSTALL, and
+UNINSTALL.
+
+===== Security Implications
+If you image uses any privileges that you want to make the user aware of, be sure to document which ones are used and optionally
+why.
+
+
+==== Sample template
+We recommend writing the help file in the https://help.github.com/articles/markdown-basics/[markdown] language and then
+converting it to the man format.  This is handy because github can natively display markdown so the help file can be used
+in multiple ways.
+
+.Sample help template in markdown format
+[source, markdown]
+----
+% IMAGE_NAME(1)
+% MAINTAINER
+% DATE
+
+
+# DESCRIPTION
+Describe in greater detail the role or purpose of the image.  This can include more specifics about the
+packages that make up the image.  You can also describe whether image is meant to be interactive
+or more service oriented.
+
+# USAGE
+Describe how to run the image as a container and what factors might influence the behaviour of the image
+itself. For example:
+
+To set up the host system for use by the XYZ container, run:
+
+  atomic install XYZimage
+
+To run the XYZ container (after it is installed), run:
+
+  atomic run XYZimage
+
+To remove the XYZ container (not the image) from your system, run:
+
+  atomic uninstall XYZimage
+
+To upgrade the XYZ container from your system, run:
+
+  atomic upgrade XYZimage
+
+# LABELS
+Describe LABEL settings (from the Dockerfile that created the image) that contains pertinent information.
+For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS. Others could
+include BZComponent, Name, Version, Release, and Architecture.
+
+# SECURITY IMPLICATIONS
+If you expose ports or run with privileges, it would be warranted to briefly note those and provide
+an explanation if needed.
+
+# HISTORY
+Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
+----
+
+==== Example help file for the rsyslog container
+
+[source, markdown]
+----
+% RSYSLOG (1) Container Image Pages
+% Stephen Tweedie
+% January 27, 2016
+
+# NAME
+rsyslog \- rsyslog container image
+
+# DESCRIPTION
+
+The rsyslog image provides a containerized packaging of the rsyslogd daemon. The rsyslogd daemon is a
+utility that supports system message logging. With the rsyslog container installed and running, you
+can configure the rsyslogd service directly on the host computer as you would if the daemon were
+not containerized.
+
+You can find more information on the rsyslog project from the project Web site (http://www.rsyslog.com/doc).
+
+The rsyslog image is designed to be run by the atomic command with one of these options:
+
+`install`
+
+Sets up the container to access directories and files from the host system to use for rsyslogd configuration,
+logging, log rotation, and credentials.
+
+`run`
+
+Starts the installed container with selected privileges to the host and with logging-related files and
+directories bind mounted inside the container. If the container stops, it is set to always restart.
+
+`uninstall`
+
+Removes the container from the system. This removes the syslog logrotate file, leave all other files
+and directories associated with rsyslogd on the host system.
+
+Because privileges are opened to the host system, the running rsyslog container can gather log messages
+from the host and save them to the filesystem on the host.
+
+The container itself consists of:
+    - rhel7/rhel base image
+    - rsyslog RPM package
+
+Files added to the container during docker build include: /bin/install.sh, /bin/rsyslog.sh, and /bin/uninstall.sh.
+
+# "USAGE"
+To use the rsyslog container, you can run the atomic command with install, run, or uninstall options:
+
+To set up the host system for use by the rsyslog container, run:
+
+  atomic install rhel7/rsyslog
+
+To run the rsyslog container (after it is installed), run:
+
+  atomic run rhel7/rsyslog
+
+To remove the rsyslog container (not the image) from your system, run:
+
+  atomic uninstall rhel7/rsyslog
+
+# LABELS
+The rsyslog container includes the following LABEL settings:
+
+That atomic command runs the docker command set in this label:
+
+`INSTALL=`
+
+  LABEL INSTALL="docker run --rm --privileged -v /:/host \
+  -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME \
+  IMAGE /bin/install.sh"
+
+  The contents of the INSTALL label tells an `atomic install rhel7/rsyslog` command to remove the container
+  after it exits (--rm), run with root privileges open to the host, mount the root directory (/) from the hos on
+  the /host directory within the container, set the location of the host file system to /host, set the name of
+  the image and run the install.sh script.
+
+`RUN=`
+
+  LABEL RUN="docker run -d --privileged --name NAME \
+  --net=host --pid=host \
+  -v /etc/pki/rsyslog:/etc/pki/rsyslog \
+  -v /etc/rsyslog.conf:/etc/rsyslog.conf \
+  -v /etc/sysconfig/rsyslog:/etc/sysconfig/rsyslog \
+  -v /etc/rsyslog.d:/etc/rsyslog.d \
+  -v /var/log:/var/log \
+  -v /var/lib/rsyslog:/var/lib/rsyslog \
+  -v /run:/run \
+  -v /etc/machine-id:/etc/machine-id \
+  -v /etc/localtime:/etc/localtime \
+  -e IMAGE=IMAGE -e NAME=NAME \
+  --restart=always IMAGE /bin/rsyslog.sh"
+
+  The contents of the RUN label tells an `atomic run rhel7/rsyslog` command to open various privileges to the host
+  (described later), mount a variety of host files and directories into the container, set the name of the container,
+  set the container to restart automatically if it stops, and run the rsyslog.sh script.
+
+
+`UNINSTALL=`
+
+  LABEL UNINSTALL="docker run --rm --privileged -v /:/host \
+  -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME \
+  IMAGE /bin/uninstall.sh"
+
+  The contents of the UNINSTALL label tells an `atomic uninstall rhel7/rsyslog` command to uninstall the rsyslog
+  container. Stopping the container in this way removes the container, but not the rsyslog image from your system.
+  Also, uninstalling leaves all rsyslog configuration files and log files intact on the host (only removing the
+  syslog logrotate file).
+
+`BZComponent=`
+
+The bugzilla component for this container. For example, "BZComponent="rsyslog-docker".
+
+`Name=`
+
+The registry location and name of the image. For example, "Name="rhel7/rsyslog":
+
+`Version=`
+
+The Red Hat Enterprise Linux version from which the container was built. For example, "Version="7.2".
+
+`Release=`
+
+The specific release number of the container Release="12.1.a":
+
+`Architecture=`
+
+The machine architecture associated with the Red Hat Enterprise Linux release. For example, "Architecture="x86_64"
+
+When the atomic command runs the rsyslog container, it reads the command line associated with the selected option
+from a LABEL set within the Docker container itself. It then runs that command. The following sections detail
+each option and associated LABEL:
+
+.SH "SECURITY IMPLICATIONS"
+The rsyslog container is what is referred to as a super-privileged container. It is designed to have almost complete
+access to the host system as root user. The following docker command options open selected privileges to the host:
+
+`-d`
+
+Runs continuously as a daemon process in the background
+
+`--privileged`
+
+Turns off security separation, so a process running as root in the container would have the same access to the
+host as it would if it were run directly on the host.
+
+`--net=host`
+
+Allows processes run inside the container to directly access host network interfaces
+
+`--pid=host`
+
+Allows processes run inside the container to see and work with all processes in the host process table
+
+`--restart=always`
+
+If the container should fail or otherwise stop, it would be restarted
+
+.SH "HISTORY"
+Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
+
+.SH "AUTHORS"
+
+Stephen Tweedie
+----
+
+
+==== Converting markdown to man format
+There are several methods for converting markdown format to man format.  One prevalent method is to use go-md2man supplied
+by the golang-github-cpuguy83-go-md2man package.  To convert from markdown to man using this utility, you do as follows:
+
+[source, none]
+----
+# go-md2man -in path_to_man_file -out output_file
+----

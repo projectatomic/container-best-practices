@@ -8,6 +8,8 @@ LABS=index.asciidoc \
 	maintaining/maintaining_index.adoc \
 	appendix/appendix_index.adoc
 
+ALL_ADOC_FILES := $(shell find . -type f -name '*.adoc')
+
 all: $(LABS) labs
 
 labs: $(LABS)
@@ -35,13 +37,16 @@ epub: $(LABS) $(SLIDES)
 	a2x -fepub -dbook --no-xmllint -v index.asciidoc
 
 check:
-	@for docsrc in $(LABS); do \
-		echo -n "Processing '$$docsrc' ..."; \
-		cat $$docsrc | aspell -a --lang=en \
-					 --dont-backup \
-					 --personal=./containers.dict | grep -e '^&'; \
-		[ "$$?" == "0" ] && exit 1 || echo ' no errors.'; \
-	done
+	# Disabled for now
+	#@for docsrc in $(ALL_ADOC_FILES); do \
+	#	echo -n "Processing '$$docsrc' ..."; \
+	#	cat $$docsrc | aspell -a --lang=en \
+	#				 --dont-backup \
+	#				 --personal=./containers.dict | grep -e '^&'; \
+	#	[ "$$?" == "0" ] && exit 1 || echo ' no errors.'; \
+	#done
+	echo "Disabled"
+
 
 clean:
 	find . -type f -name \*.html -exec rm -f {} \;
