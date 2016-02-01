@@ -6,6 +6,97 @@
 :toclevels 4:
 :homepage https://github.com/projectatomic/container-best-practices:
 
+
+=== Upstream Docker Best Practices
+
+Upstream docker has a nice description of https://docs.docker.com/engine/articles/dockerfile_best-practices/[best practices] for Dockerfiles. It
+describes the various instructions that can be used to compose a Dockerfile and their best usage.  Familiarize yourself with these
+recommendations.
+
+=== Choosing base image
+
+==== RHEL base images
+
+==== Building your own
+
+===== Docker Base Image Creation
+
+=== Labels
+
+Labels in Dockerfiles serve as a useful way to organize and document metadata used to describe an image.  Some labels are only descriptive
+by nature, like  _Name_ whereas others, like _RUN_ can be used to describe action-oriented metadata.  Labels are often leveraged by applications, like
+https://github.com/projectatomic/atomic[atomic], to help the image run as the author intended.  They can also for purely descriptive
+purposed and can viewed manually with the _docker inspect <image_name>_ command.
+
+The authoritative source for labels
+is the  https://github.com/projectatomic/ContainerApplicationGenericLabels[Container Application Generic Labels] git repository.
+
+
+
+==== When are they required?
+
+==== Descriptive labels
+
+The descriptive labels usually are alpha-numeric strings used to describe some aspect of the image itself.  Examples, might be
+the version and release labels which could theoretically just be integer based.
+The following table describes labels that are meant to be purely descriptive in nature.
+
+.Descriptive labels
+[options="header,footer"]
+|===============================================
+| Label | Description | Example
+| name 	| Name of the Image | _"rhel7/rsyslog"_
+| version | Version of the image | _"7.2"_
+| release | Release number of the image | _"12"_
+| architecture | Architecture for the image | _"x86_64"_
+| build-date | Date/Time image was built as https://tools.ietf.org/html/rfc3339[RFC 3339] date-time | _"2015-12-03T10:00:44.038585Z"_
+| vendor | Owner of the image | _"Red Hat, Inc."_
+| URL | URL with more information about the image | _TBD_
+| Summary | Brief description of the image | _TBD_
+| Description | Longer description of the image | _TBD_
+| vcs-type | The type of version control used by the container source. Generally one of git, hg, svn, bzr, cvs | _"git"_
+| vcs-url |URL of the version control repository | _TBD_
+| vcs-ref | A 'reference' within the version control repository; e.g. a git commit, or a subversion branch | _"364a...92a"_
+| authoritative-source-url |	The authoritative location in which the image is published | _TBD_
+| distribution-scope |Intended scope of distribution for image. Possible values are private, authoritive-source-only, restricted, or public  | _private_
+| changelog-url | URL of a page containing release notes for the image| _TBD_
+|===============================================
+
+==== Action-oriented labels
+
+Most action-oriented labels will be a used in the context of a docker command in order for the container to behave in a desired
+way.  The following table describes the defined action-oriented labels.
+
+.Action-oriented labels
+[options="header,footer"]
+|===============================================
+| Label | Description | Example
+| help | Command to run the help command of the image | _tbd_
+| run | Command to run the image | _"docker run -d --privileged --name NAME --net=host --pid=host -v /etc/pki/rsyslog:/etc/pki/rsyslog -v /etc/rsyslog.conf:/etc/rsyslog.conf -v /etc/sysconfig/rsyslog:/etc/sysconfig/rsyslog -v /etc/rsyslog.d:/etc/rsyslog.d -v /var/log:/var/log -v /var/lib/rsyslog:/var/lib/rsyslog -v /run:/run -v /etc/machine-id:/etc/machine-id -v /etc/localtime:/etc/localtime -e IMAGE=IMAGE -e NAME=NAME --restart=always IMAGE /bin/rsyslog.sh"_
+| uninstall | Command to uninstall the image | _"docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/uninstall.sh"_
+| install |	Command to install the image | _"docker run --rm --privileged -v /:/host -e HOST=/host -e IMAGE=IMAGE -e NAME=NAME IMAGE /bin/install.sh"_
+| stop | Command to execute before stopping container | _tbd_
+| debug | Command to run the image with debugging turned on | _tbd_
+|===============================================
+
+=== all attributes (FROM, MAINTAINER)
+
+=== Template
+
+=== Image naming
+
+=== Verifying your Dockerfile (linter)
+
+// Help section
+=== Creating a Help file
+include::help.adoc[]
+
+
+=== Creating a Changelog
+
+
+OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
+
 === Dockerfiles
 
 ==== Location

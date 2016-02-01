@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Appendix</title>
+<link rel="stylesheet" href="http://www.projectatomic.io/stylesheets/application.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="Appendix">Appendix</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_atomic_application">Atomic application</h3>
+<div class="paragraph">
+<p>The <a href="https://github.com/projectatomic/atomic">atomic application</a> is meant to be a user-friendly way to
+install, manage, and run container images using container. Unlike docker commands, it leverages the ability
+read and act upon LABELs defined in a Dockerfile.  By its nature, it helps authors of Dockerfiles to have
+their images run as they intended without a significant amount of knowledge by the end users.  Atomic has several
+subcommands:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>diff</p>
+</li>
+<li>
+<p><a href="help">help</a></p>
+</li>
+<li>
+<p>host</p>
+</li>
+<li>
+<p>info</p>
+</li>
+<li>
+<p>install</p>
+</li>
+<li>
+<p>images</p>
+</li>
+<li>
+<p>migrate</p>
+</li>
+<li>
+<p>mount</p>
+</li>
+<li>
+<p>push</p>
+</li>
+<li>
+<p>scan</p>
+</li>
+<li>
+<p>stop</p>
+</li>
+<li>
+<p>run</p>
+</li>
+<li>
+<p>top</p>
+</li>
+<li>
+<p>uninstall</p>
+</li>
+<li>
+<p>unmount</p>
+</li>
+<li>
+<p>update</p>
+</li>
+<li>
+<p>version</p>
+</li>
+<li>
+<p>verify</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Knowledge of these subcommands can make you a better author of Dockerfiles because you too can simplify end users'
+interactions with your images.  Look to the following sections for more information on these relevant subcommands.</p>
+</div>
+<div class="sect3">
+<h4 id="help">Displaying the help file</h4>
+<div class="paragraph">
+<p>You can display the help file for a container using the <strong><a href="https://github.com/projectatomic/atomic">atomic</a></strong> command.
+For example, to display the help file for a container called <em>foobar</em>, you would run the command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-none" data-lang="none"># atomic help foobar</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the default method of displaying the help file.  In this case, the help file is formatted like any typical
+man page and is displayed (like man) with a pager.  The help file needs to be located in the / of the image filesystem
+and called <strong>help.1</strong>.</p>
+</div>
+<div class="paragraph">
+<p>If no help file is present and there is no HELP LABEL defined, atomic will simply tell you it could not find any
+help associated with that container or image.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2016-02-01 12:57:08 CST
+</div>
+</div>
+</body>
+</html>

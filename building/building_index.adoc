@@ -4,6 +4,16 @@
 :data-uri:
 :homepage https://github.com/projectatomic/container-best-practices:
 
+
+=== Simple build
+=== Use a build service
+=== Container Development Kit
+==== OpenShift VM
+==== Kubernetes VM
+==== Eclipse/Docker VM
+
+
+OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD
 Building a single Docker image once is a simple matter.
 
 ----

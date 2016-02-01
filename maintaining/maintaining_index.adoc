@@ -5,3 +5,6 @@
 :toc:
 :toclevels 4:
 :homepage https://github.com/projectatomic/container-best-practices:
+
+=== Lifecycle
+=== Garbage Collection
