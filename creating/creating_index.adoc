@@ -87,6 +87,72 @@ way.  The following table describes the defined action-oriented labels.
 
 === Verifying your Dockerfile (linter)
 
+=== Starting your application
+
+Generally the RUN instruction in the Dockerfile is used by docker to start your application
+when the image or container is started.  In the planning section, we provided some reasoning
+for choosing how to  *_xref:planning_starting_application[start your application]_*.  The following
+subsections will show how to implement each choice in your Dockerfile.
+
+==== Calling the binary directly
+Being the simplest of the choices, you simply need to call the binary using the CMD instruction
+in your Dockerfile.
+
+```
+CMD ["/usr/bin/some_binary"]
+```
+
+[[creating_using_a_script]]
+==== Using a script
+Using a script to start an application is very similar to calling the binary directly. Again, you
+use the CMD instruction but instead of pointing at the binary you point at your script that was
+injected into the image.  The _registry.access.redhat.com/rhel7/rsyslog_ image uses a script
+to start the rsyslogd application. Lets look at the two relevant instructions in its Dockerfile
+that make this happen.
+
+The following instruction injects our script (rsyslog.sh) into the image in the _bin_ dir.
+```
+ADD rsyslog.sh /bin/rsyslog.sh
+```
+
+The contents of the script are as follows:
+
+```
+#!/bin/sh
+# Wrapper to start rsyslog.d with appropriate sysconfig options
+
+echo $$ > /var/run/syslogd.pid
+
+source /etc/sysconfig/rsyslog
+exec /usr/sbin/rsyslogd -n $SYSLOGD_OPTIONS
+```
+
+Notice how the script does in fact handle environment variables by sourcing the _/etc/sysconfig/rsyslog_
+file. And the CMD instruction simply calls the script.
+
+```
+CMD [ "/bin/rsyslog.sh" ]
+```
+
+==== Using systemd
+
+Extending our example from link:creating_using_a_script[starting an application with a script], the rsyslog
+image was started with a script.  We could easily use systemd to start the application.  To use systemd
+to start a service that has an unit file, we need to tell systemd to enable the service and then let the
+init process handle the rest.  So instead of the ADD instruction used earlier, we would use a RUN
+instruction to enable the service.
+
+```
+RUN systemctl enable rsyslog
+```
+
+And then we need to change the CMD instruction to call _/usr/sbin/init_ to let systemd take over.
+
+```
+RUN /usr/sbin/init
+```
+
+
 // Help section
 === Creating a Help file
 include::help.adoc[]
