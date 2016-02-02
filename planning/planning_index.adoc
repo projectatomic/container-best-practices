@@ -54,6 +54,9 @@ themselves and therefor can make complex applications that require environment v
 with.  One disadvantage is that systemd will increase the size of your image and there is a small
 amount of memory used for systemd itself.
 
+NOTE: As docker-1.10, the docker run parameter of _--privileged_ is no longer needed to use systemd
+within a container.
+
 
 === Plan your network
 
