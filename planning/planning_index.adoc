@@ -22,11 +22,38 @@ Careful planning is important when working with container technology.
 
 ==== help files
 
-=== Best way to start your application
+[[planning_starting_application]]
+=== Starting your applications within a container
+At some point in the design of your Dockerfile and image, you will need to determine how to start your
+application.  There are three prevalent methods for starting applications:
 
-==== Should you use systemd within your container
+- Call the application binary directly
+- Call a script that results in your binary starting
+- Use systemd to start the application
 
-==== Should you construct an init script?
+For the most part, there is no single right answer on which method should be used; however, there are
+some softer decision points that might help you decide which would be easiest for you as the
+Dockerfile owner.
+
+==== Calling the binary directly
+If your application is not service oriented, calling the binary directly might be the simplest and most
+straight-forward method to start a container.  There is no memory overhead and no additional packages
+are needed (like systemd and its dependancies).  However, it is more difficult to deal with
+setting environment variables.
+
+==== Using a script
+Using a special script to start your application in a container can be a handy way to deal with slightly
+more complex applications.  One upside is that it is generally trivial to set environment variables.  This
+method is also good when you need to call more than a single binary to start the application correctly.
+One downside is that you now have to maintain the script and ensure it is always present in the image.
+
+==== Use systemd
+Using systemd to start your application is a great if your application is service oriented (like httpd).
+It can benefit from leveraging well tested unit files generally delivered with the applications
+themselves and therefor can make complex applications that require environment variables easy to work
+with.  One disadvantage is that systemd will increase the size of your image and there is a small
+amount of memory used for systemd itself.
+
 
 === Plan your network
 
