@@ -17,11 +17,10 @@ labs: $(LABS)
 	#a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
 	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
-html: $(LABS)
-	#asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
-	#asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css help.adoc
-	# remove until document structure is sorted out
-	#$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
+html:
+	# asciidoctor can only put a single HTML output
+	# chunked output is close per upstream
+	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
 
 publish: $(LABS)
 	git branch -D gh-pages
@@ -47,6 +46,9 @@ check:
 	#done
 	echo "Disabled"
 
+toc:
+	asciidoctor index.asciidoc
+	python toc.py
 
 clean:
 	find . -type f -name \*.html -exec rm -f {} \;
