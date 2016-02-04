@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-LABS=index.asciidoc \
+LABS=index.adoc \
     overview/overview_index.adoc \
 	goals/goals_index.adoc \
     planning/planning_index.adoc \
@@ -13,7 +13,7 @@ ALL_ADOC_FILES := $(shell find . -type f -name '*.adoc')
 all: $(LABS) labs
 
 labs: $(LABS)
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
 	#a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
 	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
@@ -24,16 +24,16 @@ html:
 
 publish: $(LABS)
 	git branch -D gh-pages
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.asciidoc
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
 	git checkout -b gh-pages
 	git commit index.html -m "Update"
 	git push origin gh-pages -f
 
 pdf: $(LABS) 
-	a2x -fpdf -dbook --fop --no-xmllint -v index.asciidoc
+	a2x -fpdf -dbook --fop --no-xmllint -v index.adoc
 
 epub: $(LABS) $(SLIDES)
-	a2x -fepub -dbook --no-xmllint -v index.asciidoc
+	a2x -fepub -dbook --no-xmllint -v index.adoc
 
 check:
 	# Disabled for now
@@ -47,7 +47,7 @@ check:
 	echo "Disabled"
 
 toc:
-	asciidoctor index.asciidoc
+	asciidoctor index.adoc
 	python toc.py
 
 clean:
@@ -56,6 +56,9 @@ clean:
 	find . -type f -name \*.epub -exec rm -f {} \;
 	find . -type f -name \*.fo -exec rm -f {} \;
 	find . -type f -name \*.xml -exec rm -f {} \;
+	rm -fr output/
 
 review:
 	python mark_change.py ${ALL_ADOC_FILES}
+	cd output && asciidoctor index.adoc
+

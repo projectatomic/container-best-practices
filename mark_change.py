@@ -54,7 +54,7 @@ class ChangeReview(object):
         new_file_lines = []
         for line in foo.splitlines():
             if line.startswith('+') and not line.startswith('++'):
-                new_file_lines.append(line[:1] + '[silver-background]##' + line[1:] + "##")
+                new_file_lines.append(line[:1] + '[aqua-background]##' + line[1:] + "##")
             else:
                 new_file_lines.append(line)
         output = open(os.path.join(outdir, basename + '.patch'), 'w')
