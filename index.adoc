@@ -2,7 +2,7 @@
 = Container Best Practices
 :description: A guide for creating and managing container-based applications.
 //:icons: font
-:toc:
+:toc: left
 :toclevels: 5
 :sectnums:
 :homepage https://github.com/projectatomic/container-best-practices:
