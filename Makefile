@@ -22,6 +22,9 @@ html:
 	# chunked output is close per upstream
 	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
 
+plain-html:
+	asciidoctor index.adoc
+
 publish: $(LABS)
 	git branch -D gh-pages
 	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc

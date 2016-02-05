@@ -6,7 +6,6 @@
 
 Careful planning is important when working with container technology.
 
-=== Deconstructing an application for containers
 
 === Application Classes
 
@@ -69,11 +68,21 @@ service topology, performance characteristics, configuration and dependencies su
 many applications can be ported to container technology without modification there are sometimes optimizations that
 should be made regarding configuration, storage, installation or service architecture.
 
+===== Deconstructing Microservice Applications
+
+The process of deconstructing applications varies widely depending on the complexity and architecture of the application. Consider the following steps as a guide to a generalized process.
+
+. Identify the components that will be broken down into microservices. These typically map to a container images.
+. Identify how the services will communicate. How are REST or message bus interfaces authenticated?
+. Identify how data will be accessed by the services. Which services need read/write access to the storage?
+. Create a service topology drawing to represent the components, lines of communication and storage. This will guide the development work, configuration discussions, debugging and potentially become part of the end-user documentation.
+. Identify how the services will be configured, which services need to share configuration and how these services might be deployed in a highly available configuration.
+
+
 ==== Security and user requirements
 
-==== Persistent vs ephemeral storage
 
-=== Considerations for images on AH and OpenShift
+=== Considerations for images on Atomic Host and OpenShift
 
 === Where to store related components
 
@@ -82,6 +91,8 @@ should be made regarding configuration, storage, installation or service archite
 ==== tar files
 
 ==== help files
+
+==== Dockerfiles
 
 [[planning_starting_application]]
 === Starting your applications within a container
@@ -119,7 +130,7 @@ NOTE: As docker-1.10, the docker run parameter of _--privileged_ is no longer ne
 within a container.
 
 
-=== Plan your network
+=== Network Considerations
 
 ==== single host
 
@@ -127,22 +138,29 @@ within a container.
 
 ==== AEP / OSE / Docker considerations
 
-=== Passing credentials and secrets
+=== Storage Considerations
+==== Persistent vs ephemeral storage
+==== Docker persistent storage
+==== OpenShift persistent storage
 
+=== Security and User considerations
 
-OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD OLD
+==== Passing credentials and secrets
+==== User NameSpace Mapping (docker-1.10 feature)
+==== https://www.openshift.com/promotions/docker-security.html
 
+=== Image naming
+https://github.com/projectatomic/ContainerApplicationGenericLabels/blob/master/vendor/redhat/names.md
 
-=== Deconstructing Microservice Applications
+=== Deployment Considerations
 
-The process of deconstructing applications varies widely depending on the complexity and architecture of the application. Consider the following steps as a guide to a generalized process.
+Preparing applications for production distribution and deployment must carefully consider the supported
+deployment platforms. Production services require high uptime, injection of private or sensitive data,
+storage integration and configuration control. The deployment platform determines methods for load balancing,
+scheduling and upgrading. A platform that does not provide these services requires additional work when
+developing the container packaging.
 
-. Identify the components that will be broken down into microservices. These typically map to a container images.
-. Identify how the services will communicate. How are REST or message bus interfaces authenticated?
-. Identify how data will be accessed by the services. Which services need read/write access to the storage?
-. Create a service topology drawing to represent the components, lines of communication and storage. This will guide the development work, configuration discussions, debugging and potentially become part of the end-user documentation.
-. Identify how the services will be configured, which services need to share configuration and how these services might be deployed in a highly available configuration.
-
-=== Deployment Platform Considerations
-
-Preparing applications for production distribution and deployment must carefully consider the supported deployment platforms. Production services require high uptime, injection of private or sensitive data, storage integration and configuration control. The deployment platform determines methods for load balancing, scheduling and upgrading. A platform that does not provide these services requires additional work when developing the container packaging.
+==== Platform
+==== Lifecycle
+==== Maintenance
+==== Build infrastructure
