@@ -6,6 +6,14 @@
 :toclevels 4:
 :homepage https://github.com/projectatomic/container-best-practices:
 
+The base unit of creating an image is the Dockerfile itself.  This section
+focuses on the the instructions that make up a Dockerfile.
+
+This chapter will not cover every Dockerfile instruction available but instead
+will focus on specific ones that we want to re-enforce to those who develop
+Dockerfiles.  Docker has published a
+link:https://docs.docker.com/engine/reference/builder/[reference guide] already
+covering each of the Dockerfile instructions.
 
 === Upstream Docker Best Practices
 
@@ -21,6 +29,90 @@ recommendations.
 
 ===== Docker Base Image Creation
 
+=== Create small and concise images
+
+It is preferable to create small and concise images whenever possible.  This can
+be highly dependent on the application you are containerizing, but there are
+techniques to help you accomplish this.  The following sections cover these
+techniques.
+
+==== Clear packaging caches and temporary package downloads
+
+To keep images as small as possible, it is beneficial to clear the temporary yum cache files after installing or updating packages. To remove unnecessary cache files, use the **yum clean** command. The command is described in detail in the +yum(8)+ man page.
+
+Cache needs to be cleaned out of every layer that updates or installs software. That means if you perform multiple install operations within one layer, you need to run **yum clean** at the end of it. For example:
+
+----
+RUN yum install -y epel-release && \
+    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+    v8314 mongodb24-mongodb mongodb24 && \
+    yum clean all
+----
+
+On the other hand, if you perform multiple install/update operations on multiple layers, **yum clean** must be run on each layer. For example:
+
+----
+RUN yum install -y epel-release && \
+    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    yum clean all
+
+RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+    v8314 mongodb24-mongodb mongodb24 && \
+    yum clean all
+----
+
+==== Installing Documentation
+
+Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
+
+----
+RUN yum install -y mysql --setopt=tsflags=nodocs
+----
+
+==== Updating Software supplied by Base-Image
+
+Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
+
+Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size.
+
+In other words, avoid using instructions similar to this one:
+
+----
+RUN yum -y update
+----
+
+// TBD: different recommendations for Fedora and CentOS/RHEL base images?
+
+==== Minimizing the Number of Layers
+
+In general, having fewer layers improves readability. Commands that are chained together become a part of the same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
+
+A new layer is created for every new instruction defined. This does not necessarily mean that one instruction should be associated with only one command or definition.
+
+Ensure transparency and provide a good overview of the content of each layer by grouping related operations together so that they together constitute a single layer. Consider this snippet from the OpenShift Python 3.3 Dockerfile:
+
+----
+RUN yum install -y \
+    https://www.softwarecollections.org/en/scls/rhscl/python33/epel-7-x86_64/download/rhscl-python33-epel-7-x86_64.noarch.rpm && \
+    yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus \
+    python33 python33-python-devel python33-python-setuptools \
+    epel-release && \
+    yum install -y --setopt=tsflags=nodocs install nss_wrapper && \
+    yum clean all -y && \
+    scl enable python33 "easy_install pip" && \
+    chown -R default:default /opt/openshift && \
+    chmod -R og+rwx /opt/openshift
+----
+
+Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of the layers high.
+
+// Find a good example for the opposite case, when we want to have similar operations split into multiple instructions.
+
+==== Squashing layers
+
+// can this be done by joe regular?
+
 === Labels
 
 Labels in Dockerfiles serve as a useful way to organize and document metadata used to describe an image.  Some labels are only descriptive
@@ -30,8 +122,6 @@ purposed and can viewed manually with the _docker inspect <image_name>_ command.
 
 The authoritative source for labels
 is the  https://github.com/projectatomic/ContainerApplicationGenericLabels[Container Application Generic Labels] git repository.
-
-
 
 ==== When are they required?
 
@@ -84,8 +174,6 @@ way.  The following table describes the defined action-oriented labels.
 === Template
 
 === Image naming
-
-=== Verifying your Dockerfile (linter)
 
 === Starting your application
 
@@ -160,6 +248,8 @@ include::help.adoc[]
 
 === Creating a Changelog
 
+=== Verifying Dockerfile (linter)
+
 
 OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
 
@@ -189,53 +279,6 @@ TBD
 
 // maybe move somewhere RHEL-specific
 
-==== Clearing the yum Caches
-
-To keep images as small as possible, it is beneficial to clear the temporary yum cache files after installing or updating packages. To remove unnecessary cache files, use the **yum clean** command. The command is described in detail in the +yum(8)+ man page.
-
-Cache needs to be cleaned out of every layer that updates or installs software. That means if you perform multiple install operations within one layer, you need to run **yum clean** at the end of it. For example:
-
-----
-RUN yum install -y epel-release && \
-    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
-    yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
-    v8314 mongodb24-mongodb mongodb24 && \
-    yum clean all
-----
-
-On the other hand, if you perform multiple install/update operations on multiple layers, **yum clean** must be run on each layer. For example:
-
-----
-RUN yum install -y epel-release && \
-    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
-    yum clean all
-
-RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
-    v8314 mongodb24-mongodb mongodb24 && \
-    yum clean all
-----
-
-==== Installing Documentation
-
-Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
-
-----
-RUN yum install -y mysql --setopt=tsflags=nodocs
-----
-
-==== Updating Software supplied by Base-Image
-
-Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
-
-Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size.
-
-In other words, avoid using instructions similar to this one:
-
-----
-RUN yum -y update
-----
-
-// TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
 ==== Users
 TBD
@@ -321,43 +364,6 @@ ENTRYPOINT Example:
 ENTRYPOINT ["/usr/bin/python"]
 ----
 
-
-==== systemd
-
-tbd
-
-==== non-systemd
-
-tbd
-
-=== Layering
-
-This chapter provides guidelines on creating layers.
-
-==== Minimizing the Number of Layers
-
-In general, having fewer layers improves readability. Commands that are chained together become a part of the same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
-
-A new layer is created for every new instruction defined. This does not necessarily mean that one instruction should be associated with only one command or definition.
-
-Ensure transparency and provide a good overview of the content of each layer by grouping related operations together so that they together constitute a single layer. Consider this snippet from the OpenShift Python 3.3 Dockerfile:
-
-----
-RUN yum install -y \
-    https://www.softwarecollections.org/en/scls/rhscl/python33/epel-7-x86_64/download/rhscl-python33-epel-7-x86_64.noarch.rpm && \
-    yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus \
-    python33 python33-python-devel python33-python-setuptools \
-    epel-release && \
-    yum install -y --setopt=tsflags=nodocs install nss_wrapper && \
-    yum clean all -y && \
-    scl enable python33 "easy_install pip" && \
-    chown -R default:default /opt/openshift && \
-    chmod -R og+rwx /opt/openshift
-----
-
-Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of the layers high.
-
-// Find a good example for the opposite case, when we want to have similar operations split into multiple instructions.
 
 ==== Squashing Layers
 

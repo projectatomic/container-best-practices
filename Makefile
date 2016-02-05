@@ -30,7 +30,8 @@ publish: $(LABS)
 	git push origin gh-pages -f
 
 pdf: $(LABS) 
-	a2x -fpdf -dbook --fop --no-xmllint -v index.adoc
+	#a2x -fpdf -dbook --fop --no-xmllint -v index.adoc
+	asciidoctor -r asciidoctor-pdf -b pdf -o container_best_practices.pdf index.adoc
 
 epub: $(LABS) $(SLIDES)
 	a2x -fepub -dbook --no-xmllint -v index.adoc
