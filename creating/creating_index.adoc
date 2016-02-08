@@ -272,9 +272,9 @@ cause the command to be run by a shell (sh -c) instead of being executed directl
 The CMD instruction can be overridden when you run the image. So, notice the different results from running
 mycmd in two different ways:
 ```
-# docker build -t mycmd .
-# docker run mycmd            Runs cat to list hosts, os-release files
-# docker run -it mycmd bash   Runs bash, ignoring cat command
+$ docker build -t mycmd .
+$ docker run mycmd            Runs cat to list hosts, os-release files
+$ docker run -it mycmd bash   Runs bash, ignoring cat command
 ```
 
 Any time you add an argument to the end of a docker run command, the CMD instruction inside the container is ignored.
@@ -300,9 +300,9 @@ ENTRYPOINT instruction. If you were to build that Dockerfile into an image named
 examples of running the resulting image:
 
 ```
-# docker build -t myent .
-# docker run myent                  Runs cat on hosts, os-release files
-# docker run -it myent /etc/issue   Runs cat on issue, ignore others
+$ docker build -t myent .
+$ docker run myent                  Runs cat on hosts, os-release files
+$ docker run -it myent /etc/issue   Runs cat on issue, ignore others
 ```
 
 Notice that the command (cat) on the ENTRYPOINT line uses /etc/hosts and /etc/os-release files as arguments
@@ -319,9 +319,9 @@ ENTRYPOINT ["cat","/etc/hosts","/etc/os-release"]
 ```
 
 When you build and run the image you get these results:
-# docker build -t myent1 .
-# docker run myent1                      Runs cat on hosts, os-release
-# docker run -it myent1 /issue           Runs cat all three files
+$ docker build -t myent1 .
+$ docker run myent1                      Runs cat on hosts, os-release
+$ docker run -it myent1 /issue           Runs cat all three files
 
 Because the hosts and os-release files are on the ENTRYPOINT line, there adding arguments to the end of the docker
 run line does not override them. Adding /etc/issue to the docker run line causes that file to be displayed to the
@@ -332,9 +332,10 @@ doesn't override the command set by ENTRYPOINT, you can override the ENTRYPOINT 
 option. For example, this command line would run a bash shell instead of the default cat command set by the
 ENTRYPOINT inside the selected image:
 
-# docker run -it --entrypoint="/bin/bash" myent1
+$ docker run -it --entrypoint="/bin/bash" myent1
 
 [[creating_using_a_script]]
+
 ==== Using a script
 Using a script to start an application is very similar to calling the binary directly. Again, you
 use the CMD instruction but instead of pointing at the binary you point at your script that was
