@@ -1,36 +1,58 @@
-LABS=labs.adoc \
-    content/overview/overview.adoc \
-    content/location_images_dockerfiles/location_images_dockerfiles.adoc \
-    content/layering/layering.adoc \
-    content/image_naming/image_naming.adoc \
-    content/general_guidelines/general_guidelines.adoc \
-    content/dockerfile_instructions/dockerfile_instructions.adoc \
-    content/layered_image_spec/layered_image_spec.adoc \
-    content/base_image_spec/base_image_spec.adoc \
-    content/spc/spc.adoc \
-    content/openshift/openshift.adoc \
-    content/middleware/middleware.adoc \
-    content/atomic_app/atomic_app.adoc \
-    content/appendix/appendix.adoc \
-    content/references/references.adoc
+SHELL := /bin/bash
+LABS=index.adoc \
+    overview/overview_index.adoc \
+	goals/goals_index.adoc \
+    planning/planning_index.adoc \
+	creating/creating_index.adoc \
+	building/building_index.adoc \
+	maintaining/maintaining_index.adoc \
+	appendix/appendix_index.adoc
+
+ALL_ADOC_FILES := $(shell find . -type f -name '*.adoc')
 
 all: $(LABS) labs
 
 labs: $(LABS)
-	asciidoc -v labs.adoc
-	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
-	$(foreach lab,$(LABS), asciidoc -v $(lab);)
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
+	#a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
+	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
-html: $(LABS) 
-	asciidoc -v labs.adoc
-	asciidoc --backend 
-	$(foreach lab,$(LABS), asciidoc -v $(lab);)
+html:
+	# asciidoctor can only put a single HTML output
+	# chunked output is close per upstream
+	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
+
+plain-html:
+	asciidoctor index.adoc
+
+publish: $(LABS)
+	git branch -D gh-pages
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
+	git checkout -b gh-pages
+	git commit index.html -m "Update"
+	git push origin gh-pages -f
 
 pdf: $(LABS) 
-	a2x -fpdf -dbook --fop --no-xmllint -v labs.adoc
+	#a2x -fpdf -dbook --fop --no-xmllint -v index.adoc
+	asciidoctor -r asciidoctor-pdf -b pdf -o container_best_practices.pdf index.adoc
 
 epub: $(LABS) $(SLIDES)
-	a2x -fepub -dbook --no-xmllint -v labs.adoc
+	a2x -fepub -dbook --no-xmllint -v index.adoc
+
+check:
+	# Disabled for now
+	#@for docsrc in $(ALL_ADOC_FILES); do \
+	#	echo -n "Processing '$$docsrc' ..."; \
+	#	cat $$docsrc | aspell -a --lang=en \
+	#				 --dont-backup \
+	#				 --personal=./containers.dict | grep -e '^&'; \
+	#	[ "$$?" == "0" ] && exit 1 || echo ' no errors.'; \
+	#done
+	echo "Disabled"
+
+toc:
+	asciidoctor index.adoc
+	python toc.py
 
 clean:
 	find . -type f -name \*.html -exec rm -f {} \;
@@ -38,3 +60,9 @@ clean:
 	find . -type f -name \*.epub -exec rm -f {} \;
 	find . -type f -name \*.fo -exec rm -f {} \;
 	find . -type f -name \*.xml -exec rm -f {} \;
+	rm -fr output/
+
+review:
+	python mark_change.py ${ALL_ADOC_FILES}
+	cd output && asciidoctor index.adoc
+

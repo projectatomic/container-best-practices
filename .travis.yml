@@ -1,0 +1,18 @@
+language: ruby
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
+
+rvm: 2.0.0
+
+install:
+  - gem install asciidoctor
+
+script:
+  - make check
+  - make html

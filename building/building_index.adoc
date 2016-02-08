@@ -1,0 +1,53 @@
+// vim: set syntax=asciidoc:
+[[build]]
+== Building Applications
+:data-uri:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+
+=== Simple build
+=== Use a build service
+=== Container Development Kit
+==== OpenShift VM
+==== Kubernetes VM
+==== Eclipse/Docker VM
+
+
+OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD
+Building a single Docker image once is a simple matter.
+
+----
+sudo docker build -t <registry_URL>/some/image .
+----
+
+This will build the image which could then be pushed to a registry location. Done. However, this immutable image will need to be updated. And this image depends on other images which will be updated, which means this image will need to be rebuilt. If this image is part of a microservice application it is just one of several images that work together as integrated services that comprise an application. Do you really want a developer to build production services from their laptop?
+
+Serious work with container technology should automate builds. While there are some unique challenges specific to container automation, generally following continuous integration and delivery best practices is recommended.
+
+=== Build Environment
+A build environment should have the following characteristics
+
+- is secure by limiting direct access to the build environment
+- limits access to configure and trigger builds
+- limits access to build sources
+- limits access to base images, those images referenced in the `FROM` line of a Dockerfile
+- provides access to build logs
+- provides some type of a pipeline or workflow, integrating with external services to trigger builds, report results, etc.
+- provides a way to test built images
+- provides a way to reproduce builds
+- provides a secure registry to store builds
+- provides a mechanism to promote tested builds
+- shares the same kernel as the target production runtime environment
+
+A build environment that meets these requirements is difficult to create from scratch. An automation engine like Jenkins is essential to managing a complex pipeline. While a virtual machine-based solution could be created, it is recommended that a dedicated, purpose-built platform such as OpenShift be used.
+
+//== Triggering Builds
+
+
+//== Build Testing
+
+
+//== Scanning
+
+
+

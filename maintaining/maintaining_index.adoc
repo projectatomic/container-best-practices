@@ -1,9 +1,10 @@
 // vim: set syntax=asciidoc:
-[[Chapter_2]]
-= Layering
+[[Maintaining]]
+== Maintaining
 :data-uri:
-:icons:
 :toc:
 :toclevels 4:
-:numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
+
+=== Lifecycle
+=== Garbage Collection

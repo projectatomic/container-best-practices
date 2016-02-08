@@ -1,11 +1,11 @@
 // vim: set syntax=asciidoc:
-[[image_naming]]
-= Image Naming
+[[Appendix]]
+== Appendix
 :data-uri:
-:icons:
 :toc:
 :toclevels 4:
-:numbered:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Image naming standards.
+// Atomic
+=== Atomic application
+include::atomic.adoc[]

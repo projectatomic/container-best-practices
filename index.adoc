@@ -1,0 +1,32 @@
+// vim: set syntax=asciidoc:
+= Container Best Practices
+:description: A guide for creating and managing container-based applications.
+//:icons: font
+:toc: left
+:toclevels: 5
+:sectnums:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+// Overview
+include::overview/overview_index.adoc[]
+
+// Goals
+include::goals/goals_index.adoc[]
+
+// Planning
+include::planning/planning_index.adoc[]
+
+// Creating
+include::creating/creating_index.adoc[]
+
+// Build and Test
+include::building/building_index.adoc[]
+
+// Maintaining
+include::maintaining/maintaining_index.adoc[]
+
+// Appendix
+include::appendix/appendix_index.adoc[]
+
+// Deliver
+//include::deliver/image_naming.adoc[]
