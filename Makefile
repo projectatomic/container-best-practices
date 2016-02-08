@@ -1,3 +1,7 @@
+ifneq ($(COMMIT_ID),)
+	DO_COMMIT_ID = '--commit=$(COMMIT_ID)'
+endif
+
 SHELL := /bin/bash
 LABS=index.adoc \
     overview/overview_index.adoc \
@@ -63,6 +67,6 @@ clean:
 	rm -fr output/
 
 review:
-	python mark_change.py ${ALL_ADOC_FILES}
+	python mark_change.py ${ALL_ADOC_FILES} ${DO_COMMIT_ID}
 	cd output && asciidoctor index.adoc
 
