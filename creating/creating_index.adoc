@@ -15,6 +15,9 @@ Dockerfiles.  Docker has published a
 link:https://docs.docker.com/engine/reference/builder/[reference guide] already
 covering each of the Dockerfile instructions.
 
+
+
+
 === Upstream Docker Best Practices
 
 Upstream docker has a nice description of https://docs.docker.com/engine/articles/dockerfile_best-practices/[best practices] for Dockerfiles. It
@@ -40,61 +43,61 @@ techniques.
 
 ==== Clear packaging caches and temporary package downloads
 
-To keep images as small as possible, it is beneficial to clear the temporary yum cache files after installing or updating packages. To remove unnecessary cache files, use the **yum clean** command. The command is described in detail in the +yum(8)+ man page.
+Package managers can typically generate lots of metadata and also stored downloaded content into a cache of
+sorts. To keep images and layers as small as possible, you should consider clearing out these caches of downloaded
+content.  Note how the following example ends with a _yum -y clean all_ which removes deletable yum content.
 
-Cache needs to be cleaned out of every layer that updates or installs software. That means if you perform multiple install operations within one layer, you need to run **yum clean** at the end of it. For example:
-
-----
+.A singular RUN instruction performing multiple commands
+```
 RUN yum install -y epel-release && \
     rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
     yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
     v8314 mongodb24-mongodb mongodb24 && \
-    yum clean all
-----
+    yum -y clean all
+```
 
-On the other hand, if you perform multiple install/update operations on multiple layers, **yum clean** must be run on each layer. For example:
-
-----
-RUN yum install -y epel-release && \
-    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
-    yum clean all
-
-RUN yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
-    v8314 mongodb24-mongodb mongodb24 && \
-    yum clean all
-----
 
 ==== Installing Documentation
+It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
+package manager caches should be cleared to reduce image sizes.  You can also reduce image size by limiting the
+documentation being installed.  If you package manager supports such a thing and then you have no expectations
+for users to use a shell to interact with your image, this might significantly reduce the size of your image.
 
-Because you want to keep the image as small as possible, you can avoid installing documentation files along with installing or updating software by specifying the **nodocs** flag. For example:
-
+Yum has an optional flag to not install documentation.  The following example shows how to set the flag.
 ----
 RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
 ==== Updating Software supplied by Base-Image
 
-Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated on a regular basis by the supplier and provide software that has been tested for a particular environment.
+Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated
+on a regular basis by the supplier and provide software that has been tested for a particular environment.
 
-Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted dependencies and in certain cases significantly expand the image size.
+Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted
+dependencies and in certain cases significantly expand the image size.
 
 In other words, avoid using instructions similar to this one:
 
-----
+```
 RUN yum -y update
-----
+```
 
 // TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
 ==== Minimizing the Number of Layers
 
-In general, having fewer layers improves readability. Commands that are chained together become a part of the same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
+In general, having fewer layers improves readability. Commands that are chained together become a part of the
+same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large
+number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
 
-A new layer is created for every new instruction defined. This does not necessarily mean that one instruction should be associated with only one command or definition.
+A new layer is created for every new instruction defined. This does not necessarily mean that one instruction
+should be associated with only one command or definition.
 
-Ensure transparency and provide a good overview of the content of each layer by grouping related operations together so that they together constitute a single layer. Consider this snippet from the OpenShift Python 3.3 Dockerfile:
+Ensure transparency and provide a good overview of the content of each layer by grouping related operations
+together so that they together constitute a single layer. Consider this snippet from the OpenShift
+Python 3.3 Dockerfile:
 
-----
+```
 RUN yum install -y \
     https://www.softwarecollections.org/en/scls/rhscl/python33/epel-7-x86_64/download/rhscl-python33-epel-7-x86_64.noarch.rpm && \
     yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus \
@@ -105,7 +108,7 @@ RUN yum install -y \
     scl enable python33 "easy_install pip" && \
     chown -R default:default /opt/openshift && \
     chmod -R og+rwx /opt/openshift
-----
+```
 
 Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of the layers high.
 
@@ -174,10 +177,28 @@ way.  The following table describes the defined action-oriented labels.
 | debug | Command to run the image with debugging turned on | _tbd_
 |===============================================
 
-===== RUN
-===== INSTALL
-===== UNINSTALL
-===== HELP
+==== Recommended labels for your project
+
+Labels are critical to properly identifying your image and influencing how it runs.  For the purposes of
+identification, we recommend that you at least use the following labels:
+
+* name
+* version
+* release
+* architecture
+* vendor
+
+And for actionable labels, we recommend you use at least the following:
+
+* RUN
+* INSTALL
+* UNINSTALL
+
+These three are the most critical for ensuring that users run the image in the manner you wish.  Furthermore,
+tools developed to read and act upon this meta data will work correctly.
+
+In the case that you provide a help file that does not follow the standard of a man page, then the HELP label would also
+be prudent.
 
 === Template
 // Should we create a default template of sorts
@@ -185,7 +206,7 @@ way.  The following table describes the defined action-oriented labels.
 
 === Starting your application
 
-Generally the RUN instruction in the Dockerfile is used by docker to start your application
+Generally the CMD instruction in the Dockerfile is used by docker to start your application
 when the image or container is started.  In the planning section, we provided some reasoning
 for choosing how to  *_xref:planning_starting_application[start your application]_*.  The following
 subsections will show how to implement each choice in your Dockerfile.
@@ -197,6 +218,98 @@ in your Dockerfile.
 ```
 CMD ["/usr/bin/some_binary"]
 ```
+
+===== Setting a Command to Execute from a Dockerfile
+The CMD and ENTRYPOINT instructions identify what command is started when you run the container image. Commands set
+by the RUN instruction, however, are only used when you build the image, while CMD and ENTRYPOINT are used at the
+time you execute docker run. Those three instructions have different meanings, as illustrated in the following
+Dockerfile examples.
+
+===== Using the CMD Instruction
+With CMD, you can identify the default command to run from the image, along with options you want to pass to it.
+If there is no ENTRYPOINT in the Dockerfile, the value of CMD is the command run by default when you start the
+container image. If there is an ENTRYPOINT in the Dockerfile, the ENTRYPOINT value is run as the command instead,
+with the value of CMD used as options to the ENTRYPOINT command.
+
+You can only have one CMD line in a Dockerfile. Here's an example of a Dockerfile that includes a CMD instruction
+to run the cat command to list a couple of files:
+
+```
+FROM fedora:latest
+MAINTAINER John Jones
+CMD ["cat","/etc/hosts","/etc/os-release"]
+```
+
+In this example if you build an image called mycmd, docker run mycmd results in hosts and os-release files
+being output to the shell. The CMD arguments in this case are the command (cat) followed by two file names
+(/etc/hosts and /etc/os-release). The arguments are in JSON format (square brackets and double-quotes in a
+comma-separated list). The CMD line could have simply been CMD cat /etc/hosts /etc/os-release, which would
+cause the command to be run by a shell (sh -c) instead of being executed directly.
+
+The CMD instruction can be overridden when you run the image. So, notice the different results from running
+mycmd in two different ways:
+```
+# docker build -t mycmd .
+# docker run mycmd            Runs cat to list hosts, os-release files
+# docker run -it mycmd bash   Runs bash, ignoring cat command
+```
+
+Any time you add an argument to the end of a docker run command, the CMD instruction inside the container is ignored.
+So the second example opens a bash shell instead of running the cat command. If you want to assign a command that
+is not overridden by options at the end of a docker run command, use the ENTRYPOINT instruction.
+
+===== Using the ENTRYPOINT Instruction
+The ENTRYPOINT instruction lets you define the command executed when you run the container image. It does this in a
+way that is not overridden by arguments you put at the end of a docker run line. If your Dockerfile includes an
+ENTRYPOINT instruction and there is also a CMD instruction, any arguments on the CMD instruction line are passed to
+the command defined in the ENTRYPOINT line. Here is an example of a Dockerfile that uses an ENTRYPOINT instruction:
+
+```
+FROM fedora:latest
+MAINTAINER John Jones
+CMD ["/etc/hosts","/etc/os-release"]
+ENTRYPOINT ["cat"]
+```
+
+Because the ENTRYPOINT used in this Dockerfile is set to run the cat command, that command is used by default
+with the container. However, if there is also a CMD line in the file, arguments on that line are passed to the
+ENTRYPOINT instruction. If you were to build that Dockerfile into an image named myent, here are a couple of
+examples of running the resulting image:
+
+```
+# docker build -t myent .
+# docker run myent                  Runs cat on hosts, os-release files
+# docker run -it myent /etc/issue   Runs cat on issue, ignore others
+```
+
+Notice that the command (cat) on the ENTRYPOINT line uses /etc/hosts and /etc/os-release files as arguments
+as long as no other argument is given on the docker run command line. However, if there is an argument when you
+run the image (/etc/issue here), anything on a CMD instruction is ignored.
+
+An advantage of having the ENTRYPOINT only identify the command is that you might want to override the default way of
+running a command. Consider this example:
+
+```
+FROM fedora:latest
+MAINTAINER John Jones
+ENTRYPOINT ["cat","/etc/hosts","/etc/os-release"]
+```
+
+When you build and run the image you get these results:
+# docker build -t myent1 .
+# docker run myent1                      Runs cat on hosts, os-release
+# docker run -it myent1 /issue           Runs cat all three files
+
+Because the hosts and os-release files are on the ENTRYPOINT line, there adding arguments to the end of the docker
+run line does not override them. Adding /etc/issue to the docker run line causes that file to be displayed to the
+shell after the other two files appear.
+
+One last thing about ENTRYPOINT to keep in mind. Even though arguments at the end of the docker run command line
+doesn't override the command set by ENTRYPOINT, you can override the ENTRYPOINT command with the --entrypoint=""
+option. For example, this command line would run a bash shell instead of the default cat command set by the
+ENTRYPOINT inside the selected image:
+
+# docker run -it --entrypoint="/bin/bash" myent1
 
 [[creating_using_a_script]]
 ==== Using a script
@@ -259,6 +372,10 @@ include::help.adoc[]
 === Verifying Dockerfile (linter)
 
 
+
+
+
+
 OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
 
 === Dockerfiles
@@ -313,35 +430,6 @@ Therefore, for example for Apache server, ports 8080 or 8433 (HTTP or HTTPS) sho
 TBD
 
 ...
-
-
-=== ENTRYPOINT vs CMD
-
-+ENTRYPOINT+ defines the default binary with which the Docker container will start. In other words, it makes the container behave like a binary. The default +ENTRYPOINT+ for Docker is +/bin/sh -c+. Consider the following example:
-
-----
-docker run -i -t fedora /bin/bash
-----
-
-Here +/bin/bash+ is passed as argument to the +ENTRYPOINT+ which is +/bin/sh -c+. Docker also provides a way to override the entrypoint by providing the --entrypoint flag.
-
-----
-docker run --entrypoint /bin/cat -i -t fedora /etc/redhat-release
-----
-
-In the example above, the default +ENTRYPOINT+ is overridden by the flag and +/etc/redhat-release+ is passed as a parameter to +/bin/cat+.
-
-+CMD+ is used to execute the supplied command as a parameter to the +ENTRYPOINT+. It is advisable to use +CMD+ unless you are absolutely sure about changing the +ENTRYPOINT+ since all the execution will run as the parameter to the +ENTRYPOINT+. Using +ENTRYPOINT+ can easily confuse the other users who are not familiar with the image and can make debugging or even obtaining a shell difficult since everything will be a parameter to the +ENTRYPOINT+
-
-CMD Example:
-----
-CMD ["python","myscript.py"]
-----
-
-ENTRYPOINT Example:
-----
-ENTRYPOINT ["/usr/bin/python"]
-----
 
 
 
