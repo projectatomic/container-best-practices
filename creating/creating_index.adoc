@@ -68,6 +68,29 @@ Yum has an optional flag to not install documentation.  The following example sh
 RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
+Note that the **nodocs** flag is used in some base images, for example CentOS and Fedora, and this setting gets inherited by the child layers. This can cause problems in case you want to include documentation deliberately in your layered image.
+
+In this case, if you wish to have the documentation installed for **packages from your single layer only**, you have to empty the **tsflags** option as follows:
+
+----
+RUN yum -y install docker --setopt=tsflags=''
+----
+
+If you wish to have the documentation installed for **packages from your single layer and the parent layers**, you need to reinstall the packages with the empty **tsflags** option as follow:
+
+----
+RUN yum -y reinstall "*" --setopt-tsflags='' && yum install docker --setopt-tsflags=''
+----
+
+In case you need to have documentation included for **every package from every single parent or child layer**, the */etc/yum.conf* file needs to be edited as follows:
+
+----
+RUN [ -e /etc/yum.conf ] && sed -i '/tsflags=nodocs/d' /etc/yum.conf || true
+RUN yum -y reinstall "*"
+RUN yum -y install <package>
+----
+
+
 ==== Updating Software supplied by Base-Image
 
 Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated
