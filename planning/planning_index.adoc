@@ -4,7 +4,12 @@
 :data-uri:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Careful planning is important when working with container technology.
+As you begin to contemplate the containerization of your application, there are number of factors that
+should be considered prior to authoring a Dockerfile.  You will want to plan out everything from
+how to start the application, to network considerations, to making sure your image is architected in a way that
+can run in multiple environments like Atomic Host or OpenShift.
+
+The following sections discuss our advice and best practices on planning to containerize your applications.
 
 
 === Application Classes

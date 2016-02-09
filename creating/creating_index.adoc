@@ -235,18 +235,12 @@ for choosing how to  *_xref:planning_starting_application[start your application
 subsections will show how to implement each choice in your Dockerfile.
 
 ==== Calling the binary directly
-Being the simplest of the choices, you simply need to call the binary using the CMD instruction
-in your Dockerfile.
+Being the simplest of the choices, you simply need to call the binary using the CMD instruction or
+define an ENTRYPOINT in your Dockerfile.
 
 ```
 CMD ["/usr/bin/some_binary"]
 ```
-
-===== Setting a Command to Execute from a Dockerfile
-The CMD and ENTRYPOINT instructions identify what command is started when you run the container image. Commands set
-by the RUN instruction, however, are only used when you build the image, while CMD and ENTRYPOINT are used at the
-time you execute docker run. Those three instructions have different meanings, as illustrated in the following
-Dockerfile examples.
 
 ===== Using the CMD Instruction
 With CMD, you can identify the default command to run from the image, along with options you want to pass to it.
@@ -254,85 +248,25 @@ If there is no ENTRYPOINT in the Dockerfile, the value of CMD is the command run
 container image. If there is an ENTRYPOINT in the Dockerfile, the ENTRYPOINT value is run as the command instead,
 with the value of CMD used as options to the ENTRYPOINT command.
 
-You can only have one CMD line in a Dockerfile. Here's an example of a Dockerfile that includes a CMD instruction
-to run the cat command to list a couple of files:
-
-```
-FROM fedora:latest
-MAINTAINER John Jones
-CMD ["cat","/etc/hosts","/etc/os-release"]
-```
-
-In this example if you build an image called mycmd, docker run mycmd results in hosts and os-release files
-being output to the shell. The CMD arguments in this case are the command (cat) followed by two file names
-(/etc/hosts and /etc/os-release). The arguments are in JSON format (square brackets and double-quotes in a
-comma-separated list). The CMD line could have simply been CMD cat /etc/hosts /etc/os-release, which would
-cause the command to be run by a shell (sh -c) instead of being executed directly.
-
 The CMD instruction can be overridden when you run the image. So, notice the different results from running
 mycmd in two different ways:
-```
-$ docker build -t mycmd .
-$ docker run mycmd            Runs cat to list hosts, os-release files
-$ docker run -it mycmd bash   Runs bash, ignoring cat command
-```
 
 Any time you add an argument to the end of a docker run command, the CMD instruction inside the container is ignored.
 So the second example opens a bash shell instead of running the cat command. If you want to assign a command that
 is not overridden by options at the end of a docker run command, use the ENTRYPOINT instruction.
 
 ===== Using the ENTRYPOINT Instruction
-The ENTRYPOINT instruction lets you define the command executed when you run the container image. It does this in a
-way that is not overridden by arguments you put at the end of a docker run line. If your Dockerfile includes an
+Like CMD, the ENTRYPOINT instruction lets you define the command executed when you run the container image but it
+cannot be overridden by arguments you put at the end of a docker run line. If your Dockerfile includes an
 ENTRYPOINT instruction and there is also a CMD instruction, any arguments on the CMD instruction line are passed to
-the command defined in the ENTRYPOINT line. Here is an example of a Dockerfile that uses an ENTRYPOINT instruction:
+the command defined in the ENTRYPOINT line.
 
-```
-FROM fedora:latest
-MAINTAINER John Jones
-CMD ["/etc/hosts","/etc/os-release"]
-ENTRYPOINT ["cat"]
-```
+This is the distinct advantage of the ENTRYPOINT instruction over the CMD instruction because the command being run
+is not overridden but it can be subsidized.  Suppose you have an ENTRYPOINT instruction that displays two files.
+You could easily add an additional file to be displayed by adding it to the docker run command.
 
-Because the ENTRYPOINT used in this Dockerfile is set to run the cat command, that command is used by default
-with the container. However, if there is also a CMD line in the file, arguments on that line are passed to the
-ENTRYPOINT instruction. If you were to build that Dockerfile into an image named myent, here are a couple of
-examples of running the resulting image:
-
-```
-$ docker build -t myent .
-$ docker run myent                  Runs cat on hosts, os-release files
-$ docker run -it myent /etc/issue   Runs cat on issue, ignore others
-```
-
-Notice that the command (cat) on the ENTRYPOINT line uses /etc/hosts and /etc/os-release files as arguments
-as long as no other argument is given on the docker run command line. However, if there is an argument when you
-run the image (/etc/issue here), anything on a CMD instruction is ignored.
-
-An advantage of having the ENTRYPOINT only identify the command is that you might want to override the default way of
-running a command. Consider this example:
-
-```
-FROM fedora:latest
-MAINTAINER John Jones
-ENTRYPOINT ["cat","/etc/hosts","/etc/os-release"]
-```
-
-When you build and run the image you get these results:
-$ docker build -t myent1 .
-$ docker run myent1                      Runs cat on hosts, os-release
-$ docker run -it myent1 /issue           Runs cat all three files
-
-Because the hosts and os-release files are on the ENTRYPOINT line, there adding arguments to the end of the docker
-run line does not override them. Adding /etc/issue to the docker run line causes that file to be displayed to the
-shell after the other two files appear.
-
-One last thing about ENTRYPOINT to keep in mind. Even though arguments at the end of the docker run command line
-doesn't override the command set by ENTRYPOINT, you can override the ENTRYPOINT command with the --entrypoint=""
-option. For example, this command line would run a bash shell instead of the default cat command set by the
-ENTRYPOINT inside the selected image:
-
-$ docker run -it --entrypoint="/bin/bash" myent1
+You can override the ENTRYPOINT command by defining a new entrypoint with the --entrypoint="" option on the docker
+command line.
 
 [[creating_using_a_script]]
 
