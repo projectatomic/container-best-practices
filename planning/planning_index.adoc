@@ -75,17 +75,54 @@ should be made regarding configuration, storage, installation or service archite
 
 ===== Deconstructing Microservice Applications
 
-The process of deconstructing applications varies widely depending on the complexity and architecture of the application. Consider the following steps as a guide to a generalized process.
+The process of deconstructing applications varies widely depending on the complexity and architecture of the
+application. Consider the following steps as a guide to a generalized process.
 
 . Identify the components that will be broken down into microservices. These typically map to a container images.
 . Identify how the services will communicate. How are REST or message bus interfaces authenticated?
 . Identify how data will be accessed by the services. Which services need read/write access to the storage?
-. Create a service topology drawing to represent the components, lines of communication and storage. This will guide the development work, configuration discussions, debugging and potentially become part of the end-user documentation.
-. Identify how the services will be configured, which services need to share configuration and how these services might be deployed in a highly available configuration.
+. Create a service topology drawing to represent the components, lines of communication and storage. This will
+guide the development work, configuration discussions, debugging and potentially become part of the
+end-user documentation.
+. Identify how the services will be configured, which services need to share configuration and how these
+services might be deployed in a highly available configuration.
 
 
 ==== Security and user requirements
 
+==== Host and image synchronization
+
+Some applications that run in containers require the host and container to more or less be synchronized on certain
+attributes so their behaviors are also similar.  One such common attribute can be time.  The following sections discuss
+best practices to keeping those attributes similar or the same.
+
+===== Time
+
+Consider a case where multiple containers (and the host) are running applications and logging to something like
+a log server.  The log timestamps and information would almost be entirely useless if each container reported a different
+time than the host.
+
+The best way to synchronize the time between a container and its host is through the use of bind mounts.  You simply need
+to bind mount the hosts _/etc/localtime_ with the container's _/etc/localtime_.
+
+In your Dockerfile, this can be accomplished by adding the following to your RUN label.
+
+.Synchronizing the timezone of the host to the container.
+```
+-v /etc/localtime:/etc/localtime
+```
+
+===== Machine ID
+
+The _etc/machine_id_ file is often used as an identifier for things like applications and logging.  Depending on your
+application, it might be beneficial to also bind mount the machine id of the host into the container.  For example.
+in many cases journald relies on the machine ID for identification.  The sosreport application also uses it.  To bind
+mount the machine ID of the host to the container, add something like the following to your RUN label.
+
+.Synchronizing the host machine ID with a container
+```
+-v /etc/machine_id:/etc/machine_id
+```
 
 === Considerations for images on Atomic Host and OpenShift
 
