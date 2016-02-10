@@ -43,7 +43,7 @@ techniques.
 
 ==== Clear packaging caches and temporary package downloads
 
-Package managers can typically generate lots of metadata and also stored downloaded content into a cache of
+Package managers can typically generate lots of metadata and also store downloaded content into a cache of
 sorts. To keep images and layers as small as possible, you should consider clearing out these caches of downloaded
 content.  Note how the following example ends with a _yum -y clean all_ which removes deletable yum content.
 
@@ -91,9 +91,9 @@ RUN yum -y install <package>
 ----
 
 
-==== Updating Software supplied by Base-Image
+==== Updating Software supplied by Base Image
 
-Avoid updating software supplied by base-image unless necessary. Base images themselves are meant to be updated
+Avoid updating software supplied by base image unless necessary. Base images themselves are meant to be updated
 on a regular basis by the supplier and provide software that has been tested for a particular environment.
 
 Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted
@@ -315,8 +315,8 @@ CMD [ "/bin/rsyslog.sh" ]
 
 Extending our example from link:creating_using_a_script[starting an application with a script], the rsyslog
 image was started with a script.  We could easily use systemd to start the application.  To use systemd
-to start a service that has an unit file, we need to tell systemd to enable the service and then let the
-init process handle the rest.  So instead of the ADD instruction used earlier, we would use a RUN
+to start a service that has a unit file, we need to tell systemd to enable the service and then let the
+init process handle the rest. So instead of the ADD instruction used earlier, we would use a RUN
 instruction to enable the service.
 
 ```

@@ -78,7 +78,7 @@ should be made regarding configuration, storage, installation or service archite
 The process of deconstructing applications varies widely depending on the complexity and architecture of the
 application. Consider the following steps as a guide to a generalized process.
 
-. Identify the components that will be broken down into microservices. These typically map to a container images.
+. Identify the components that will be broken down into microservices. These typically map to container images.
 . Identify how the services will communicate. How are REST or message bus interfaces authenticated?
 . Identify how data will be accessed by the services. Which services need read/write access to the storage?
 . Create a service topology drawing to represent the components, lines of communication and storage. This will
@@ -103,7 +103,7 @@ a log server.  The log timestamps and information would almost be entirely usele
 time than the host.
 
 The best way to synchronize the time between a container and its host is through the use of bind mounts.  You simply need
-to bind mount the hosts _/etc/localtime_ with the container's _/etc/localtime_.
+to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.
 
 In your Dockerfile, this can be accomplished by adding the following to your RUN label.
 
@@ -150,9 +150,9 @@ some softer decision points that might help you decide which would be easiest fo
 Dockerfile owner.
 
 ==== Calling the binary directly
-If your application is not service oriented, calling the binary directly might be the simplest and most
+If your application is not service-oriented, calling the binary directly might be the simplest and most
 straight-forward method to start a container.  There is no memory overhead and no additional packages
-are needed (like systemd and its dependancies).  However, it is more difficult to deal with
+are needed (like systemd and its dependencies).  However, it is more difficult to deal with
 setting environment variables.
 
 ==== Using a script
@@ -162,13 +162,13 @@ method is also good when you need to call more than a single binary to start the
 One downside is that you now have to maintain the script and ensure it is always present in the image.
 
 ==== Use systemd
-Using systemd to start your application is a great if your application is service oriented (like httpd).
+Using systemd to start your application is a great if your application is service-oriented (like httpd).
 It can benefit from leveraging well tested unit files generally delivered with the applications
-themselves and therefor can make complex applications that require environment variables easy to work
+themselves and therefore can make complex applications that require environment variables easy to work
 with.  One disadvantage is that systemd will increase the size of your image and there is a small
 amount of memory used for systemd itself.
 
-NOTE: As docker-1.10, the docker run parameter of _--privileged_ is no longer needed to use systemd
+NOTE: As of docker-1.10, the docker run parameter of _--privileged_ is no longer needed to use systemd
 within a container.
 
 
