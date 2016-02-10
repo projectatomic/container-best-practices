@@ -181,8 +181,77 @@ within a container.
 ==== AEP / OSE / Docker considerations
 
 === Storage Considerations
-==== Persistent vs ephemeral storage
-==== Docker persistent storage
+
+When you architect your container image, storage can certainly be a critical consideration.  The power of containers is
+that they can mimic, replicate, or replace all kinds of applications and therein lies why you must be careful in
+considering how you deal with storage needs.
+
+By nature, the storage for containers is ephemeral.  This makes sense because one of the attractions of containers
+is that they can be easily created, deleted, replicated, and so on.  If no consideration to storage is given, the
+container will only have access to its own filesystem.  This means if the container is deleted, whatever information
+whether it is logs or data will be lost.  For some applications, this is perfectly acceptable if not preferred.
+
+However, if your application generates import data that should be retained or perhaps could be shared amongst
+multiple containers, you will need to ensure that this storage is setup for the user.
+
+==== Persistent storage for containers: Data Volumes
+
+Docker defines link:https://docs.docker.com/engine/userguide/containers/dockervolumes/[persistent storage] in two ways.
+
+. Data volumes
+. Data volume containers
+
+However at present, the use of link:https://docs.docker.com/engine/userguide/containers/dockervolumes/#data-volumes[data volumes]
+is emerging to be the preferred storage option for users of Docker.  The docker website defines a data volume as
+_"a specially-designated directory within one or more containers that bypasses the Union File System."_ It has the distinct
+advantages that they can they can be shared and reused for one or more containers.  Moreover, a data volume will
+persist even if the associated container is deleted.
+
+Data volumes must be explicitly created and preferbaly should be named to provide it with a meaningful name.  You can
+manually create a data volume with the _docker volume create_ command.
+
+.Creating a data volume for persistent storage
+```
+$ docker volume create <image_name>
+```
+
+NOTE: You can also specify a driver name with the -d option
+
+===== Using data volumes in a Dockerfile
+
+For developers whose applications require persistent storage, the trick will be instantiating the data volume
+prior to running the image.  This, however, can be achieved leveraging the link:#label_action[LABEL metadata]
+and applications like atomic.
+
+We recommend that the data volume be created through the use of the INSTALL label.  If you recall, the INSTALL label
+is meant to identify a script that should be run prior to ever running the image. In that install script, adding
+something like the following can be used to create the data volume.
+
+.Creating a data volume in your install script
+```
+chroot /host /usr/bin/docker volume create <image_name>
+```
+
+To then use the data volume, the RUN label would need to use the bind mount feature.  Adding the following to your
+RUN label would bind mount the data volume by name:
+
+.Adding a data volume by name into your RUN label
+```
+-v <data_volume_name>:/<mount_path_inside_container>
+```
+
+==== Persistent storage for containers: Mounting a directory from the host
+You can also leverage the root filesystem for persistent storage through the use of bind mounts.  The basic idea for this
+is to use a directory on the root filesystem that will be bind mounted into the container at runtime.  This can be simply
+used by adding a bind mount to your RUN label:
+
+.Bind mounting a directory from the rootfs to a running container
+```
+-v /<path_on_the_rootfs>:/<mount_path_inside_container>
+```
+
+One downside to this approach is that anyone with privileges to that directory on the host will be able to view and
+possibly alter the content.
 ==== OpenShift persistent storage
 
 === Security and User considerations

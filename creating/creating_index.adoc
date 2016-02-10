@@ -184,7 +184,7 @@ The following table describes labels that are meant to be purely descriptive in 
 |===============================================
 
 ==== Action-oriented labels
-
+[[label_action]]
 Most action-oriented labels will be a used in the context of a docker command in order for the container to behave in a desired
 way.  The following table describes the defined action-oriented labels.
 
