@@ -1,7 +1,7 @@
 You can now provide a man-like help file with your images that allow for users to have a deeper understanding of your
 image.  This function now allows you to provide a:
 
-- more verbose description of the what the images is and does
+- more verbose description of the what the image is and does
 - understanding of how the image should be run
 - description of the security implications inherent in running the image
 - requirement if the image needs to be installed

@@ -1,7 +1,7 @@
 // Atomic https://github.com/projectatomic/atomic
 
 The https://github.com/projectatomic/atomic[atomic application] is meant to be a user-friendly way to
-install, manage, and run container images using container. Unlike docker commands, it leverages the ability
+install, manage, and run container images using container. Unlike docker commands, it leverages the ability to
 read and act upon LABELs defined in a Dockerfile.  By its nature, it helps authors of Dockerfiles to have
 their images run as they intended without a significant amount of knowledge by the end users.  Atomic has several
 subcommands:
