@@ -40,4 +40,4 @@ Github serves HTML documents from the `gh-pages` branch. This command will push 
 
 ### Spell check
 
-`aspell` is used to spell check the document. This is run in a [Travis job](https://travis-ci.org/projectatomic/container-best-practices) for all pull requests.Any non-English words should be added to `containers.dict` with your commit. Ensure `make check` passes.
+`aspell` is used to spell check the document. This is run in a [Travis job](https://travis-ci.org/projectatomic/container-best-practices) for all pull requests. Any non-English words should be added to `containers.dict` with your commit. Ensure `make check` passes.
