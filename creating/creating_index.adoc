@@ -107,7 +107,16 @@ RUN yum -y update
 
 // TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
-==== Minimizing the Number of Layers
+==== Squashing layers
+
+Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional data that are not always part of the resulting image. For example, if you add a file in one layer, but remove it in another layer later, the final image's size will include the added file size in a form of a special "whiteout" file although you removed it. In addition, every layer contains separate metadata that add up to the overall image size as well. So what are the benefits of squashing?
+
+* **Performance** - since all layers are copy-on-write file systems, it will take longer to build the final container from many layers.
+* **Image size ** - As already described above, any new instruction in the Dockerfile increases the overall size of the image. With squashing, you can prevent these unwanted size additions.
+
+However, Docker does not yet support squashing natively, so you will have to work around it by using alternative approaches, some of which are listed below.
+
+===== Chaining Commands
 
 In general, having fewer layers improves readability. Commands that are chained together become a part of the
 same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large
@@ -135,12 +144,13 @@ RUN yum install -y \
 
 Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of the layers high.
 
-// Find a good example for the opposite case, when we want to have similar operations split into multiple instructions.
+===== docker export & docker import
 
-==== Squashing layers
+You can _docker export_ and _docker import_ the container to squash all the layers in your container in a single one. This approach, however, is not very practical for sharing as the user will be able to only download the whole content and cannot take advantage the caching. Note that the base image layer will be included as well and might be severl hundreds of megabytes in size.
 
-// can this be done by joe regular?
-https://github.com/goldmann/docker-scripts
+===== Custom Tools
+
+You will surely find a lot of utilities on the internet that facilitate layer squashing. We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-scripts[docker-scripts], which automates layer squashing and which is maintained and has been tested by the community.
 
 ==== Locales
 
