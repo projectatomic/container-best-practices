@@ -191,7 +191,7 @@ is that they can be easily created, deleted, replicated, and so on.  If no consi
 container will only have access to its own filesystem.  This means if the container is deleted, whatever information
 whether it is logs or data will be lost.  For some applications, this is perfectly acceptable if not preferred.
 
-However, if your application generates import data that should be retained or perhaps could be shared amongst
+However, if your application generates important data that should be retained or perhaps could be shared amongst
 multiple containers, you will need to ensure that this storage is setup for the user.
 
 ==== Persistent storage for containers: Data Volumes
@@ -241,8 +241,8 @@ RUN label would bind mount the data volume by name:
 ```
 
 ==== Persistent storage for containers: Mounting a directory from the host
-You can also leverage the root filesystem for persistent storage through the use of bind mounts.  The basic idea for this
-is to use a directory on the root filesystem that will be bind mounted into the container at runtime.  This can be simply
+You can also leverage the host filesystem for persistent storage through the use of bind mounts.  The basic idea for this
+is to use a directory on the host filesystem that will be bind mounted into the container at runtime.  This can be simply
 used by adding a bind mount to your RUN label:
 
 .Bind mounting a directory from the rootfs to a running container
