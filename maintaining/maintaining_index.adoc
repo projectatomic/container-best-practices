@@ -7,4 +7,5 @@
 :homepage https://github.com/projectatomic/container-best-practices:
 
 === Lifecycle
+==== techniques for upgrades
 === Garbage Collection

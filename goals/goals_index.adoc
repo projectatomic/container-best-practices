@@ -5,3 +5,7 @@
 :toc:
 :toclevels 4:
 :homepage https://github.com/projectatomic/container-best-practices:
+
+=== Provide general guidance on containerizing applications
+=== Provide a deep-dive into specific challenges related to container technology
+=== Describe a complete end-to-end journey of a containerized application, including the technology, tools and best practices
