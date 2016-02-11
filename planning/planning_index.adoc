@@ -124,6 +124,14 @@ mount the machine ID of the host to the container, add something like the follow
 -v /etc/machine_id:/etc/machine_id
 ```
 
+=== Logging
+==== journald
+==== logging services (fluentd, rsyslog, splunk)
+==== openshift logging
+==== native docker logging
+==== system vs per image
+
+
 === Considerations for images on Atomic Host and OpenShift
 
 === Where to store related components
@@ -170,6 +178,12 @@ amount of memory used for systemd itself.
 
 NOTE: As of docker-1.10, the docker run parameter of _--privileged_ is no longer needed to use systemd
 within a container.
+
+=== Techniques for deploying or starting images from a host
+==== host systemd considerations
+==== native docker (ah) unit file
+===== example unit file - atomic create unit file
+==== openshift driven
 
 
 === Network Considerations
@@ -252,7 +266,9 @@ used by adding a bind mount to your RUN label:
 
 One downside to this approach is that anyone with privileges to that directory on the host will be able to view and
 possibly alter the content.
+
 ==== OpenShift persistent storage
+==== Storage backends for persistent storage
 
 === Security and User considerations
 
