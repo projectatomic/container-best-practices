@@ -114,7 +114,7 @@ In your Dockerfile, this can be accomplished by adding the following to your RUN
 
 ===== Machine ID
 
-The _etc/machine_id_ file is often used as an identifier for things like applications and logging.  Depending on your
+The _/etc/machine_id_ file is often used as an identifier for things like applications and logging.  Depending on your
 application, it might be beneficial to also bind mount the machine id of the host into the container.  For example.
 in many cases journald relies on the machine ID for identification.  The sosreport application also uses it.  To bind
 mount the machine ID of the host to the container, add something like the following to your RUN label.
