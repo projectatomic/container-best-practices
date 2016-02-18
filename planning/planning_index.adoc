@@ -124,14 +124,6 @@ mount the machine ID of the host to the container, add something like the follow
 -v /etc/machine_id:/etc/machine_id
 ```
 
-=== Logging
-==== journald
-==== logging services (fluentd, rsyslog, splunk)
-==== openshift logging
-==== native docker logging
-==== system vs per image
-
-
 === Considerations for images on Atomic Host and OpenShift
 
 === Where to store related components
@@ -194,6 +186,7 @@ within a container.
 
 ==== AEP / OSE / Docker considerations
 
+[[planning_storage]]
 === Storage Considerations
 
 When you architect your container image, storage can certainly be a critical consideration.  The power of containers is
@@ -270,6 +263,56 @@ possibly alter the content.
 ==== OpenShift persistent storage
 ==== Storage backends for persistent storage
 
+=== Logging
+
+If your application logs actions, errors, and warnings to some sort of log mechanism, you will want to consider how
+to allows users to obtain, review, and possible retain those logs.  The flexibility of a container environment
+can however present some challenges when it comes to logging because typically your containers are separated
+by namespace and cannot leverage the system logging without some explicit action by the users.  There are also
+several solutions for logging containers like:
+
+* using a logging service like rsyslog or fluentd
+* setting the docker daemon's log driver
+* logging to a file shared with the host (bind mounting)
+
+As a developer, if your application does using logging of some manner, you should be thinking about how you will
+handle your log files.  Each of aforementioned solutions has its pros and cons.
+
+
+==== Using a logging service
+
+Most traditional Linux systems use a logging service like link:http://www.rsyslog.com/[rsyslog] to collect and store
+its logfiles.  Often the logging service will coordinate logging with journald but nevertheless it too is a service
+will accept log input.
+
+If your application uses a logger and you want to take advantage of the host's logger, you can bind mount _/dev/log_
+between the host and container as part of the RUN label like so:
+
+```
+-v /dev/log:/dev/log
+```
+
+Depending on the host distribution, log messages will now be in the host's journald and subsequently into
+_/var/log/messages_ assumming the host is using something like rsyslog.
+
+==== Setting the log driver for docker daemon
+
+Docker has the ability to link:https://docs.docker.com/engine/admin/logging/overview/[configure a logging driver].  When
+implemented, it will impact all containers on the system.  This is only useful when you can ensure that the
+host will only be running your application as this might impact other containers.  Therefore this method has limited
+usefulness unless you can ensure the final runtime environment.
+
+==== Using shared storage with the host
+
+The use of xref:planning_storage[persistent storage] can be another effective way to deal with log files whether
+you choose to perform a simple bind mount with the host or data volumes.  Like  using a logging service, it has the
+advantage that the logs can be preserved irregardless of the state of the container.  Shared storage also reduces
+the potential to chew up filesystem space assigned to the container itself.  You can bind mount either a file or
+directory between host and container using the _-v_ flag in your RUN label.
+
+```
+-v <host_dir|file>:<image_dir|file>
+```
 === Security and User considerations
 
 ==== Passing credentials and secrets
