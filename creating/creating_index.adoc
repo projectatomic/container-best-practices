@@ -26,6 +26,21 @@ recommendations.
 
 === Choosing base image
 
+
+==== Updating Software supplied by Base Image
+
+Avoid updating software supplied by base image unless necessary. Base images themselves are meant to be updated
+on a regular basis by the supplier and provide software that has been tested for a particular environment.
+
+Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted
+dependencies and in certain cases significantly expand the image size.
+
+In other words, avoid using instructions similar to this one:
+
+```
+RUN yum -y update
+```
+
 ==== RHEL base images
 
 ==== Building your own
@@ -90,20 +105,6 @@ RUN yum -y reinstall "*"
 RUN yum -y install <package>
 ----
 
-
-==== Updating Software supplied by Base Image
-
-Avoid updating software supplied by base image unless necessary. Base images themselves are meant to be updated
-on a regular basis by the supplier and provide software that has been tested for a particular environment.
-
-Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted
-dependencies and in certain cases significantly expand the image size.
-
-In other words, avoid using instructions similar to this one:
-
-```
-RUN yum -y update
-```
 
 // TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
