@@ -1,0 +1,74 @@
+=== Application Classes
+
+We have defined applications into four general categories:
+
+. System Services
+. Client Tools
+. Service Components
+. Micro-service Applications
+
+
+==== System Services
+
+System services are a special kind of application. These are drivers or system agents
+that extend the functionality of the host system. They are typically single-container
+images. They are typically run using automation during a start-up script like cloud-init or a
+configuration management system. System service containers require special runtime configuration to
+enable the appropriate level of privilege to modify the host system. They are commonly referred as
+Super Privileged Containers (SPCs). They utilize the benefits of container packaging but not separation.
+
+==== Client Tools
+
+Client Tools applications are another special kind of application. These are used by end-users who do
+not wish to install a client using traditional packaging such as RPM. Container technology enables an
+end-user to add a client to their workstation without modifying the operating system.
+
+There are an endless number of potential clients for this class of applications. A few examples include
+remote clients such as OpenStack or Amazon Web Services (AWS) client tools. An extension of the model is
+vagrant-like development environment where a tool set for a given project is packaged. For example,
+Red Hat's link:https://access.redhat.com/documentation/en/red-hat-enterprise-linux-atomic-host/version-7/getting-started-with-containers/#using_the_atomic_tools_container_image[rhel-tools image]
+is a toolkit for interacting with an immutable Atomic host system. It includes git, strace and sosreport, for example.
+
+Two important architectural decisions should be considered for client container images.
+
+. How does the end-user interact with the container? Will they use them like traditional command line
+interface (CLI) tools? Or will they enter the container environment as a shell, perform some commands, then exit.
+The entrypoint command chosen for the container will determine the default behavior.
+. Will end-users will need access to files on the host system? If so, will the default behavior bindmount
+the current working directory or a user-specified directory?
+
+==== Service Components
+
+Service components are applications that an application developer integrates with. Databases are common examples.
+A database is typically a component of a larger application.
+
+The challenge of porting service components to container technology is optimizing integration. Will the application
+developer be able to configure the service to their needs? Will the application developer have sufficient documentation
+to install, configure and secure the service being integrated?
+
+==== Microservice Applications
+
+The microservice architecture is particularly well-suited to container technology. Martin Fowler describes microservice
+applications as "suites of independently deployable services."footnote:[Martin Fowler,
+http://martinfowler.com/articles/microservices.html] Well-designed microservice applications have a clean separation
+of code, configuration and data.
+
+Planning is especially critical for microservice applications because they are especially challenging to port to
+container technology. The planning phase must include experts who understand the application's architecture and
+service topology, performance characteristics, configuration and dependencies such as networking and storage. While
+many applications can be ported to container technology without modification there are sometimes optimizations that
+should be made regarding configuration, storage, installation or service architecture.
+
+===== Deconstructing Microservice Applications
+
+The process of deconstructing applications varies widely depending on the complexity and architecture of the
+application. Consider the following steps as a guide to a generalized process.
+
+. Identify the components that will be broken down into microservices. These typically map to container images.
+. Identify how the services will communicate. How are REST or message bus interfaces authenticated?
+. Identify how data will be accessed by the services. Which services need read/write access to the storage?
+. Create a service topology drawing to represent the components, lines of communication and storage. This will
+guide the development work, configuration discussions, debugging and potentially become part of the
+end-user documentation.
+. Identify how the services will be configured, which services need to share configuration and how these
+services might be deployed in a highly available configuration.
