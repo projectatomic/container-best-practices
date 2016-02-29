@@ -21,7 +21,7 @@ recommendations.
 
 ==== Choosing Base Image
 
-Images that have no parent are called base images. Every Docker image has its own root filesystem with an operating system installed. So when you want to create a new container, it either has to be based on an image that actually provides an operating system or you will need to create this layer in your image.
+Images that have no parent are called base images. Docker image usually have their own root filesystem with an operating system installed. So when you want to create a new image, it either has to be based on an image that actually provides an operating system or you will need to create this layer in your image. The only difference to this are super minimal images that instead of an operating system provide only a single binary as described later in the text.
 There is a wide variety of base images already available on Docker Hub, so the simplest solution is to use one from there. Here are a few things that should help you determine which base image will fit your needs:
 
 * Linux distribution - Your personal preference and perhaps experience is a reason why to choose a certain distribution rather than another one. However, you should definitely consider whether your containerized application requires specific libraries or tools from a specific system.
@@ -122,23 +122,6 @@ RUN [ -e /etc/yum.conf ] && sed -i '/tsflags=nodocs/d' /etc/yum.conf || true
 RUN yum -y reinstall "*"
 RUN yum -y install <package>
 ----
-
-
-==== Updating Software supplied by Base Image
-
-Avoid updating software supplied by base image unless necessary. Base images themselves are meant to be updated
-on a regular basis by the supplier and provide software that has been tested for a particular environment.
-
-Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted
-dependencies and in certain cases significantly expand the image size.
-
-In other words, avoid using instructions similar to this one:
-
-```
-RUN yum -y update
-```
-
-// TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
 ==== Squashing layers
 
