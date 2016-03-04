@@ -42,7 +42,7 @@ def get_parent_info(image):
     parent = inspect_info['Parent']
     iid = inspect_info['Id']
     size = inspect_info['Size']
-    cmd = " ".join(inspect_info['ContainerConfig']['Cmd']).replace("/bin/sh -c ","")
+    cmd = "" if inspect_info['ContainerConfig']['Cmd'] is None else " ".join(inspect_info['ContainerConfig']['Cmd']).replace("/bin/sh -c ","")
     if len(parent) > 0:
         get_parent_info(parent)
     outputs.append({'id': iid, 'parent': parent, 'size': size, 'cmd': cmd})
