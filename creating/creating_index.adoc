@@ -369,8 +369,35 @@ include::help.adoc[]
 === Verifying Dockerfile (linter)
 
 
+=== Using semi-colons (;) vs double ampersands (&&)
 
+In the RUN instruction of Dockerfiles, it is common to string together multiple commands for efficiency.  Stringing
+commands together in the RUN instructions are typically done with ampersands or semi-colons. However, you should
+consider the implications of each and their usage.  The following examples illustrate the difference.
 
+.Using semi-colons as instruction conjunctions
+```
+RUN do_1; do_2
+```
+
+This sort of conjunction will be evaluated into do_1 and then do_2.  However, using the double
+ampersands results in a different evaluation.
+
+.Using double ampersands as conjunctions
+```
+RUN do_1 && do_2
+```
+
+The ampersands change the resulting evaluation into do_1 and then do_2 _only if do_1 was successful_.
+
+The use of the double ampersands as conjunctions is probably a better practice in Dockerfiles because
+it ensures that your instructions are completed or the build will fail.  If the build were to continue
+and you had not closely monitored the build (or its results), then the image may not be exactly
+as you desired.  This is particularly true with automated build systems where you will want any
+failure to result in the failure of the build itself.
+
+There are certainly use cases where semi-colons might be preferred and possibly should be used.
+Nevertheless, the possible result of an incomplete image should be carefully considered.
 
 
 OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
