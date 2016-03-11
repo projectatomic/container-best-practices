@@ -78,10 +78,9 @@ Below are examples pictured for dnf and rvm:
 
 ```
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
-    yum -y install --setopt=tsflags=nodocs dnf && \ 
     dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
-    libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which && dnf clean all && \
-    yum clean all
+    libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which && \
+    dnf clean all && \
 ```
 
 ```
@@ -98,6 +97,37 @@ RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \
 In the above example, notice the yum clean all called after rvm, this is because some package managers like rvm rely on others (like yum 
 in this case) to help perform their duties. Make sure to examine your container's layers sizes to help determine where you can 
 eliminate excess size and keep it's footprint size to a minimum. 
+
+Here is a listing of some package managers and the applicable cleanup commands:
+
+.Package Managers
+[cols="2*", options"header"]
+|===
+|Package Manager
+|Cleanup Command
+
+|yum
+|yum clean all
+
+|dnf
+|dnf clean all
+
+|rvm
+|rvm cleanup all
+
+|gem
+|gem cleanup
+
+|cpan
+|rm -rf ~/.cpan/{build,sources}/*
+
+|pip
+|rm -rf ~/.cache/pip/*
+
+|apt-get
+|apt-get clean
+
+|===
 
 
 ==== Installing Documentation
