@@ -89,6 +89,64 @@ RUN yum install -y epel-release && \
     yum -y clean all
 ```
 
+There are several package managers beyond yum that should be of note: dnf, rvm, gems, cpan, pip. Most of these 
+managers have some form of a clean up command that will handle excess cache created while performing their package management duties. 
+
+Below are examples pictured for dnf and rvm:
+
+```
+RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+    dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
+    libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which && \
+    dnf clean all && \
+```
+
+```
+RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \ 
+    /usr/bin/curl -sSL https://get.rvm.io | rvm_tar_command=tar bash -s stable && \
+    source /etc/profile.d/rvm.sh && \
+    echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc && \ 
+    /bin/bash -l -c "rvm requirements && rvm install ruby 2.2.4 && rvm use 2.2.4 --default && \
+    gem install bundler rake && \ 
+    gem install nokogiri --use-system-libraries && \
+    rvm cleanup all && yum clean all && rvm disk-usage all"
+```
+
+In the above example, notice the yum clean all called after rvm, this is because some package managers like rvm rely on others (like yum 
+in this case) to help perform their duties. Make sure to examine your container's layers sizes to help determine where you can 
+eliminate excess size and keep it's footprint size to a minimum. 
+
+Here is a listing of some package managers and the applicable cleanup commands:
+
+.Package Managers
+[cols="2*", options"header"]
+|===
+|Package Manager
+|Cleanup Command
+
+|yum
+|yum clean all
+
+|dnf
+|dnf clean all
+
+|rvm
+|rvm cleanup all
+
+|gem
+|gem cleanup
+
+|cpan
+|rm -rf ~/.cpan/{build,sources}/*
+
+|pip
+|rm -rf ~/.cache/pip/*
+
+|apt-get
+|apt-get clean
+
+|===
+
 
 ==== Installing Documentation
 It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
