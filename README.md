@@ -1,7 +1,7 @@
 # Container Best Practices Guide
 [![Build Status](https://travis-ci.org/projectatomic/container-best-practices.svg?branch=master)](https://travis-ci.org/projectatomic/container-best-practices) [![Docs](https://img.shields.io/badge/docs-asciidoc-blue.svg)](http://aweiteka.github.io/container-best-practices)
 
-A collaborative project to document container-based application architecture, creation and management.
+A collaborative project to document container-based application architecture, creation and management.  The built version of this source can be viewed at http://docs.projectatomic.io/container-best-practices/
 
 ## Contributing
 
