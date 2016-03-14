@@ -7,47 +7,65 @@
 :homepage https://github.com/projectatomic/container-best-practices:
 
 The base unit of creating an image is the Dockerfile itself.  This section
-focuses on the the instructions that make up a Dockerfile.
+focuses on the instructions that make up a Dockerfile.
 
 This chapter will not cover every Dockerfile instruction available but instead
 will focus on specific ones that we want to re-enforce to those who develop
 Dockerfiles.  Docker has published a
 link:https://docs.docker.com/engine/reference/builder/[reference guide] already
-covering each of the Dockerfile instructions.
-
-
-
-
-=== Upstream Docker Best Practices
-
-Upstream docker has a nice description of https://docs.docker.com/engine/articles/dockerfile_best-practices/[best practices] for Dockerfiles. It
-describes the various instructions that can be used to compose a Dockerfile and their best usage.  Familiarize yourself with these
+covering each of the Dockerfile instructions. In addition, upstream docker has a nice description of https://docs.docker.com/engine/articles/dockerfile_best-practices/[best practices] for Dockerfiles. It
+describes the various instructions that can be used to compose a Dockerfile and their best usage. Familiarize yourself with these
 recommendations.
 
-=== Choosing base image
+=== Creating Base Images
 
+==== Choosing Base Image
 
-==== Updating Software supplied by Base Image
+Images that have no parent are called base images. Docker image usually have their own root filesystem with an operating system installed. So when you want to create a new image, it either has to be based on an image that actually provides an operating system or you will need to create this layer in your image. The only difference to this are super minimal images that instead of an operating system provide only a single binary as described later in the text.
+There is a wide variety of base images already available on Docker Hub, so the simplest solution is to use one from there. Here are a few things that should help you determine which base image will fit your needs:
 
-Avoid updating software supplied by base image unless necessary. Base images themselves are meant to be updated
-on a regular basis by the supplier and provide software that has been tested for a particular environment.
+* Linux distribution - Your personal preference and perhaps experience is a reason why to choose a certain distribution rather than another one. However, you should definitely consider whether your containerized application requires specific libraries or tools from a specific system.
 
-Also, updating base-image software in layered images can introduce unexpected problems or bring in unwanted
-dependencies and in certain cases significantly expand the image size.
+* Image size - Base images usually contain a minimal operating system with a set of tools needed for basic operations. To preserve your environment small and efficient, size should also be taken into account when picking the right base image. The size varies; you can take advantage of super small base images, such as 2MB busybox, or use a standard minimal operating system, such as Fedora or CentOS that are up to 200MB in size.
 
-In other words, avoid using instructions similar to this one:
+* Updates - Not all community images are necessarily rebuilt on a regular basis or when security vulnerabilities are addressed. You should therefore consider using base images from "official repositories" on Docker Hub, and confirm their update policy in advance.
+
+//==== RHEL base images
+
+// ==== BusyBox, the Minimalistic Operating System
+
+==== Creating Base Image
+
+Once you've considered all options and decided to create your own base image, the process will mostly depend on the distribution you chose. Note that the major distributions have their source files available on GitHub so you still might want to consider creating an issue or opening a pull request to suggest a change in the feature set or any adjustment.
+https://docs.docker.com/engine/userguide/eng-image/baseimages/[Docker documentation] suggests two approaches to creating a base image, using tar and building an image "FROM scratch".
+
+===== Using tar
+
+Using the tar tool is a simple way how to build a base image. As a prerequisite, you will need to set up a directory structure for chroot with all items that you wish to be part of the base image. There are various tools that might help you with this, for example _debootstrap_ for Debian systems or _supermin_ for RPM-based systems.
+
+Once you have your chroot directory ready, it is as simple as running:
 
 ```
-RUN yum -y update
+# tar -C <chroot_dir> -c . | docker import - <new_image_name>
 ```
 
-==== RHEL base images
+Note that docker provides a set of scripts for base image creation that take advantage of tar: https://github.com/docker/docker/tree/master/contrib[https://github.com/docker/docker/tree/master/contrib]. Well known distributions then use their own build systems that usually also utilizes tar. For example Fedora's https://fedoraproject.org/wiki/Koji/BuildingImages?rd=Koji/KojiLiveCDHowTo#Building_Disk_Images[koji].
 
-==== Building your own
+===== FROM scratch
 
-===== Docker Base Image Creation
+"scratch" is a special repository in the Docker Hub registry, created using an empty tarball. It is not meant to be pulled or run, and at any such an attempt you will most likely encounter this message: _'scratch' is a reserved name_.
+Using scratch is ideal for creating extremely minimal images, for example for containerizing single binaries. An example is available from https://docs.docker.com/engine/userguide/eng-image/baseimages/[Docker documentation].
+scratch is also very handy for creating standard distribution base images. But as with tar, you'll first need to prepare a directory structure for chroot. After that, just add the directory in your Dockerfile as follows:
 
-=== Creating Component or Application Images ?
+```
+FROM scratch
+ADD <chroot_dir> /
+CMD ["/bin/bash"]
+```
+
+=== Creating Layered Images
+
+==== Creating Component or Application Images
 
 === Create small and concise images
 
@@ -104,9 +122,6 @@ RUN [ -e /etc/yum.conf ] && sed -i '/tsflags=nodocs/d' /etc/yum.conf || true
 RUN yum -y reinstall "*"
 RUN yum -y install <package>
 ----
-
-
-// TBD: different recommendations for Fedora and CentOS/RHEL base images?
 
 ==== Squashing layers
 
