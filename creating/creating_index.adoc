@@ -263,6 +263,7 @@ failure to result in the failure of the build itself.
 
 There are certainly use cases where semi-colons might be preferred and possibly should be used.
 Nevertheless, the possible result of an incomplete image should be carefully considered.
+
 ===== docker export & docker import
 
 You can _docker export_ and _docker import_ the container to squash all the layers in your container in a single one. This approach, however, is not very practical for sharing as the user will be able to only download the whole content and cannot take advantage the caching. Note that the base image layer will be included as well and might be severl hundreds of megabytes in size.
