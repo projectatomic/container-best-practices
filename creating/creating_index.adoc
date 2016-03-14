@@ -94,6 +94,7 @@ managers have some form of a clean up command that will handle excess cache crea
 
 Below are examples pictured for dnf and rvm:
 
+.dnf cleanup example
 ```
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
@@ -101,6 +102,7 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
     dnf clean all && \
 ```
 
+.Ruby(rvm) cleanup example
 ```
 RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \ 
     /usr/bin/curl -sSL https://get.rvm.io | rvm_tar_command=tar bash -s stable && \
@@ -159,21 +161,26 @@ Yum has an optional flag to not install documentation.  The following example sh
 RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
-Note that the **nodocs** flag is used in some base images, for example CentOS and Fedora, and this setting gets inherited by the child layers. This can cause problems in case you want to include documentation deliberately in your layered image.
+Note that the **nodocs** flag is used in some base images, for example CentOS and Fedora, and this setting gets
+inherited by the child layers. This can cause problems in case you want to include documentation deliberately in your
+ layered image.
 
-In this case, if you wish to have the documentation installed for **packages from your single layer only**, you have to empty the **tsflags** option as follows:
+In this case, if you wish to have the documentation installed for **packages from your single layer only**, you have to
+empty the **tsflags** option as follows:
 
 ----
 RUN yum -y install docker --setopt=tsflags=''
 ----
 
-If you wish to have the documentation installed for **packages from your single layer and the parent layers**, you need to reinstall the packages with the empty **tsflags** option as follow:
+If you wish to have the documentation installed for **packages from your single layer and the parent layers**, you need
+ to reinstall the packages with the empty **tsflags** option as follow:
 
 ----
 RUN yum -y reinstall "*" --setopt-tsflags='' && yum install docker --setopt-tsflags=''
 ----
 
-In case you need to have documentation included for **every package from every single parent or child layer**, the */etc/yum.conf* file needs to be edited as follows:
+In case you need to have documentation included for **every package from every single parent or child layer**,
+the */etc/yum.conf* file needs to be edited as follows:
 
 ----
 RUN [ -e /etc/yum.conf ] && sed -i '/tsflags=nodocs/d' /etc/yum.conf || true
@@ -183,12 +190,19 @@ RUN yum -y install <package>
 
 ==== Squashing layers
 
-Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional data that are not always part of the resulting image. For example, if you add a file in one layer, but remove it in another layer later, the final image's size will include the added file size in a form of a special "whiteout" file although you removed it. In addition, every layer contains separate metadata that add up to the overall image size as well. So what are the benefits of squashing?
+Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional
+data that are not always part of the resulting image. For example, if you add a file in one layer, but remove it in
+another layer later, the final image's size will include the added file size in a form of a special "whiteout" file
+although you removed it. In addition, every layer contains separate metadata that add up to the overall image size as
+well. So what are the benefits of squashing?
 
-* **Performance** - since all layers are copy-on-write file systems, it will take longer to build the final container from many layers.
-* **Image size ** - As already described above, any new instruction in the Dockerfile increases the overall size of the image. With squashing, you can prevent these unwanted size additions.
+* **Performance** - since all layers are copy-on-write file systems, it will take longer to build the final container
+from many layers.
+* **Image size ** - As already described above, any new instruction in the Dockerfile increases the overall size of the
+ image. With squashing, you can prevent these unwanted size additions.
 
-However, Docker does not yet support squashing natively, so you will have to work around it by using alternative approaches, some of which are listed below.
+However, Docker does not yet support squashing natively, so you will have to work around it by using alternative
+approaches, some of which are listed below.
 
 ===== Chaining Commands
 
@@ -216,8 +230,39 @@ RUN yum install -y \
     chmod -R og+rwx /opt/openshift
 ```
 
-Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of the layers high.
+Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the
+same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of
+the layers high.
 
+===== Using semi-colons (;) vs double ampersands (&&)
+
+In the RUN instruction of Dockerfiles, it is common to string together multiple commands for efficiency.  Stringing
+commands together in the RUN instructions are typically done with ampersands or semi-colons. However, you should
+consider the implications of each and their usage.  The following examples illustrate the difference.
+
+.Using semi-colons as instruction conjunctions
+```
+RUN do_1; do_2
+```
+
+This sort of conjunction will be evaluated into do_1 and then do_2.  However, using the double
+ampersands results in a different evaluation.
+
+.Using double ampersands as conjunctions
+```
+RUN do_1 && do_2
+```
+
+The ampersands change the resulting evaluation into do_1 and then do_2 _only if do_1 was successful_.
+
+The use of the double ampersands as conjunctions is probably a better practice in Dockerfiles because
+it ensures that your instructions are completed or the build will fail.  If the build were to continue
+and you had not closely monitored the build (or its results), then the image may not be exactly
+as you desired.  This is particularly true with automated build systems where you will want any
+failure to result in the failure of the build itself.
+
+There are certainly use cases where semi-colons might be preferred and possibly should be used.
+Nevertheless, the possible result of an incomplete image should be carefully considered.
 ===== docker export & docker import
 
 You can _docker export_ and _docker import_ the container to squash all the layers in your container in a single one. This approach, however, is not very practical for sharing as the user will be able to only download the whole content and cannot take advantage the caching. Note that the base image layer will be included as well and might be severl hundreds of megabytes in size.
@@ -414,35 +459,6 @@ include::help.adoc[]
 === Verifying Dockerfile (linter)
 
 
-=== Using semi-colons (;) vs double ampersands (&&)
-
-In the RUN instruction of Dockerfiles, it is common to string together multiple commands for efficiency.  Stringing
-commands together in the RUN instructions are typically done with ampersands or semi-colons. However, you should
-consider the implications of each and their usage.  The following examples illustrate the difference.
-
-.Using semi-colons as instruction conjunctions
-```
-RUN do_1; do_2
-```
-
-This sort of conjunction will be evaluated into do_1 and then do_2.  However, using the double
-ampersands results in a different evaluation.
-
-.Using double ampersands as conjunctions
-```
-RUN do_1 && do_2
-```
-
-The ampersands change the resulting evaluation into do_1 and then do_2 _only if do_1 was successful_.
-
-The use of the double ampersands as conjunctions is probably a better practice in Dockerfiles because
-it ensures that your instructions are completed or the build will fail.  If the build were to continue
-and you had not closely monitored the build (or its results), then the image may not be exactly
-as you desired.  This is particularly true with automated build systems where you will want any
-failure to result in the failure of the build itself.
-
-There are certainly use cases where semi-colons might be preferred and possibly should be used.
-Nevertheless, the possible result of an incomplete image should be carefully considered.
 
 
 OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
