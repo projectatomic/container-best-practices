@@ -11,6 +11,11 @@ The atomic application will allow you to display this help file trivially like s
 ----
 # atomic help <image or container name>
 ----
+
+==== Location
+The help file must be located in the images as /help.1 and in 'man' format.
+
+
 ==== Required headings
 
 The following headings are strongly encouraged in the help file for an image.
