@@ -204,7 +204,21 @@ from many layers.
 However, Docker does not yet support squashing natively, so you will have to work around it by using alternative
 approaches, some of which are listed below.
 
-===== Chaining Commands
+===== docker save
+
+You can use _docker save_ to squash all the layers of your image into a single layer.  The _save_ command
+was intended for this use, so this happens to be a side effect of the process. This approach,
+however, is not very practical for sharing as the user will be able to only download
+the whole content and cannot take advantage the caching. Note that the base image layer will be included
+as well and might be several hundreds of megabytes in size.
+
+===== Custom Tools
+
+You will surely find a lot of utilities on the internet that facilitate layer squashing.
+We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-scripts[docker-scripts], which
+automates layer squashing and which is maintained and has been tested by the community.
+
+==== Chaining Commands
 
 In general, having fewer layers improves readability. Commands that are chained together become a part of the
 same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large
@@ -214,25 +228,19 @@ A new layer is created for every new instruction defined. This does not necessar
 should be associated with only one command or definition.
 
 Ensure transparency and provide a good overview of the content of each layer by grouping related operations
-together so that they together constitute a single layer. Consider this snippet from the OpenShift
-Python 3.3 Dockerfile:
+together so that they together constitute a single layer. Consider this snippet:
 
+.Chained Dockerfile instruction
 ```
-RUN yum install -y \
-    https://www.softwarecollections.org/en/scls/rhscl/python33/epel-7-x86_64/download/rhscl-python33-epel-7-x86_64.noarch.rpm && \
-    yum install -y --setopt=tsflags=nodocs --enablerepo=centosplus \
-    python33 python33-python-devel python33-python-setuptools \
-    epel-release && \
-    yum install -y --setopt=tsflags=nodocs install nss_wrapper && \
-    yum clean all -y && \
-    scl enable python33 "easy_install pip" && \
-    chown -R default:default /opt/openshift && \
-    chmod -R og+rwx /opt/openshift
+RUN yum install -y --setopt=tsflags=nodocs \
+    httpd vim && \
+    systemctl enable httpd &&
+    yum clean all
 ```
 
-Each command that is related to the installation and configuration of `sti-python` is grouped together as a part of the
-same layer. This meaningful grouping of operations keeps the number of layers low while keeping the easy legibility of
-the layers high.
+Each command that is related to the installation and configuration of `httpd` is grouped together
+as a part of the same layer. This meaningful grouping of operations keeps the number of layers low
+while keeping the easy legibility of the layers high.
 
 ===== Using semi-colons (;) vs double ampersands (&&)
 
@@ -264,13 +272,6 @@ failure to result in the failure of the build itself.
 There are certainly use cases where semi-colons might be preferred and possibly should be used.
 Nevertheless, the possible result of an incomplete image should be carefully considered.
 
-===== docker export & docker import
-
-You can _docker export_ and _docker import_ the container to squash all the layers in your container in a single one. This approach, however, is not very practical for sharing as the user will be able to only download the whole content and cannot take advantage the caching. Note that the base image layer will be included as well and might be severl hundreds of megabytes in size.
-
-===== Custom Tools
-
-You will surely find a lot of utilities on the internet that facilitate layer squashing. We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-scripts[docker-scripts], which automates layer squashing and which is maintained and has been tested by the community.
 
 ==== Locales
 
@@ -285,6 +286,15 @@ The authoritative source for labels
 is the  https://github.com/projectatomic/ContainerApplicationGenericLabels[Container Application Generic Labels] git repository.
 
 ==== When are they required?
+
+Labels are never required per-se unless your build system or lifecycle management process requires them.
+However, the use of labels is highly recommended for a number of reasons:
+
+* As mentioned above, many container related tools can use the label metadata in meaningful ways often
+contributing to a better user experience.
+* The label metadata is always visible when inspecting the image.  Therein, users can at least see the
+metadata even if their tooling does not make specific use of it.  For example, the RUN label basically
+documents how you, as the author of the Dockerfile, expect this image to be run.
 
 ==== Descriptive labels
 
