@@ -149,6 +149,28 @@ Here is a listing of some package managers and the applicable cleanup commands:
 
 |===
 
+==== Remove unnecessary packages
+
+In some cases, your image can end up with several packages that are not necessary to support the runtime of your
+application.  A good example is when you actually build your application from source during the build of the image
+itself.  Typically, when you build an application, you will pull in development (-devel) packages as well as
+toolchain based packages like make and gcc.  Once your application is built, you may no longer need these packages
+for runtime depending on how your application links to libraries.
+
+Depending on your application and which packages you added to your image, you might need to iteratively attempt to
+remove packages checking to make sure your application still works.  One suggestion would be to remove big parts of the
+toolchain.  And then use your package manager's command to clean up unused packages.  In the case of _yum_, you can
+remove unneeded packages like so:
+
+.Removing unnecessary packages with yum
+```
+# yum autoremove
+```
+
+You should run this command in an interactive shell (docker run -it --rm <image> /bin/bash) initially so you can
+get a feel for which packages will be removed.  One upside to doing so is that you can then test run your application
+from the interactive shell to make sure it still works.
+
 
 ==== Installing Documentation
 It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
