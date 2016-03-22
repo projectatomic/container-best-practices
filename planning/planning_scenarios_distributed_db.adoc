@@ -1,12 +1,10 @@
-=== Container Interconnection: Distributed Database Server
-
-Introduce the basic environment and began to foreshadow the perceieved complications
-
-==== Database server
+=== Container Interconnection
 
 By their very nature, distributed application components need to communicate with one another.  
 Container technologies encourage developers to make these interconnection points explicit and 
 provide a number of mechanisms to coordinate or otherwise enable communication between containers.
+
+==== Traditional Database server/environment
 
 Consider the database example in the previous section.  Once we have established persistent 
 storage for the database server, we also need to consider how database clients will connect to it.
