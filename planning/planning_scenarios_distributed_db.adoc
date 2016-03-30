@@ -1,6 +1,6 @@
-=== Container Interconnection
+=== Container Interconnection: Database Server with Local and Distributed Clients
 
-By their very nature, distributed application components need to communicate with one another.  
+By definition, distributed application components need to communicate with one another.  
 Container technologies encourage developers to make these interconnection points explicit and 
 provide a number of mechanisms to coordinate or otherwise enable communication between containers.
 
@@ -37,8 +37,8 @@ EXPOSE 5432
 Some container coordination frameworks, such as Kubernetes, attempt to simplify this use case for 
 containers co-located on a single node by sharing the network port space between node-local containers.
 
-(Diagram placeholder, Kube network model, where PID spaces are distinct but network space is 
-shared, allowing a DB client to simply connect to localhost:PORT)
+Further details and examples of networking interconnect options for various contaner frameworks and
+schenarios can be found in the xref:planning_network[network considerations] section of this document.
 
 For non-network connections between containers on a single node, shared filesystem locations, either for
 domain sockets or actual filesystem content, must be set up at the time the containers are launched.  
@@ -54,4 +54,7 @@ In our DB server example, assuming the database maintains a listening UNIX domai
 
 This will ensure that both the server and client see the same directory content, exported from the host, 
 allowing the client to connect using the expected/default location.
+
+Further details and example can be found in the xref:planning_storage[storage considerations] section of
+this document.
 
