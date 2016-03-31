@@ -33,13 +33,14 @@ a log server.  The log timestamps and information would almost be entirely usele
 time than the host.
 
 The best way to synchronize the time between a container and its host is through the use of bind mounts.  You simply need
-to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.
+to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.  We use the _ro_ flag to ensure the container
+can't modify the host's time zone by default.
 
 In your Dockerfile, this can be accomplished by adding the following to your RUN label.
 
 .Synchronizing the timezone of the host to the container.
 ```
--v /etc/localtime:/etc/localtime
+-v /etc/localtime:/etc/localtime:ro
 ```
 
 ==== Machine ID
@@ -51,7 +52,7 @@ mount the machine ID of the host to the container, add something like the follow
 
 .Synchronizing the host machine ID with a container
 ```
--v /etc/machine_id:/etc/machine_id
+-v /etc/machine_id:/etc/machine_id:ro
 ```
 
 === Considerations for images on Atomic Host and OpenShift
