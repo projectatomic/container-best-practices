@@ -184,8 +184,8 @@ That atomic command runs the docker command set in this label:
   -v /var/log:/var/log \
   -v /var/lib/rsyslog:/var/lib/rsyslog \
   -v /run:/run \
-  -v /etc/machine-id:/etc/machine-id \
-  -v /etc/localtime:/etc/localtime \
+  -v /etc/machine-id:/etc/machine-id:ro \
+  -v /etc/localtime:/etc/localtime:ro \
   -e IMAGE=IMAGE -e NAME=NAME \
   --restart=always IMAGE /bin/rsyslog.sh"
 
