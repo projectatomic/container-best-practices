@@ -1,0 +1,97 @@
+// vim: set syntax=asciidoc:
+[[Testing]]
+== Testing
+:data-uri:
+:toc:
+:toclevels 4:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+=== Purpose of the testing
+
+Container images generally consist of distro packages and some scripts that help to start the container properly. For example in case of MariaDB database, it is set of RPMs with mariadb-server that provides the main functionality, but we need some scripts that handle proper database stack initialization, changes basic configuration based on the container run options etc.
+
+If we want to test basic functionality of the container, we do not have to test the RPM functionality, because it should have already be done during RPM develpment process. We need to focus on testing the additional scripts instead and test the API of the container -- whether it works as it is described. Again, in case of the MariaDB database, we do not run MariaDB unit test in the container, but we focus on whether the database is initialized properly, whether configuration is changed after proper options are set on container run command etc.
+
+=== Converntions for test scripts
+
+It is a good practice to keep the basic sanity test for the image together with the image sources. For example test/run might be a script, that tests image specified by IMAGE_NAME environment variable.
+
+=== Examples of test scripts
+
+Some examples of test scripts might be found in the container images for OpenShift, for example:
+* https://github.com/openshift/postgresql/blob/master/9.4/test/run
+* https://github.com/openshift/sti-python/blob/master/3.4/test/run
+
+The minimum script that verifies a container image by running it as deamon and then running some script that checks the proper functionality, is shown bellow. It stores IDs of containers created during the test into a temporary directory, which helps to remove the contaiers after test finishes.
+
+[source,bash]
+----
+#!/bin/bash
+#
+# General test of the image.
+#
+# IMAGE_NAME specifies the name of the candidate image used for testing.
+# The image has to be available before this script is executed.
+#
+
+set -exo nounset
+shopt -s nullglob
+
+IMAGE_NAME=${IMAGE_NAME-default-image-name}
+CIDFILE_DIR=$(mktemp --suffix=test_cidfiles -d)
+
+# clears containers run during the test
+function cleanup() {
+  for cidfile in $CIDFILE_DIR/* ; do
+    CONTAINER=$(cat $cidfile)
+
+    echo "Stopping and removing container $CONTAINER..."
+    docker stop $CONTAINER
+    exit_status=$(docker inspect -f '{{.State.ExitCode}}' $CONTAINER)
+    if [ "$exit_status" != "0" ]; then
+      echo "Dumping logs for $CONTAINER"
+      docker logs $CONTAINER
+    fi
+    docker rm $CONTAINER
+    rm $cidfile
+    echo "Done."
+  done
+  rmdir $CIDFILE_DIR
+}
+trap cleanup EXIT
+
+# returns ID of specified named container
+function get_cid() {
+  local id="$1" ; shift || return 1
+  echo $(cat "$CIDFILE_DIR/$id")
+}
+
+# returns IP of specified named container
+function get_container_ip() {
+  local id="$1" ; shift
+  docker inspect --format='{{.NetworkSettings.IPAddress}}' $(get_cid "$id")
+}
+
+# runs command to test running container
+function test_image() {
+  local name=$1 ; shift
+  echo "  Testing Image"
+  docker run --rm $IMAGE_NAME get_status `get_container_ip $name`
+  echo "  Success!"
+}
+
+# start a new container
+function create_container() {
+  local name=$1 ; shift
+  cidfile="$CIDFILE_DIR/$name"
+  # create container with a cidfile in a directory for cleanup
+  docker run --cidfile $cidfile -d $IMAGE_NAME
+  echo "Created container $(cat $cidfile)"
+}
+
+
+# Tests.
+
+create_container test1
+test_image test1
+----
