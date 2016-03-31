@@ -491,6 +491,7 @@ include::help.adoc[]
 
 === Verifying Dockerfile (linter)
 
+This section will be the Dockerfile linter. 
 
 
 
