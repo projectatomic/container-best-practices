@@ -18,6 +18,10 @@ offer solutions which would be typical in a containerized environment.
 include::planning_scenarios_simple_db.adoc[]
 
 
+//Distributed database
+include::planning_scenarios_distributed_db.adoc[]
+
+
 === Security and user requirements
 
 === Host and image synchronization
@@ -108,7 +112,7 @@ within a container.
 ===== example unit file - atomic create unit file
 ==== openshift driven
 
-
+[[planning_network]]
 === Network Considerations
 
 ==== single host
