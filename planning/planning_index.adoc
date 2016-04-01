@@ -254,7 +254,7 @@ directory between host and container using the _-v_ flag in your RUN label.
 
 Storing sensitive data like credentials is a hot topic, especially because Docker does not provide a designated option for storing and passing secret values to containers.
 
-Currently, the most popular and reasonable way to pass credentials and secrets in a container is specifying them as **environment variables** at container runtime. You as a consumer of such an image don't expose any of your sensitive data publicly.
+Currently, the most popular and a reasonable way to pass credentials and secrets in a container is specifying them as **environment variables** at container runtime. You as a consumer of such an image don't expose any of your sensitive data publicly.
 
 However, this approach also has caveats: 
 
@@ -263,8 +263,8 @@ However, this approach also has caveats:
 * Processes inside your container and other containers linked to your container might be able to access this information. Similarily, everything you pass as an environment variable is accessible from the host machine using *docker inspect* as seen in the https://hub.docker.com/r/openshift/mysql-56-centos7/[mysql example below].
 
 ```
-]# docker run -d --name mysql_database -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=db -p 3306:3306 openshift/mysql-56-centos
-]# docker inspect openshift/mysql-56-centos
+# docker run -d --name mysql_database -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=db -p 3306:3306 openshift/mysql-56-centos
+# docker inspect openshift/mysql-56-centos
 
 <snip>
 
@@ -286,7 +286,20 @@ There are a couple of things to keep in mind when operating with secrets:
 
 * Although squashing removes intermediate layers from the final image, secrets from those layers will still be present in the build cache.
 
-// Do we want to suggest https://www.vaultproject.io/intro/index.html ?
+===== Handling Secrets in Kubernetes
+
+Containers running through Kubernetes can take advantage of the **secret** object type to store sensitive data such as passwords or tokens. To learn how to create and access these, refer to the http://kubernetes.io/docs/user-guide/secrets/[Kubernetes User Guide].
+
+
+===== Other Projects Facilitating Secret Management
+
+**Custodia**
+
+Custodia is an open-source project that defines an API for storing and sharing secrets such as passwords and certificates in a way that keeps data secure, manageable and audiatable. Custodia uses the HTTP protocol and a RESTful API as an IPC mechanism over a local Unix Socket. Custodia is fully modular and suers can control how authentication, authorization and API plugins are combined and exposed. You can learn more details on the project's https://github.com/latchset/custodia[github repository] or https://github.com/latchset/custodia/wiki[wiki page].
+
+**Vault**
+
+Another open-source project that aims to handle secure accessing and storing of secrets is Vault. Detailed information about the tool and use cases can be found on the https://www.vaultproject.io/intro/index.html[Vault project website].
 
 ==== User NameSpace Mapping (docker-1.10 feature)
 ==== https://www.openshift.com/promotions/docker-security.html
