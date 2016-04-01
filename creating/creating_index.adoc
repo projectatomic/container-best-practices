@@ -491,9 +491,53 @@ include::help.adoc[]
 
 === Verifying Dockerfile (linter)
 
-This section will be the Dockerfile linter. 
+The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check syntax and best practice options for things such as 'Was yum clean up evoked after a package installation?' or 'In the RUN section did the writer link commands via semicolons or double ampersands?'. The input rules are called via a set of yaml files. At the time of this writing, there are a number of templates from base to automated build configurations. 
+
+There are two iterations of the linter. 
+
+The CLI version of the project is available here:
+link:https://github.com/projectatomic/dockerfile_lint[Dockerfile_lint] 
+
+The online version of the project is available here:
+link:https://access.redhat.com/labs/linterfordockerfile/#/[Online linter]
+
+For the next section, we will assume that the linter will be installed manually via npm using the following commands: 
+
+```
+git clone https://github.com/projectatomic/dockerfile_lint/
+cd dockerfile_lint
+npm install
+```
+
+Upon evokation of the CLI version of the linter, some sample output may include:
+
+```
+-> bin/dockerfile_lint -f ~/Documents/manage-iq/Dockerfile.2 -r sample_rules/basic_rules.yaml 
+
+--------ERRORS---------
+
+ERROR: Maintainer is not defined. The MAINTAINER line is useful for identifying the author in the form of MAINTAINER Joe Smith <joe.smith@example.com>. 
+Reference -> https://docs.docker.com/reference/builder/#maintainer
 
 
+ERROR: Required LABEL name/key 'Architecture' is not defined. 
+Reference -> http://docs.projectatomic.io/container-best-practices/#_recommended_labels_for_your_project
+
+
+
+-------WARNINGS--------
+
+WARNING: No 'USER' instruction. The process(es) within the container may run as root and RUN instructions my be run as root. 
+Reference -> https://docs.docker.com/reference/builder/#user
+
+
+
+--------INFO---------
+
+INFO: There is no 'ENTRYPOINT' instruction. None. 
+Reference -> https://docs.docker.com/reference/builder/#entrypoint
+
+```
 
 OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
 
