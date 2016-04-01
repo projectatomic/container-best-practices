@@ -21,24 +21,31 @@ True multi-node distributed applications may host the database as a distinct nod
 communication must occur via the network.  Clients that wish to use the database must be made 
 aware of its location, either via explicit configuration or a service discovery mechanism.
 
-(diagram placeholder - single node versus multi node with IP address)
+.Traditional DB environment using both socket and TCP/IP connections
+image::images/interconnect_single.png[]
 
 ==== Container environment - Docker
 
-Once an interconnection mechanism has been established a container developer must ensure 
+The previous example shows a traditional database where a single node allows both socket
+and port (TCP/IP) connections.  If we were to "containerize" the database server and
+the database client into seperate containers, this would present a slight challenge in
+the architecture due to the container namespacing.  Consider the following image:
+
+.Single Node Database with server and client in separate containers
+image::images/single_node_mult_containers.png[]
+
+In this setup, there are actually two clients.  One is containerized and the other is executing
+from the container host directly.  The database is also containerized but isolated by namespacing
+as well.  The database client executing on the host can still communicate with the containerized
+database server via TCP/IP because Docker has an internal network for containers to communication with
+each other and the host.  Once an interconnection mechanism has been established a container developer must ensure
 that service containers are properly configured to allow access to these connections.
 
-For network connections, Docker provides a simple directive in the Dockerfile to expose a port from the 
-running container.  For example, to create a Postgres DB server container that listents on the default 
-Postgres port, you would add the following line:
-
-EXPOSE 5432
-
-Some container coordination frameworks, such as Kubernetes, attempt to simplify this use case for 
+Some container coordination frameworks, such as Kubernetes, attempt to simplify this use case for
 containers co-located on a single node by sharing the network port space between node-local containers.
 
 Further details and examples of networking interconnect options for various contaner frameworks and
-schenarios can be found in the xref:planning_network[network considerations] section of this document.
+scenarios can be found in the xref:planning_network[network considerations] section of this document.
 
 For non-network connections between containers on a single node, shared filesystem locations, either for
 domain sockets or actual filesystem content, must be set up at the time the containers are launched.  
@@ -58,3 +65,21 @@ allowing the client to connect using the expected/default location.
 Further details and example can be found in the xref:planning_storage[storage considerations] section of
 this document.
 
+Another iteration on this scenario would be where the database server and clients are on different nodes
+and require network access to communicate.  In this case, you must ensure that Docker not only exposes a
+port for the database container but that a port is also exposed to the network so other clients can
+communicate with it.
+
+.Multiple node deployment where server and client are separated
+image::images/multi_node_single_container.png[]
+
+Notice how in this scenario, the database server is still containerized but the client resides on a different
+node.
+For network connections, Docker provides a simple directive in the Dockerfile to expose a port from the
+running container.  For example, to create a Postgres DB server container that listens on the default
+Postgres port, you would add the following line:
+
+EXPOSE 5432
+
+You then also need to ensure that you perform the port mapping when the container runs using either the -P or -p
+flags.
