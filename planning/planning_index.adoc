@@ -1,4 +1,5 @@
 // vim: set syntax=asciidoc:
+
 [[plan]]
 == Application Planning
 :data-uri:
@@ -210,14 +211,14 @@ several solutions for logging containers like:
 * setting the docker daemon's log driver
 * logging to a file shared with the host (bind mounting)
 
-As a developer, if your application does using logging of some manner, you should be thinking about how you will
+As a developer, if your application uses logging of some manner, you should be thinking about how you will
 handle your log files.  Each of aforementioned solutions has its pros and cons.
 
-
+[[logging_use_service]]
 ==== Using a logging service
 
 Most traditional Linux systems use a logging service like link:http://www.rsyslog.com/[rsyslog] to collect and store
-its logfiles.  Often the logging service will coordinate logging with journald but nevertheless it too is a service
+its log files.  Often the logging service will coordinate logging with journald but nevertheless it too is a service
 will accept log input.
 
 If your application uses a logger and you want to take advantage of the host's logger, you can bind mount _/dev/log_
@@ -237,6 +238,7 @@ implemented, it will impact all containers on the system.  This is only useful w
 host will only be running your application as this might impact other containers.  Therefore this method has limited
 usefulness unless you can ensure the final runtime environment.
 
+[[logging_host_shared_storage]]
 ==== Using shared storage with the host
 
 The use of xref:planning_storage[persistent storage] can be another effective way to deal with log files whether
@@ -301,8 +303,47 @@ Custodia is an open-source project that defines an API for storing and sharing s
 
 Another open-source project that aims to handle secure accessing and storing of secrets is Vault. Detailed information about the tool and use cases can be found on the https://www.vaultproject.io/intro/index.html[Vault project website].
 
+
 ==== User NameSpace Mapping (docker-1.10 feature)
 ==== https://www.openshift.com/promotions/docker-security.html
+
+=== Preventing your image users from filling the filesystem
+
+Most default docker deployments only set aside about 20GB of storage for each container.  For many applications, that
+amount of storage is more than enough.  But if your containerized application produces significant log output,
+or your deployment scenario restarts containers infrequently, file system space can become a concern.
+
+
+The first step to preventing the container filesystem from filling up is to make sure your images
+are link:#creating_concise[small and concise].  This obviously will reduce how much space your
+image consumes from the filesystem right away. However, as a developer, the following techniques
+can be used by you to manage the container filesystem size.
+
+
+
+==== Ask for a larger storage space on run
+
+One solution to dealing with filesystem space could be to increase the amount of storage allocated to the container when
+your image is run.  This can be achieved with the following switch to _docker run_.
+
+.Increase the container storage space to 60GB
+```
+--storage-opt size:60
+```
+
+If you are using a defined RUN label in your Dockerfile, you could add the switch to that label.  However,
+abuse of this switch could lead to irking users and you should be prudent in using it.
+
+==== Space considerations for logging
+
+Logging can sometimes unknowingly consume disk space, particularily when a service or daemon has
+failed.  If your application performs logging, or more specifically verbose logging, consider the
+following approaches to help keep filesystem usage down:
+
+* Use logrotate inside the container periodically.
+* Mount your logs to a link:#logging_host_shared_storage[shared host filesystem]
+* link:#logging_use_service[Use a logging service or the host's journalctl (/dev/log)]
+
 
 === Image naming
 https://github.com/projectatomic/ContainerApplicationGenericLabels/blob/master/vendor/redhat/names.md

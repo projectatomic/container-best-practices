@@ -67,6 +67,7 @@ CMD ["/bin/bash"]
 
 ==== Creating Component or Application Images
 
+[[creating_concise]]
 === Create small and concise images
 
 It is preferable to create small and concise images whenever possible.  This can
