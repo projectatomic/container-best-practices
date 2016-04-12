@@ -492,7 +492,14 @@ include::help.adoc[]
 
 === Verifying Dockerfile (linter)
 
+=== Dockerfiles
 
+The Dockerfiles for many of the public images are hosted in git repositories where users can view
+them.  This also allows users to customize them as well.
+
+It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
+include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
+approach to make sure your Dockerfiles can be easily found.
 
 
 OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
