@@ -502,7 +502,7 @@ any issues with startup or the container are logged like any other system servic
 
 When using systemd to manage your containers, you are really using systemd to call docker commands (and
 subsequently the docker daemon) to perform the actions.  Therefore, once you commit to using systemd
-to control a container, you will need to make sure that all stop, stop, and restart actions are
+to control a container, you will need to make sure that all start, stop, and restart actions are
 conducted with systemd.  Failure to do so essentially decouples the docker daemon and systemd causing
 systemd to be out of sync.
 
