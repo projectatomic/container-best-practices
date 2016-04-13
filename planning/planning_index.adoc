@@ -108,7 +108,7 @@ amount of memory used for systemd itself.
 NOTE: As of docker-1.10, the docker run parameter of _--privileged_ is no longer needed to use systemd
 within a container.
 
-You can implement using link:creating_using_systemd[systemd fairly simply in your Dockerfile].
+You can implement using link:#creating_using_systemd[systemd fairly simply in your Dockerfile].
 
 === Techniques for deploying or starting images from a host
 ==== host systemd considerations
