@@ -559,6 +559,7 @@ in the case of where they are configurable, the EnvironmentFile is usually more 
 application is started.  If you are link:planning_use_system[dstarting the application] within an image
 with systemd, then systemd will use _/etc/sysconfig/<service_name>_ within the image itself.
 
+For more information on writing unit files see link:https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/System_Administrators_Guide/sect-Managing_Services_with_systemd-Unit_Files.html[Managing Systemd unit files].
 
 // Help section
 === Creating a Help file
