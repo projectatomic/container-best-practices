@@ -467,7 +467,7 @@ CMD [ "/bin/rsyslog.sh" ]
 [[creating_using_systemd]]
 ==== Using systemd "inside the container"
 
-Extending our example from link:creating_using_a_script[starting an application with a script], the rsyslog
+Extending our example from link:#creating_using_a_script[starting an application with a script], the rsyslog
 image was started with a script.  We could easily use systemd to start the application.  To use systemd
 to start a service that has a unit file, we need to tell systemd to enable the service and then let the
 init process handle the rest. So instead of the ADD instruction used earlier, we would use a RUN
@@ -556,7 +556,7 @@ The [Service] section also has an option for EnvironmentFile.  In a traditional,
 this configuration file resides in _/etc/sysconfig/<service_name>_.  In the case of a containerized application,
 these configuration files are not always configurable and therefore do not reside on the host's filesystem.  And
 in the case of where they are configurable, the EnvironmentFile is usually more important to how the service
-application is started.  If you are link:planning_use_system[dstarting the application] within an image
+application is started.  If you are link:#planning_use_systemd[starting the application] within an image
 with systemd, then systemd will use _/etc/sysconfig/<service_name>_ within the image itself.
 
 For more information on writing unit files see link:https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/System_Administrators_Guide/sect-Managing_Services_with_systemd-Unit_Files.html[Managing Systemd unit files].
