@@ -150,6 +150,41 @@ Here is a listing of some package managers and the applicable cleanup commands:
 
 |===
 
+===== Clearing package cache and squashing
+
+If you squash your images after manual building or as part of an automated build process, it is not necessary to clean cache in every single relevant instruction/layer as the intermediate layers affect the previous ones in this case.
+
+Simple example Dockerfiles below would both produce the same image if they were squashed:
+
+.Cache cleanup in a separate instruction
+```
+FROM fedora
+RUN dnf install -y mariadb
+RUN dnf install -y wordpress
+RUN dnf clean all
+```
+
+.Cache cleanup chained with the install command
+```
+FROM fedora
+RUN dnf install -y mariadb wordpress && dnf clean all
+
+```
+However, without squashing, the first image would contain additional files and would be bigger than the second one.
+
+.Size comparison
+```
+# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
+example             separate            54870d73715f        21 seconds ago       537.7 MB
+example             chained             6a6156547888        About a minute ago   377.9 MB
+
+```
+
+Therefore, it is a good practice to write Dockerfiles in a way so that others can use it as a valid reference and are always able to reproduce the build. To ensure this, you should **clean cache in every layer** where applicable. In general, you should always aim to create images that are small and concise regardless of whether the final image is squashed or not.
+
+Read more about suqashing and its repercussions in the link:#squashing[Squashing layers] section.
+
 ==== Remove unnecessary packages
 
 In some cases, your image can end up with several packages that are not necessary to support the runtime of your
@@ -171,7 +206,6 @@ remove unneeded packages like so:
 You should run this command in an interactive shell (docker run -it --rm <image> /bin/bash) initially so you can
 get a feel for which packages will be removed.  One upside to doing so is that you can then test run your application
 from the interactive shell to make sure it still works.
-
 
 ==== Installing Documentation
 It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
@@ -211,6 +245,7 @@ RUN yum -y reinstall "*"
 RUN yum -y install <package>
 ----
 
+[[squashing]]
 ==== Squashing layers
 
 Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional
@@ -219,10 +254,11 @@ another layer later, the final image's size will include the added file size in 
 although you removed it. In addition, every layer contains separate metadata that add up to the overall image size as
 well. So what are the benefits of squashing?
 
-* **Performance** - since all layers are copy-on-write file systems, it will take longer to build the final container
+* **Performance** - Since all layers are copy-on-write file systems, it will take longer to build the final container
 from many layers.
-* **Image size ** - As already described above, any new instruction in the Dockerfile increases the overall size of the
+* **Image size** - As already described above, any new instruction in the Dockerfile increases the overall size of the
  image. With squashing, you can prevent these unwanted size additions.
+* **Organization** - Squashing also helps you control the structure of an image and organize images in logical layers.
 
 However, Docker does not yet support squashing natively, so you will have to work around it by using alternative
 approaches, some of which are listed below.
@@ -238,7 +274,7 @@ as well and might be several hundreds of megabytes in size.
 ===== Custom Tools
 
 You will surely find a lot of utilities on the internet that facilitate layer squashing.
-We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-scripts[docker-scripts], which
+We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-squash[docker-squash], which
 automates layer squashing and which is maintained and has been tested by the community.
 
 ==== Chaining Commands
