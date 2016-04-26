@@ -22,6 +22,8 @@ include::planning_scenarios_simple_db.adoc[]
 //Distributed database
 include::planning_scenarios_distributed_db.adoc[]
 
+//Storage initalization
+include::planning_scenarios_initialization.adoc[]
 
 === Security and user requirements
 

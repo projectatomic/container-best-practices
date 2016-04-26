@@ -1,0 +1,51 @@
+=== Data Initialization
+
+A truly stateless application component acquires all configuration information via combination of discovery or injection via a cloud, container or configuration management framework. It assumes that all local storage is ephemeral and that any data that requires persistence beyond a shutdown, reboot or termination must be stored elsewhere.
+
+In practice, many applications are not truly stateless in the sense defined above. Instead they require at least some element of persistent state or storage to be made available or "attached" to the component at the time it is launched. Frequently, this storage must be initialized the first time the application is run.
+
+==== Examples
+
+- Creation of schema/tables and initial population of a relational database
+- Initialization of configuration data, such as the location of a central server or executive to which the application component should connect.
+- Initialization of unique identifying information such as a UUID, key pair or shared secrets
+
+==== Key Issues
+
+- Tracking whether initialization has occurred to ensure it only happens once or, at the very least, only occurs when the user wants it to
+
+- Selecting persistence between restarts of a component versus persistence beyond termination/removal
+
+- If data is persistent beyond termination of the component, re-associating the persistent storage with a freshly launched instance of the component (be it a VM or a container)
+
+- If data is persistent across restarts _and_ updates to an underlying container image, ensuring that the “old” persistent data is still .  (Brent notes that our users have expectations in this area based on RPM behavior.)
+
+==== General Approaches and Patterns - Containers
+
+Two common patterns have emerged to address components that require one time data initialization.
+
+- Automatic Initialization - In this pattern, any component that requires data initialization incorporates a check into initial start up. If the check determines that persistent data is already present, it continues as normal. If persistent data is not present, it performs the required data initialization before moving on to normal start up.
+
+- Explicit Initialization - In this pattern users must explicitly execute an initialization step prior to running an application component. Details may differ depending on the specific container tool or framework being used.
+
+==== Persistent Storage in Docker
+
+Docker containers provide persistence a few different ways.  Changes to the local file system of a running container persist across starts and stops but are lost if the container is ever removed.  If a user requires persistence beyond removal, Docker provides the concept of "Volumes" which are available in two flavors.
+
+- "Data Volumes" are directories that exist outside of the container file system and whose contents persist even after a container is terminated.
+- "Bind Mounts" are host directories can also be directly mounted into a running container.
+
+For more details on Docker storage configurations see the xref:planning_storage[storage considerations] section of this guide.
+
+
+==== Framework Support
+
+This is an area of active development within the various container management frameworks and there is no silver bullet. 
+
+Generally speaking, if an application component does not provide some mechanism for automatic initialization it falls to the user to identify and perform perform any expected explicit storage initialization.  It is also the user's responsibility to track the resulting persistent storage objects during the removal/termination/restart of a container or an update to the underlying container image.
+
+===== Explicit Initialization - Atomic CLI
+
+The one exception is the Atomic CLI (aka "atomic run") which provides support within its metadata format for encoding any required explicit initialization steps.
+
+(Brief example and then reference to atomic CLI docs.)
