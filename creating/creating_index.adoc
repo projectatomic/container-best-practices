@@ -475,6 +475,12 @@ tools developed to read and act upon this meta data will work correctly.
 In the case that you provide a help file that does not follow the standard of a man page, then the HELP label would also
 be prudent.
 
+==== Recommended labels for your OpenShift project
+
+Images that are meant to be run in OpenShift, should contain a set of recommended labels are seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
+
+For more details, refer to https://docs.openshift.org/latest/creating_images/metadata.html[https://docs.openshift.org/latest/creating_images/metadata.html].
+
 === Template
 // Should we create a default template of sorts
 
