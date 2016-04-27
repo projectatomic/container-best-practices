@@ -327,7 +327,7 @@ IMAGE               CREATED             CREATED BY          SIZE                
 
 ```
 
-* One of the biggest benefits of using layers is the posibility to reuse them. Images are usually squashed into a single big layer, which does not allow for pushing partial updates in individual layers; instead, the whole image needs to be pushed into the registry upon a change. The same is applies to pulling the image from the registry.
+* One of the biggest benefits of using layers is the posibility to reuse them. Images are usually squashed into a single big layer, which does not allow for pushing partial updates in individual layers; instead, the whole image needs to be pushed into the registry upon a change. The same applies to pulling the image from the registry.
 * Some users might rely on suqashing when it comes to sensitive data. Be cautios because squashing is not meant to "hide" content. Even though squashing removes intermediate layers from the final image, information about secrets used in those layers will stay in the build cache.
 
 ==== Chaining Commands
