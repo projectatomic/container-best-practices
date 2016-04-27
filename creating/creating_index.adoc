@@ -150,6 +150,41 @@ Here is a listing of some package managers and the applicable cleanup commands:
 
 |===
 
+===== Clearing package cache and squashing
+
+If you squash your images after manual building or as part of an automated build process, it is not necessary to clean cache in every single relevant instruction/layer as the intermediate layers affect the previous ones in this case.
+
+Simple example Dockerfiles below would both produce the same image if they were squashed:
+
+.Cache cleanup in a separate instruction
+```
+FROM fedora
+RUN dnf install -y mariadb
+RUN dnf install -y wordpress
+RUN dnf clean all
+```
+
+.Cache cleanup chained with the install command
+```
+FROM fedora
+RUN dnf install -y mariadb wordpress && dnf clean all
+
+```
+However, without squashing, the first image would contain additional files and would be bigger than the second one.
+
+.Size comparison
+```
+# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
+example             separate            54870d73715f        21 seconds ago       537.7 MB
+example             chained             6a6156547888        About a minute ago   377.9 MB
+
+```
+
+Therefore, it is a good practice to write Dockerfiles in a way so that others can use it as a valid reference and are always able to reproduce the build. To ensure this, you should **clean cache in every layer** where applicable. In general, you should always aim to create images that are small and concise regardless of whether the final image is squashed or not.
+
+Read more about suqashing and its repercussions in the link:#squashing[Squashing layers] section.
+
 ==== Remove unnecessary packages
 
 In some cases, your image can end up with several packages that are not necessary to support the runtime of your
@@ -171,7 +206,6 @@ remove unneeded packages like so:
 You should run this command in an interactive shell (docker run -it --rm <image> /bin/bash) initially so you can
 get a feel for which packages will be removed.  One upside to doing so is that you can then test run your application
 from the interactive shell to make sure it still works.
-
 
 ==== Installing Documentation
 It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
@@ -211,6 +245,7 @@ RUN yum -y reinstall "*"
 RUN yum -y install <package>
 ----
 
+[[squashing]]
 ==== Squashing layers
 
 Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional
@@ -219,10 +254,12 @@ another layer later, the final image's size will include the added file size in 
 although you removed it. In addition, every layer contains separate metadata that add up to the overall image size as
 well. So what are the benefits of squashing?
 
-* **Performance** - since all layers are copy-on-write file systems, it will take longer to build the final container
-from many layers.
-* **Image size ** - As already described above, any new instruction in the Dockerfile increases the overall size of the
- image. With squashing, you can prevent these unwanted size additions.
+* **Performance** - Since all layers are copy-on-write file systems, it will take longer to build the final container
+from many layers. Squashing helps reduce the build time.
+
+* **Image size** - Similarly, since an image is actually a collection of other images, the final image size is the sum of the sizes of component images. With squashing, you can prevent these unwanted size additions.
+
+* **Organization** - Squashing also helps you control the structure of an image, reduce the number of layers and organize images logically.
 
 However, Docker does not yet support squashing natively, so you will have to work around it by using alternative
 approaches, some of which are listed below.
@@ -235,11 +272,63 @@ however, is not very practical for sharing as the user will be able to only down
 the whole content and cannot take advantage the caching. Note that the base image layer will be included
 as well and might be several hundreds of megabytes in size.
 
+[[squash_tools]]
 ===== Custom Tools
 
 You will surely find a lot of utilities on the internet that facilitate layer squashing.
-We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-scripts[docker-scripts], which
+We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-squash[docker-squash], which
 automates layer squashing and which is maintained and has been tested by the community.
+
+
+===== Repercussions of squashing
+
+* When you squash an image, you will lose the history together with the metadata accompanying the layers.
+* Without the metadata, users building an image from a layered image that has been squashed are losing the idea that it happened.
+* Similarly, if you decide to include the parent layer from which your image is built into the resulting squashed image, you ultimately prevent others from seeing that this happened.
+
+Look at the mongodb example:
+
+```
+# docker images openshift/mongodb-24-centos7
+REPOSITORY                               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+docker.io/openshift/mongodb-24-centos7   latest              d7c0c18b0ae4        16 hours ago        593.3 MB
+```
+
+Without squashing, you can see complete history and how each of the layers occupies space.
+
+```
+# docker history docker.io/openshift/mongodb-24-centos7:latest
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+d7c0c18b0ae4        About an hour ago   /bin/sh -c #(nop) CMD ["run-mongod"]            0 B
+63e2ba112add        About an hour ago   /bin/sh -c #(nop) ENTRYPOINT &{["container-en   0 B
+ca996db9c281        About an hour ago   /bin/sh -c #(nop) USER [184]                    0 B
+8593b9473058        About an hour ago   /bin/sh -c #(nop) VOLUME [/var/lib/mongodb/da   0 B
+5eca88b7872d        About an hour ago   /bin/sh -c touch /etc/mongod.conf && chown mo   0 B
+9439db8f40ad        About an hour ago   /bin/sh -c #(nop) ADD dir:f38635e83f0e6943cd3   17.29 kB
+12c60945cbac        About an hour ago   /bin/sh -c #(nop) ENV BASH_ENV=/usr/share/con   0 B
+e6073f9a949f        About an hour ago   /bin/sh -c #(nop) ENV CONTAINER_SCRIPTS_PATH=   0 B
+619bf2ae5ed8        About an hour ago   /bin/sh -c yum install -y centos-release-scl    342.6 MB
+ab5deeccfe21        About an hour ago   /bin/sh -c #(nop) EXPOSE 27017/tcp              0 B
+584ded9dcbca        About an hour ago   /bin/sh -c #(nop) LABEL io.k8s.description=Mo   0 B
+17e3bcd28e07        About an hour ago   /bin/sh -c #(nop) ENV MONGODB_VERSION=2.6 HOM   0 B
+807a1e9c5a7b        16 hours ago        /bin/sh -c #(nop) MAINTAINER SoftwareCollecti   0 B
+28e524afdd05        10 days ago         /bin/sh -c #(nop) CMD ["/bin/bash"]             0 B
+044c0f15c4d9        10 days ago         /bin/sh -c #(nop) LABEL name=CentOS Base Imag   0 B
+2ebc6e0c744d        10 days ago         /bin/sh -c #(nop) ADD file:6dd89087d4d418ca0c   196.7 MB
+fa5be2806d4c        7 months ago        /bin/sh -c #(nop) MAINTAINER The CentOS Proje   0 B
+
+```
+See how the history and size changes after squashing all layers in a single one (using the script link:#squash_tools[above]):
+
+```
+# docker history docker.io/openshift/mongodb-24-centos7:squashed
+IMAGE               CREATED             CREATED BY          SIZE                COMMENT
+90036ed9bd1d        58 minutes ago                          522.1 MB
+
+```
+
+* One of the biggest benefits of using layers is the posibility to reuse them. Images are usually squashed into a single big layer, which does not allow for pushing partial updates in individual layers; instead, the whole image needs to be pushed into the registry upon a change. The same is applies to pulling the image from the registry.
+* Some users might rely on suqashing when it comes to sensitive data. Be cautios because squashing is not meant to "hide" content. Even though squashing removes intermediate layers from the final image, information about secrets used in those layers will stay in the build cache.
 
 ==== Chaining Commands
 
