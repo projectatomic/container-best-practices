@@ -477,7 +477,7 @@ be prudent.
 
 ==== Recommended labels for your OpenShift project
 
-Images that are meant to be run in OpenShift, should contain a set of recommended labels are seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
+Images that are meant to be run in OpenShift, are recommended to contain a set of labels as seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
 
 See the following example snippet from the https://github.com/openshift/s2i-ruby/blob/master/2.2/Dockerfile#L12[sti-ruby] image:
 

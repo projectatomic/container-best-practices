@@ -255,6 +255,13 @@ directory between host and container using the _-v_ flag in your RUN label.
 ```
 -v <host_dir|file>:<image_dir|file>
 ```
+
+==== Logging in OpenShift
+
+OpenShift automatically collects logs of image builds and processes running inside containers. The recommended way to log for containers running in OpenShift is to send the output to standard output or standard error rather than storing it in a file. This way, OpenShift can catch the logs and output them directly in the console or on the command line (_oc logs_).
+
+image::planning/openshift_logs.png[]
+
 === Security and User considerations
 
 ==== Passing credentials and secrets
