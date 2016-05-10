@@ -477,7 +477,7 @@ be prudent.
 
 ==== Recommended labels for your OpenShift project
 
-Images that are meant to be run in OpenShift, are recommended to contain a set of labels as seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
+Images that are meant to be run in OpenShift are recommended to contain a set of labels as seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
 
 See the following example snippet from the https://github.com/openshift/s2i-ruby/blob/master/2.2/Dockerfile#L12[sti-ruby] image:
 
@@ -488,8 +488,6 @@ LABEL io.k8s.description="Platform for building and running Ruby 2.2 application
       io.openshift.tags="builder,ruby,ruby22"
 
 ```
-
-For more details, refer to https://docs.openshift.org/latest/creating_images/metadata.html[https://docs.openshift.org/latest/creating_images/metadata.html].
 
 === Template
 // Should we create a default template of sorts

@@ -83,3 +83,11 @@ EXPOSE 5432
 
 You then also need to ensure that you perform the port mapping when the container runs using either the -P or -p
 flags.
+
+==== Networking in OpenShift
+
+Establishing network connection between containers in OpenShift is different from the standard Docker container linking approach. OpenShift uses a built-in DNS so that services can be reached by the service DNS and service IP address.
+In other words, applications running in a container can connect to another container using the service name. For example, if a container running the MySQL database is a **database** service endpoint, **database** will be used as a hostname to connect to it from another container.
+In addition to DNS record, you can also use the environment variables with IP address of the service which are provided for every container running in the same project as the service. However, if the IP address (environment variable) changes, you will need to redeploy the container. Using service names is therefore recommended.
+
+For details, see https://docs.openshift.org/latest/architecture/additional_concepts/networking.html[OpenShift Documentation].
