@@ -1,4 +1,5 @@
 // vim: set syntax=asciidoc:
+
 [[plan]]
 == Application Planning
 :data-uri:
@@ -18,6 +19,12 @@ offer solutions which would be typical in a containerized environment.
 include::planning_scenarios_simple_db.adoc[]
 
 
+//Distributed database
+include::planning_scenarios_distributed_db.adoc[]
+
+//Storage initalization
+include::planning_scenarios_initialization.adoc[]
+
 === Security and user requirements
 
 === Host and image synchronization
@@ -33,13 +40,14 @@ a log server.  The log timestamps and information would almost be entirely usele
 time than the host.
 
 The best way to synchronize the time between a container and its host is through the use of bind mounts.  You simply need
-to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.
+to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.  We use the _ro_ flag to ensure the container
+can't modify the host's time zone by default.
 
 In your Dockerfile, this can be accomplished by adding the following to your RUN label.
 
 .Synchronizing the timezone of the host to the container.
 ```
--v /etc/localtime:/etc/localtime
+-v /etc/localtime:/etc/localtime:ro
 ```
 
 ==== Machine ID
@@ -51,7 +59,7 @@ mount the machine ID of the host to the container, add something like the follow
 
 .Synchronizing the host machine ID with a container
 ```
--v /etc/machine_id:/etc/machine_id
+-v /etc/machine_id:/etc/machine_id:ro
 ```
 
 === Considerations for images on Atomic Host and OpenShift
@@ -91,6 +99,7 @@ more complex applications.  One upside is that it is generally trivial to set en
 method is also good when you need to call more than a single binary to start the application correctly.
 One downside is that you now have to maintain the script and ensure it is always present in the image.
 
+[[planning_use_systemd]]
 ==== Use systemd
 Using systemd to start your application is a great if your application is service-oriented (like httpd).
 It can benefit from leveraging well tested unit files generally delivered with the applications
@@ -101,13 +110,15 @@ amount of memory used for systemd itself.
 NOTE: As of docker-1.10, the docker run parameter of _--privileged_ is no longer needed to use systemd
 within a container.
 
+You can implement using link:#creating_using_systemd[systemd fairly simply in your Dockerfile].
+
 === Techniques for deploying or starting images from a host
 ==== host systemd considerations
 ==== native docker (ah) unit file
 ===== example unit file - atomic create unit file
 ==== openshift driven
 
-
+[[planning_network]]
 === Network Considerations
 
 ==== single host
@@ -205,14 +216,14 @@ several solutions for logging containers like:
 * setting the docker daemon's log driver
 * logging to a file shared with the host (bind mounting)
 
-As a developer, if your application does using logging of some manner, you should be thinking about how you will
+As a developer, if your application uses logging of some manner, you should be thinking about how you will
 handle your log files.  Each of aforementioned solutions has its pros and cons.
 
-
+[[logging_use_service]]
 ==== Using a logging service
 
 Most traditional Linux systems use a logging service like link:http://www.rsyslog.com/[rsyslog] to collect and store
-its logfiles.  Often the logging service will coordinate logging with journald but nevertheless it too is a service
+its log files.  Often the logging service will coordinate logging with journald but nevertheless it too is a service
 will accept log input.
 
 If your application uses a logger and you want to take advantage of the host's logger, you can bind mount _/dev/log_
@@ -232,6 +243,7 @@ implemented, it will impact all containers on the system.  This is only useful w
 host will only be running your application as this might impact other containers.  Therefore this method has limited
 usefulness unless you can ensure the final runtime environment.
 
+[[logging_host_shared_storage]]
 ==== Using shared storage with the host
 
 The use of xref:planning_storage[persistent storage] can be another effective way to deal with log files whether
@@ -243,11 +255,110 @@ directory between host and container using the _-v_ flag in your RUN label.
 ```
 -v <host_dir|file>:<image_dir|file>
 ```
+
+==== Logging in OpenShift
+
+OpenShift automatically collects logs of image builds and processes running inside containers. The recommended way to log for containers running in OpenShift is to send the logs to standard output or standard error rather than storing it in a file. This way, OpenShift can catch the logs and output them directly in the console or on the command line (_oc logs_).
+
+image::planning/openshift_logs.png[]
+
+
+For details on logs aggregation, see the https://docs.openshift.org/latest/install_config/aggregate_logging.html[OpenShift docuemntation].
+
 === Security and User considerations
 
 ==== Passing credentials and secrets
+
+Storing sensitive data like credentials is a hot topic, especially because Docker does not provide a designated option for storing and passing secret values to containers.
+
+Currently, a very popular way to pass credentials and secrets in a container is specifying them as **environment variables** at container runtime. You as a consumer of such an image don't expose any of your sensitive data publicly.
+
+However, this approach also has caveats: 
+
+* If you commit such a container and push your changes to a registry, the final image will contain also all your sensitive data publicly.
+
+* Processes inside your container and other containers linked to your container might be able to access this information. Similarily, everything you pass as an environment variable is accessible from the host machine using *docker inspect* as seen in the https://hub.docker.com/r/openshift/mysql-56-centos7/[mysql example below].
+
+```
+# docker run -d --name mysql_database -e MYSQL_USER=user -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=db -p 3306:3306 openshift/mysql-56-centos
+# docker inspect openshift/mysql-56-centos
+
+<snip>
+
+"Env": [
+            "MYSQL_USER=user",
+            "MYSQL_PASSWORD=password",
+            "MYSQL_DATABASE=db",
+
+<snip>
+
+
+```
+
+There are other ways how to store secrets and although using environment variables might lead to leaking private data in certain corner cases, it still belongs to the safest workarounds available.
+
+There are a couple of things to keep in mind when operating with secrets:
+
+* For obvious reasons, you should avoid using default passwords - users tend to forget to change the default configuration and in case a known password leaks, it can be easily misused.
+
+* Although squashing removes intermediate layers from the final image, secrets from those layers will still be present in the build cache.
+
+===== Handling Secrets in Kubernetes
+
+Containers running through Kubernetes can take advantage of the **secret** resource type to store sensitive data such as passwords or tokens. kubernetes uses tmpfs volumes for storing secrets. To learn how to create and access these, refer to the http://kubernetes.io/docs/user-guide/secrets/[Kubernetes User Guide].
+
+
+===== Other Projects Facilitating Secret Management
+
+**Custodia**
+
+Custodia is an open-source project that defines an API for storing and sharing secrets such as passwords and certificates in a way that keeps data secure, manageable and audiatable. Custodia uses the HTTP protocol and a RESTful API as an IPC mechanism over a local Unix Socket. Custodia is fully modular and usrs can control how authentication, authorization and API plugins are combined and exposed. You can learn more details on the project's https://github.com/latchset/custodia[github repository] or https://github.com/latchset/custodia/wiki[wiki page].
+
+**Vault**
+
+Another open-source project that aims to handle secure accessing and storing of secrets is Vault. Detailed information about the tool and use cases can be found on the https://www.vaultproject.io/intro/index.html[Vault project website].
+
+
 ==== User NameSpace Mapping (docker-1.10 feature)
 ==== https://www.openshift.com/promotions/docker-security.html
+
+=== Preventing your image users from filling the filesystem
+
+Most default docker deployments only set aside about 20GB of storage for each container.  For many applications, that
+amount of storage is more than enough.  But if your containerized application produces significant log output,
+or your deployment scenario restarts containers infrequently, file system space can become a concern.
+
+
+The first step to preventing the container filesystem from filling up is to make sure your images
+are link:#creating_concise[small and concise].  This obviously will reduce how much space your
+image consumes from the filesystem right away. However, as a developer, the following techniques
+can be used by you to manage the container filesystem size.
+
+
+
+==== Ask for a larger storage space on run
+
+One solution to dealing with filesystem space could be to increase the amount of storage allocated to the container when
+your image is run.  This can be achieved with the following switch to _docker run_.
+
+.Increase the container storage space to 60GB
+```
+--storage-opt size:60
+```
+
+If you are using a defined RUN label in your Dockerfile, you could add the switch to that label.  However,
+abuse of this switch could lead to irking users and you should be prudent in using it.
+
+==== Space considerations for logging
+
+Logging can sometimes unknowingly consume disk space, particularily when a service or daemon has
+failed.  If your application performs logging, or more specifically verbose logging, consider the
+following approaches to help keep filesystem usage down:
+
+* Use logrotate inside the container periodically.
+* Mount your logs to a link:#logging_host_shared_storage[shared host filesystem]
+* link:#logging_use_service[Use a logging service or the host's journalctl (/dev/log)]
+
 
 === Image naming
 https://github.com/projectatomic/ContainerApplicationGenericLabels/blob/master/vendor/redhat/names.md

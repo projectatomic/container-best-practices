@@ -67,6 +67,7 @@ CMD ["/bin/bash"]
 
 ==== Creating Component or Application Images
 
+[[creating_concise]]
 === Create small and concise images
 
 It is preferable to create small and concise images whenever possible.  This can
@@ -149,6 +150,41 @@ Here is a listing of some package managers and the applicable cleanup commands:
 
 |===
 
+===== Clearing package cache and squashing
+
+If you squash your images after manual building or as part of an automated build process, it is not necessary to clean cache in every single relevant instruction/layer as the intermediate layers affect the previous ones in this case.
+
+Simple example Dockerfiles below would both produce the same image if they were squashed:
+
+.Cache cleanup in a separate instruction
+```
+FROM fedora
+RUN dnf install -y mariadb
+RUN dnf install -y wordpress
+RUN dnf clean all
+```
+
+.Cache cleanup chained with the install command
+```
+FROM fedora
+RUN dnf install -y mariadb wordpress && dnf clean all
+
+```
+However, without squashing, the first image would contain additional files and would be bigger than the second one.
+
+.Size comparison
+```
+# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
+example             separate            54870d73715f        21 seconds ago       537.7 MB
+example             chained             6a6156547888        About a minute ago   377.9 MB
+
+```
+
+Therefore, it is a good practice to write Dockerfiles in a way so that others can use it as a valid reference and are always able to reproduce the build. To ensure this, you should **clean cache in every layer** where applicable. In general, you should always aim to create images that are small and concise regardless of whether the final image is squashed or not.
+
+Read more about suqashing and its repercussions in the link:#squashing[Squashing layers] section.
+
 ==== Remove unnecessary packages
 
 In some cases, your image can end up with several packages that are not necessary to support the runtime of your
@@ -170,7 +206,6 @@ remove unneeded packages like so:
 You should run this command in an interactive shell (docker run -it --rm <image> /bin/bash) initially so you can
 get a feel for which packages will be removed.  One upside to doing so is that you can then test run your application
 from the interactive shell to make sure it still works.
-
 
 ==== Installing Documentation
 It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
@@ -210,6 +245,7 @@ RUN yum -y reinstall "*"
 RUN yum -y install <package>
 ----
 
+[[squashing]]
 ==== Squashing layers
 
 Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional
@@ -218,10 +254,12 @@ another layer later, the final image's size will include the added file size in 
 although you removed it. In addition, every layer contains separate metadata that add up to the overall image size as
 well. So what are the benefits of squashing?
 
-* **Performance** - since all layers are copy-on-write file systems, it will take longer to build the final container
-from many layers.
-* **Image size ** - As already described above, any new instruction in the Dockerfile increases the overall size of the
- image. With squashing, you can prevent these unwanted size additions.
+* **Performance** - Since all layers are copy-on-write file systems, it will take longer to build the final container
+from many layers. Squashing helps reduce the build time.
+
+* **Image size** - Similarly, since an image is actually a collection of other images, the final image size is the sum of the sizes of component images. With squashing, you can prevent these unwanted size additions.
+
+* **Organization** - Squashing also helps you control the structure of an image, reduce the number of layers and organize images logically.
 
 However, Docker does not yet support squashing natively, so you will have to work around it by using alternative
 approaches, some of which are listed below.
@@ -234,11 +272,63 @@ however, is not very practical for sharing as the user will be able to only down
 the whole content and cannot take advantage the caching. Note that the base image layer will be included
 as well and might be several hundreds of megabytes in size.
 
+[[squash_tools]]
 ===== Custom Tools
 
 You will surely find a lot of utilities on the internet that facilitate layer squashing.
-We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-scripts[docker-scripts], which
+We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-squash[docker-squash], which
 automates layer squashing and which is maintained and has been tested by the community.
+
+
+===== Repercussions of squashing
+
+* When you squash an image, you will lose the history together with the metadata accompanying the layers.
+* Without the metadata, users building an image from a layered image that has been squashed are losing the idea that it happened.
+* Similarly, if you decide to include the parent layer from which your image is built into the resulting squashed image, you ultimately prevent others from seeing that this happened.
+
+Look at the mongodb example:
+
+```
+# docker images openshift/mongodb-24-centos7
+REPOSITORY                               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+docker.io/openshift/mongodb-24-centos7   latest              d7c0c18b0ae4        16 hours ago        593.3 MB
+```
+
+Without squashing, you can see complete history and how each of the layers occupies space.
+
+```
+# docker history docker.io/openshift/mongodb-24-centos7:latest
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+d7c0c18b0ae4        About an hour ago   /bin/sh -c #(nop) CMD ["run-mongod"]            0 B
+63e2ba112add        About an hour ago   /bin/sh -c #(nop) ENTRYPOINT &{["container-en   0 B
+ca996db9c281        About an hour ago   /bin/sh -c #(nop) USER [184]                    0 B
+8593b9473058        About an hour ago   /bin/sh -c #(nop) VOLUME [/var/lib/mongodb/da   0 B
+5eca88b7872d        About an hour ago   /bin/sh -c touch /etc/mongod.conf && chown mo   0 B
+9439db8f40ad        About an hour ago   /bin/sh -c #(nop) ADD dir:f38635e83f0e6943cd3   17.29 kB
+12c60945cbac        About an hour ago   /bin/sh -c #(nop) ENV BASH_ENV=/usr/share/con   0 B
+e6073f9a949f        About an hour ago   /bin/sh -c #(nop) ENV CONTAINER_SCRIPTS_PATH=   0 B
+619bf2ae5ed8        About an hour ago   /bin/sh -c yum install -y centos-release-scl    342.6 MB
+ab5deeccfe21        About an hour ago   /bin/sh -c #(nop) EXPOSE 27017/tcp              0 B
+584ded9dcbca        About an hour ago   /bin/sh -c #(nop) LABEL io.k8s.description=Mo   0 B
+17e3bcd28e07        About an hour ago   /bin/sh -c #(nop) ENV MONGODB_VERSION=2.6 HOM   0 B
+807a1e9c5a7b        16 hours ago        /bin/sh -c #(nop) MAINTAINER SoftwareCollecti   0 B
+28e524afdd05        10 days ago         /bin/sh -c #(nop) CMD ["/bin/bash"]             0 B
+044c0f15c4d9        10 days ago         /bin/sh -c #(nop) LABEL name=CentOS Base Imag   0 B
+2ebc6e0c744d        10 days ago         /bin/sh -c #(nop) ADD file:6dd89087d4d418ca0c   196.7 MB
+fa5be2806d4c        7 months ago        /bin/sh -c #(nop) MAINTAINER The CentOS Proje   0 B
+
+```
+See how the history and size changes after squashing all layers in a single one (using the script link:#squash_tools[above]):
+
+```
+# docker history docker.io/openshift/mongodb-24-centos7:squashed
+IMAGE               CREATED             CREATED BY          SIZE                COMMENT
+90036ed9bd1d        58 minutes ago                          522.1 MB
+
+```
+
+* One of the biggest benefits of using layers is the posibility to reuse them. Images are usually squashed into a single big layer, which does not allow for pushing partial updates in individual layers; instead, the whole image needs to be pushed into the registry upon a change. The same applies to pulling the image from the registry.
+* Some users might rely on suqashing when it comes to sensitive data. Be cautios because squashing is not meant to "hide" content. Even though squashing removes intermediate layers from the final image, information about secrets used in those layers will stay in the build cache.
 
 ==== Chaining Commands
 
@@ -385,6 +475,20 @@ tools developed to read and act upon this meta data will work correctly.
 In the case that you provide a help file that does not follow the standard of a man page, then the HELP label would also
 be prudent.
 
+==== Recommended labels for your OpenShift project
+
+Images that are meant to be run in OpenShift are recommended to contain a set of labels as seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
+
+See the following example snippet from the https://github.com/openshift/s2i-ruby/blob/master/2.2/Dockerfile#L12[sti-ruby] image:
+
+```
+LABEL io.k8s.description="Platform for building and running Ruby 2.2 applications" \
+      io.k8s.display-name="Ruby 2.2" \
+      io.openshift.expose-services="8080:http" \
+      io.openshift.tags="builder,ruby,ruby22"
+
+```
+
 === Template
 // Should we create a default template of sorts
 
@@ -463,9 +567,10 @@ file. And the CMD instruction simply calls the script.
 CMD [ "/bin/rsyslog.sh" ]
 ```
 
-==== Using systemd
+[[creating_using_systemd]]
+==== Using systemd "inside the container"
 
-Extending our example from link:creating_using_a_script[starting an application with a script], the rsyslog
+Extending our example from link:#creating_using_a_script[starting an application with a script], the rsyslog
 image was started with a script.  We could easily use systemd to start the application.  To use systemd
 to start a service that has a unit file, we need to tell systemd to enable the service and then let the
 init process handle the rest. So instead of the ADD instruction used earlier, we would use a RUN
@@ -481,6 +586,83 @@ And then we need to change the CMD instruction to call _/usr/sbin/init_ to let s
 RUN /usr/sbin/init
 ```
 
+==== Using systemd to control containers
+
+The control mechanism for most docker functions is done via the docker commands or something like
+the atomic application which simplifies the management of containers and images for users.  But in
+a non-development environment, you may wish to treat your containers more like traditional services
+or applications.  For example, you may wish to have your containers start in a specific order on
+boot-up.  Or perhaps you wish to be able to restart (or recycle) a container because you have changed
+its configuration file.
+
+There are several approaches to these sorts of function.  You can make sure a specific container
+always starts on boot-up using the --restart switch with the docker command line when you initially
+run the image.  There are also orchestration platforms like Kubernetes that will allow you to determine the
+start up order of containers even when they are distributed.  But in the case where all the containers
+reside on a single node, systemd might just be exactly the solution.  Like with traditional services,
+systemd is capable of making sure services both start and in the order they are specified.  Moreover,
+any issues with startup or the container are logged like any other system service.
+
+When using systemd to manage your containers, you are really using systemd to call docker commands (and
+subsequently the docker daemon) to perform the actions.  Therefore, once you commit to using systemd
+to control a container, you will need to make sure that all start, stop, and restart actions are
+conducted with systemd.  Failure to do so essentially decouples the docker daemon and systemd causing
+systemd to be out of sync.
+
+In review, systemd is a good solution for:
+
+* host system services such as agents and long-running services
+* logging via journald
+* service dependant management
+* traditional service management vis _systemctl_
+* multi-container applications with dependencies on the same node
+
+
+The configuration file below is a sample service file that can be used and edited to control your image or
+container.  In the [Unit] section, you can declare other services needed by your image including the cases where
+those services are also images.
+
+.Sample template for a systemd service file
+```
+[Unit]
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+After=[cite another service]
+Wants=[cite another service]
+
+[Service]
+EnvironmentFile=[path to configuration file]
+ExecStartPre=-[command to execute prior to starting]
+ExecStart=[command to execute for start]
+ExecStartPost=/usr/bin/sleep 10
+ExecStop=[command to execute for stop]
+Restart=always
+
+[Install]
+WantedBy=docker.service
+```
+
+In the [Service] section, you can also declare the actual commands that should be run prior to start, in the
+case of start, and in the case of stop.  These commands can either be straight base commands or docker run (or stop)
+commands as well.  Finally, if you are using a well made image that contains labels like STOP or RUN, you
+could also use the atomic command.  For example, a start command could simply be:
+
+```
+atomic run <image_name>
+```
+
+This works because the actual docker command to run that image is part of the image's metadata and atomic is
+capable of extracting it.
+
+The [Service] section also has an option for EnvironmentFile.  In a traditional, non-containerized systemd service,
+this configuration file resides in _/etc/sysconfig/<service_name>_.  In the case of a containerized application,
+these configuration files are not always configurable and therefore do not reside on the host's filesystem.  And
+in the case of where they are configurable, the EnvironmentFile is usually more important to how the service
+application is started.  If you are link:#planning_use_systemd[starting the application] within an image
+with systemd, then systemd will use _/etc/sysconfig/<service_name>_ within the image itself.
+
+For more information on writing unit files see link:https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/System_Administrators_Guide/sect-Managing_Services_with_systemd-Unit_Files.html[Managing Systemd unit files].
 
 // Help section
 === Creating a Help file
@@ -496,6 +678,15 @@ The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rule
 .Sample Rules
 * Was yum clean up evoked after a package installation?
 * In the RUN section did the writer link commands via semicolons or double ampersands?
+=======
+=== Dockerfiles
+
+The Dockerfiles for many of the public images are hosted in git repositories where users can view
+them.  This also allows users to customize them as well.
+
+It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
+include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
+approach to make sure your Dockerfiles can be easily found.
 
 The input rules are defined via a set of yaml files. At the time of this writing, there are a number of templates from base to automated build configurations.
 
