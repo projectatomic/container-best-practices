@@ -515,6 +515,13 @@ git clone https://github.com/projectatomic/dockerfile_lint/
 cd dockerfile_lint
 npm install
 ```
+==== Creating parsing rules
+
+In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
+
+In the sample_rules directory, there are some included templates for openshift and an example base template. These are the rules we will be referencing below.
+
+==== Using the linter
 
 Upon evokation of the CLI version of the linter, some sample output may include:
 
