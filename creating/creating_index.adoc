@@ -90,8 +90,8 @@ RUN yum install -y epel-release && \
     yum -y clean all
 ```
 
-There are several package managers beyond yum that should be of note: dnf, rvm, gems, cpan, pip. Most of these 
-managers have some form of a clean up command that will handle excess cache created while performing their package management duties. 
+There are several package managers beyond yum that should be of note: dnf, rvm, gems, cpan, pip. Most of these
+managers have some form of a clean up command that will handle excess cache created while performing their package management duties.
 
 Below are examples pictured for dnf and rvm:
 
@@ -105,19 +105,19 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.
 
 .Ruby(rvm) cleanup example
 ```
-RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \ 
+RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \
     /usr/bin/curl -sSL https://get.rvm.io | rvm_tar_command=tar bash -s stable && \
     source /etc/profile.d/rvm.sh && \
-    echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc && \ 
+    echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc && \
     /bin/bash -l -c "rvm requirements && rvm install ruby 2.2.4 && rvm use 2.2.4 --default && \
-    gem install bundler rake && \ 
+    gem install bundler rake && \
     gem install nokogiri --use-system-libraries && \
     rvm cleanup all && yum clean all && rvm disk-usage all"
 ```
 
-In the above example, notice the yum clean all called after rvm, this is because some package managers like rvm rely on others (like yum 
-in this case) to help perform their duties. Make sure to examine your container's layers sizes to help determine where you can 
-eliminate excess size and keep it's footprint size to a minimum. 
+In the above example, notice the yum clean all called after rvm, this is because some package managers like rvm rely on others (like yum
+in this case) to help perform their duties. Make sure to examine your container's layers sizes to help determine where you can
+eliminate excess size and keep it's footprint size to a minimum.
 
 Here is a listing of some package managers and the applicable cleanup commands:
 
@@ -671,8 +671,14 @@ include::help.adoc[]
 
 === Creating a Changelog
 
-=== Verifying Dockerfile (linter)
+=== Verifying Dockerfiles (linter)
 
+The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check syntax and best practice options for things such as:
+
+.Sample Rules
+* Was yum clean up evoked after a package installation?
+* In the RUN section did the writer link commands via semicolons or double ampersands?
+=======
 === Dockerfiles
 
 The Dockerfiles for many of the public images are hosted in git repositories where users can view
@@ -682,8 +688,98 @@ It is also good practice to include the Dockerfile in the image itself.  Some di
 include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
 approach to make sure your Dockerfiles can be easily found.
 
+The input rules are defined via a set of yaml files. At the time of this writing, there are a number of templates from base to automated build configurations.
 
-OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD - OLD -
+==== Installing the linter
+There are two iterations of the linter.
+
+The CLI version of the project is available here:
+link:https://github.com/projectatomic/dockerfile_lint[Dockerfile_lint]
+
+The online version of the project is available here:
+link:https://access.redhat.com/labs/linterfordockerfile/#/[Online linter]
+
+For the next section, we will assume that the linter will be installed manually via npm using the following commands:
+
+```
+git clone https://github.com/projectatomic/dockerfile_lint/
+cd dockerfile_lint
+npm install
+```
+==== Creating parsing rules
+
+In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
+
+In the sample_rules directory, there are some included templates for openshift and an example base template. These are the rules we will be referencing below.
+
+==== Using the linter
+
+Upon evokation of the CLI version of the linter, some sample output may include:
+
+```
+-> bin/dockerfile_lint -f ~/Documents/manage-iq/Dockerfile.2 -r sample_rules/basic_rules.yaml
+```
+If you examine the command listed above you'll notice the inclusion of the yaml ruleset: sample_rules/basic_rules.yaml.
+
+If you take a look inside this file you'll see various rules defined as such:
+
+```
+---
+  profile:
+    name: "Default"
+    description: "Default Profile. Checks basic syntax."
+    includes:
+      - recommended_label_rules.yaml
+  line_rules:
+  RUN:
+  paramSyntaxRegex: /.+/
+  rules:
+  -
+   label: "no_yum_clean_all"  #This is a short description of the rule
+   regex: /yum(?!.+clean all|.+\.repo)/g  #regex the linter is attempting to match
+   level: "warn" # warn, error or info: These results will define how the linter exits
+   message: "yum clean all is not used" # Message to display
+   description: "the yum cache will remain in this layer making the layer unnecessarily large" # Longer message to display
+   reference_url:
+     - "http://docs.projectatomic.io/container-best-practices/#"
+     - "_clear_packaging_caches_and_temporary_package_downloads"
+    # Lastly, any best practice documentation that may be pertinent to the rule
+
+```
+
+Here is some sample output from the command above:
+
+```
+--------ERRORS---------
+
+ERROR: Maintainer is not defined. The MAINTAINER line is useful for identifying the author in the form of MAINTAINER Joe Smith <joe.smith@example.com>.
+Reference -> https://docs.docker.com/reference/builder/#maintainer
+
+
+-------WARNINGS--------
+
+WARNING: No 'USER' instruction. The process(es) within the container may run as root and RUN instructions my be run as root.
+Reference -> https://docs.docker.com/reference/builder/#user
+
+
+--------INFO---------
+
+INFO: There is no 'ENTRYPOINT' instruction. None.
+Reference -> https://docs.docker.com/reference/builder/#entrypoint
+
+```
+
+Let's revisit the rules example from above:
+
+```
+includes:
+  - recommended_label_rules.yaml
+```
+
+The include section would allow you to define your own yaml file and place it into the sample_rules directory. This would allow for execution of additional rules in addition to the file it was called from.
+
+In the example above, the basic_rules.yaml rules are processed in addition to recommended_label_rules.yaml.
+
 
 === Dockerfiles
 
