@@ -671,26 +671,20 @@ include::help.adoc[]
 
 === Creating a Changelog
 
-=== Verifying Dockerfiles (linter)
+=== The Dockerfile linter
+
+==== What is the linter?
 
 The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check syntax and best practice options for things such as:
 
-.Sample Rules
+.Example Sample Rules
 * Was yum clean up evoked after a package installation?
 * In the RUN section did the writer link commands via semicolons or double ampersands?
-=======
-=== Dockerfiles
-
-The Dockerfiles for many of the public images are hosted in git repositories where users can view
-them.  This also allows users to customize them as well.
-
-It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
-include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
-approach to make sure your Dockerfiles can be easily found.
 
 The input rules are defined via a set of yaml files. At the time of this writing, there are a number of templates from base to automated build configurations.
 
-==== Installing the linter
+==== Where do I get the linter and how do I install it?
+
 There are two iterations of the linter.
 
 The CLI version of the project is available here:
@@ -706,22 +700,37 @@ git clone https://github.com/projectatomic/dockerfile_lint/
 cd dockerfile_lint
 npm install
 ```
-==== Creating parsing rules
+==== Where do I get the templates?
 
 In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
 
 In the sample_rules directory, there are some included templates for openshift and an example base template. These are the rules we will be referencing below.
 
-==== Using the linter
+====== Types of templates
 
-Upon evokation of the CLI version of the linter, some sample output may include:
+* Basic rules - dockerfile_lint/sample_rules/basic_rules.yaml
+
+This set of rules is a basic catchall of your typical Dockerfile. Things such as yum cache clean up and command execution etiquette are checked.
+
+* Openshift Template - dockerfile_lint/sample_rules/openshift.yaml
+
+In addition to testing the semantics of the basic template from above, The Openshift template checks for some link:https://docs.openshift.org/latest/creating_images/metadata.html#defining-image-metadata[required Openshift labels] specific to its use.
+
+* OSBS Template - dockerfile_lint/sample_rules/osbs.yaml
+
+NOT SURE IF THIS IS GOING TO GO OR NOT - TODO TODO TODO
+
+==== How do I use the linter?
+
+Evocation of the CLI version of the linter may look like this:
 
 ```
 -> bin/dockerfile_lint -f ~/Documents/manage-iq/Dockerfile.2 -r sample_rules/basic_rules.yaml
 ```
-If you examine the command listed above you'll notice the inclusion of the yaml ruleset: sample_rules/basic_rules.yaml.
 
-If you take a look inside this file you'll see various rules defined as such:
+The filename of the basic template is included in the command above: sample_rules/basic_rules.yaml
+
+Inside this file is how the rules are defined:
 
 ```
 ---
@@ -744,7 +753,6 @@ If you take a look inside this file you'll see various rules defined as such:
      - "http://docs.projectatomic.io/container-best-practices/#"
      - "_clear_packaging_caches_and_temporary_package_downloads"
     # Lastly, any best practice documentation that may be pertinent to the rule
-
 ```
 
 Here is some sample output from the command above:
@@ -755,35 +763,34 @@ Here is some sample output from the command above:
 ERROR: Maintainer is not defined. The MAINTAINER line is useful for identifying the author in the form of MAINTAINER Joe Smith <joe.smith@example.com>.
 Reference -> https://docs.docker.com/reference/builder/#maintainer
 
-
--------WARNINGS--------
-
-WARNING: No 'USER' instruction. The process(es) within the container may run as root and RUN instructions my be run as root.
-Reference -> https://docs.docker.com/reference/builder/#user
-
-
 --------INFO---------
 
 INFO: There is no 'ENTRYPOINT' instruction. None.
 Reference -> https://docs.docker.com/reference/builder/#entrypoint
 
 ```
+In the event of an error being thrown from the linter, the programs exit code is reflected appropriately. This allows for quick and automated testing as what is informational and what needs to be addressed immediately.
 
-Let's revisit the rules example from above:
+An except from the rules shows how includes are defined:
 
 ```
 includes:
   - recommended_label_rules.yaml
 ```
+The include section allows for chaining rulesets of multiple sources. In the above example the recommended_label_rules.yaml is processed in addition to its source.
 
-The include section would allow you to define your own yaml file and place it into the sample_rules directory. This would allow for execution of additional rules in addition to the file it was called from.
-
-In the example above, the basic_rules.yaml rules are processed in addition to recommended_label_rules.yaml.
 
 
 === Dockerfiles
 
 ==== Location
+
+The Dockerfiles for many of the public images are hosted in git repositories where users can view
+them.  This also allows users to customize them as well.
+
+It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
+include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
+approach to make sure your Dockerfiles can be easily found.
 
 Upstream Dockerfiles should be hosted in a public GIT repository, for example https://github.com[GitHub]. Ideally, the repository should be created under the organization relevant to a particular project. For example, http://www.softwarecollections.org[Software Collections] Dockerfiles are available under the GitHub https://github.com/sclorg[sclorg] organization.
 
