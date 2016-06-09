@@ -675,13 +675,15 @@ include::help.adoc[]
 
 ==== What is the linter?
 
-The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check syntax and best practice options for things such as:
+The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check file syntax and best practice options for things such as:
 
 .Example Sample Rules
 * Was yum clean up evoked after a package installation?
 * In the RUN section did the writer link commands via semicolons or double ampersands?
 
-The input rules are defined via a set of yaml files. At the time of this writing, there are a number of templates from base to automated build configurations.
+These rules are determined by the rules author and are typically defined by best practices and writer requirements. The input rules are defined via a set of link:http://www.yaml.org/[yaml files].
+
+At the time of this writing, there are a number of templates from base to automated build configurations.
 
 ==== Where do I get the linter and how do I install it?
 
@@ -693,7 +695,7 @@ link:https://github.com/projectatomic/dockerfile_lint[Dockerfile_lint]
 The online version of the project is available here:
 link:https://access.redhat.com/labs/linterfordockerfile/#/[Online linter]
 
-For the next section, we will assume that the linter will be installed manually via npm using the following commands:
+For the next section, we will assume that the CLI version of the linter will be installed manually via link:https://docs.npmjs.com/[npm] using the following commands:
 
 ```
 git clone https://github.com/projectatomic/dockerfile_lint/
@@ -716,43 +718,106 @@ This set of rules is a basic catchall of your typical Dockerfile. Things such as
 
 In addition to testing the semantics of the basic template from above, The Openshift template checks for some link:https://docs.openshift.org/latest/creating_images/metadata.html#defining-image-metadata[required Openshift labels] specific to its use.
 
-* OSBS Template - dockerfile_lint/sample_rules/osbs.yaml
-
-NOT SURE IF THIS IS GOING TO GO OR NOT - TODO TODO TODO
-
-==== How do I use the linter?
-
-Evocation of the CLI version of the linter may look like this:
-
-```
--> bin/dockerfile_lint -f ~/Documents/manage-iq/Dockerfile.2 -r sample_rules/basic_rules.yaml
-```
+==== How do I read and customize the templates?
 
 The filename of the basic template is included in the command above: sample_rules/basic_rules.yaml
 
-Inside this file is how the rules are defined:
+The rules are implememented using regular expressions, run on one instruction of the dockerfile at a time. The rule file has 4 sections, *a profile section*, *a line rule section and a required instructions section.*
+
+===== Profile Section
+
+The profile section gives information about the rule file. The information here is meant to help a user select a rule file that is appropriate for a given dockerfile.
+```
+profile:
+  name: "Default"
+  description: "Default Profile. Checks basic syntax."
+  includes:
+    - recommended_label_rules.yaml
+```
+An except from the rules shows how includes are defined:
 
 ```
----
-  profile:
-    name: "Default"
-    description: "Default Profile. Checks basic syntax."
-    includes:
-      - recommended_label_rules.yaml
-  line_rules:
+includes:
+  - recommended_label_rules.yaml
+```
+The include section allows for chaining rulesets of multiple sources. In the above example the recommended_label_rules.yaml is processed in addition to its source.
+
+===== Line Rule Section
+
+This section contains rules that must be run on a given instruction in the dockerfile. The line rules do the bulk of the dockerfile parsing.
+
+The example below shows rules to run against the 'FROM' instruction.
+```
+  FROM registry.access.redhat.com/rhel7:latest
+```
+
+The excerpt below checks for the latest flag in the FROM line.
+
+```
+line_rules:
+  FROM:
+    paramSyntaxRegex: /^[a-z0-9./-]+(:[a-z0-9.]+)?$/
+      rules:
+        -
+          label: "is_latest_tag"
+          regex: /latest/
+          level: "error"
+          message: "base image uses 'latest' tag"
+          description: "using the 'latest' tag may cause unpredictable builds. It is recommended that a specific tag is used in the FROM line or *-released which is the latest supported release."
+          reference_url:
+            - "https://docs.docker.com/reference/builder/"
+            - "#from"
+```
+Here is another example that parses the RUN line.
+```
+  RUN yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils && \
+    yum-config-manager --disable \* && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum clean all
+
+    RUN yum -y install file open-vm-tools perl open-vm-tools-deploypkg net-tools && \
+    yum clean all
+```
+
+The regex below checks to see if the yum command has been issued. If it has, check to see if yum clean all has been run as well.
+```
   RUN:
-  paramSyntaxRegex: /.+/
-  rules:
+    paramSyntaxRegex: /.+/
+      rules:
+        -
+           label: "no_yum_clean_all"  #This is a short description of the rule
+           regex: /yum(?!.+clean all|.+\.repo)/g  #regex the linter is attempting to match
+           level: "warn" # warn, error or info: These results will define how the linter exits
+           message: "yum clean all is not used"
+           description: "the yum cache will remain in this layer making the layer unnecessarily large"
+           reference_url:
+             - "http://docs.projectatomic.io/container-best-practices/#"
+             - "_clear_packaging_caches_and_temporary_package_downloads"
+            # Lastly, any best practice documentation that may be pertinent to the rule
+```
+===== Required Instructions Section
+
+While the line rules section uses regex the required instructions looks for the instantiation of the instruction.
+
+```
+required_instructions:
   -
-   label: "no_yum_clean_all"  #This is a short description of the rule
-   regex: /yum(?!.+clean all|.+\.repo)/g  #regex the linter is attempting to match
-   level: "warn" # warn, error or info: These results will define how the linter exits
-   message: "yum clean all is not used" # Message to display
-   description: "the yum cache will remain in this layer making the layer unnecessarily large" # Longer message to display
-   reference_url:
-     - "http://docs.projectatomic.io/container-best-practices/#"
-     - "_clear_packaging_caches_and_temporary_package_downloads"
-    # Lastly, any best practice documentation that may be pertinent to the rule
+    instruction: "EXPOSE"
+    count: 1
+    level: "info"
+    message: "There is no 'EXPOSE' instruction"
+    description: "Without exposed ports how will the service of the container be accessed?"
+    reference_url:
+      - "https://docs.docker.com/reference/builder/"
+      - "#expose"
+```
+
+==== How do I use the linter?
+
+Execution of the CLI version of the linter may look like this:
+
+```
+dockerfile_lint -f /path/to/dockerfile -r sample_rules/basic_rules.yaml
 ```
 
 Here is some sample output from the command above:
@@ -769,16 +834,11 @@ INFO: There is no 'ENTRYPOINT' instruction. None.
 Reference -> https://docs.docker.com/reference/builder/#entrypoint
 
 ```
-In the event of an error being thrown from the linter, the programs exit code is reflected appropriately. This allows for quick and automated testing as what is informational and what needs to be addressed immediately.
-
-An except from the rules shows how includes are defined:
-
+By default, the linter runs in strict mode (errors and/or warnings result in non-zero return code). Run the command with '-p' or '--permissive to run in permissive mode:
 ```
-includes:
-  - recommended_label_rules.yaml
+dockerfile_lint  -p -f /path/to/dockerfile
 ```
-The include section allows for chaining rulesets of multiple sources. In the above example the recommended_label_rules.yaml is processed in addition to its source.
-
+This allows for quick and automated testing as what is informational and what needs to be addressed immediately.
 
 
 === Dockerfiles
