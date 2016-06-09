@@ -704,15 +704,20 @@ npm install
 ```
 ==== Where do I get the templates?
 
+====== Built in Templates
 In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
 
-In the sample_rules directory, there are some included templates for openshift and an example base template. These are the rules we will be referencing below.
+* dockerfile_lint/config/default_rules.yaml
 
-====== Types of templates
+* dockerfile_lint/config/base_rules.yaml
+
+====== Addition Types of templates
+
+In the sample_rules directory, there are some included templates for openshift and an example base template.
 
 * Basic rules - dockerfile_lint/sample_rules/basic_rules.yaml
 
-This set of rules is a basic catchall of your typical Dockerfile. Things such as yum cache clean up and command execution etiquette are checked.
+This set of rules is a basic catchall of your typical Dockerfile. Things such as yum cache clean up and command execution etiquette are checked. These are the rules we will be referencing below.
 
 * Openshift Template - dockerfile_lint/sample_rules/openshift.yaml
 
@@ -722,7 +727,7 @@ In addition to testing the semantics of the basic template from above, The Opens
 
 The filename of the basic template is included in the command above: sample_rules/basic_rules.yaml
 
-The rules are implememented using regular expressions, run on one instruction of the dockerfile at a time. The rule file has 4 sections, *a profile section*, *a line rule section and a required instructions section.*
+The rules are implemented using regular expressions matched on instruction of the dockerfile. The rule file has 3 sections: *a profile section, a line rule section and a required instructions section.*
 
 ===== Profile Section
 
@@ -734,7 +739,7 @@ profile:
   includes:
     - recommended_label_rules.yaml
 ```
-An except from the rules shows how includes are defined:
+An excerpt from the rules shows how includes are defined:
 
 ```
 includes:
@@ -744,14 +749,14 @@ The include section allows for chaining rulesets of multiple sources. In the abo
 
 ===== Line Rule Section
 
-This section contains rules that must be run on a given instruction in the dockerfile. The line rules do the bulk of the dockerfile parsing.
+This section contains rules match on a given instruction in the dockerfile. The line rules do the bulk of the dockerfile parsing.
 
 The example below shows rules to run against the 'FROM' instruction.
 ```
   FROM registry.access.redhat.com/rhel7:latest
 ```
 
-The excerpt below checks for the latest flag in the FROM line.
+The excerpt below checks for the latest flag in the 'FROM' line.
 
 ```
 line_rules:
@@ -768,7 +773,7 @@ line_rules:
             - "https://docs.docker.com/reference/builder/"
             - "#from"
 ```
-Here is another example that parses the RUN line.
+Here is another example that parses the 'RUN' line.
 ```
   RUN yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils && \
     yum-config-manager --disable \* && \
