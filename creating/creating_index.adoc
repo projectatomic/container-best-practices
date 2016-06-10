@@ -675,13 +675,13 @@ include::help.adoc[]
 
 ==== What is the linter?
 
-The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check file syntax and best practice options for things such as:
+The Dockerfile-lint is a rule based link:https://en.wikipedia.org/wiki/Lint_(software)['linter'] for verifying Dockerfiles. The rules are used to check file syntax and best practice options for things such as:
 
 .Example Sample Rules
 * Was yum clean up evoked after a package installation?
 * In the RUN section did the writer link commands via semicolons or double ampersands?
 
-These rules are determined by the rules author and are typically defined by best practices and writer requirements. The input rules are defined via a set of link:http://www.yaml.org/[yaml files].
+These are determined by the rules author and are typically defined by best practices and writer requirements. The input rules are defined via a set of link:http://www.yaml.org/[yaml files].
 
 At the time of this writing, there are a number of templates from base to automated build configurations.
 
@@ -713,7 +713,7 @@ In the config directory, there are two base ruleset files. If the dockerfile_lin
 
 ====== Addition Types of templates
 
-In the sample_rules directory, there are some included templates for openshift and an example base template.
+In the sample_rules directory there are some included templates for openshift and an example base template.
 
 * Basic rules - dockerfile_lint/sample_rules/basic_rules.yaml
 
@@ -731,7 +731,7 @@ The rules are implemented using regular expressions matched on instruction of th
 
 ===== Profile Section
 
-The profile section gives information about the rule file. The information here is meant to help a user select a rule file that is appropriate for a given dockerfile.
+The profile section gives information about the rule file. This is the name identifier and description for the profile. This information should help users to identify and applicable template.
 ```
 profile:
   name: "Default"
@@ -739,7 +739,7 @@ profile:
   includes:
     - recommended_label_rules.yaml
 ```
-An excerpt from the rules shows how includes are defined:
+An excerpt from the rules show how includes are defined:
 
 ```
 includes:
