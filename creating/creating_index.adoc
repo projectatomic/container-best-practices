@@ -704,24 +704,24 @@ npm install
 ```
 ==== Where do I get the templates?
 
-====== Built in Templates
+===== Built in Templates
 In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
 
 * dockerfile_lint/config/default_rules.yaml
 
 * dockerfile_lint/config/base_rules.yaml
 
-====== Addition Types of templates
+===== Addition Types of templates
 
-In the sample_rules directory there are some included templates for openshift and an example base template.
+In the sample_rules directory there are some included templates for OpenShift and an example base template.
 
 * Basic rules - dockerfile_lint/sample_rules/basic_rules.yaml
 
 This set of rules is a basic catchall of your typical Dockerfile. Things such as yum cache clean up and command execution etiquette are checked. These are the rules we will be referencing below.
 
-* Openshift Template - dockerfile_lint/sample_rules/openshift.yaml
+* OpenShift Template - dockerfile_lint/sample_rules/openshift.yaml
 
-In addition to testing the semantics of the basic template from above, The Openshift template checks for some link:https://docs.openshift.org/latest/creating_images/metadata.html#defining-image-metadata[required Openshift labels] specific to its use.
+In addition to testing the semantics of the basic template from above, The OpenShift template checks for some link:https://docs.openshift.org/latest/creating_images/metadata.html#defining-image-metadata[required OpenShift labels] specific to its use.
 
 ==== How do I read and customize the templates?
 
@@ -731,7 +731,7 @@ The rules are implemented using regular expressions matched on instruction of th
 
 ===== Profile Section
 
-The profile section gives information about the rule file. This is the name identifier and description for the profile. This information should help users to identify and applicable template.
+The profile section gives information about the rule file. This is the name identifier and description for the profile. This information should help users to identify an applicable template.
 ```
 profile:
   name: "Default"
@@ -739,7 +739,7 @@ profile:
   includes:
     - recommended_label_rules.yaml
 ```
-An excerpt from the rules show how includes are defined:
+An excerpt from the rules shows how includes are defined:
 
 ```
 includes:
