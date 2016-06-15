@@ -677,7 +677,6 @@ include::help.adoc[]
 
 The Dockerfile-lint is a rule based link:https://en.wikipedia.org/wiki/Lint_(software)['linter'] for verifying Dockerfiles. The rules are used to check file syntax and best practice options for things such as:
 
-.Example Sample Rules
 * Was yum clean up evoked after a package installation?
 * In the RUN section did the writer link commands via semicolons or double ampersands?
 
