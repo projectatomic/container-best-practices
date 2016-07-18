@@ -671,26 +671,21 @@ include::help.adoc[]
 
 === Creating a Changelog
 
-=== Verifying Dockerfiles (linter)
+=== The Dockerfile linter
 
-The Dockerfile-lint is a rule based 'linter' for verifying Dockerfiles. The rules are used to check syntax and best practice options for things such as:
+==== What is the linter?
 
-.Sample Rules
+The Dockerfile-lint is a rule based link:https://en.wikipedia.org/wiki/Lint_(software)['linter'] for verifying Dockerfiles. The rules are used to check file syntax and best practice options for things such as:
+
 * Was yum clean up evoked after a package installation?
 * In the RUN section did the writer link commands via semicolons or double ampersands?
-=======
-=== Dockerfiles
 
-The Dockerfiles for many of the public images are hosted in git repositories where users can view
-them.  This also allows users to customize them as well.
+These are determined by the rules author and are typically defined by best practices and writer requirements. The input rules are defined via a set of link:http://www.yaml.org/[yaml files].
 
-It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
-include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
-approach to make sure your Dockerfiles can be easily found.
+At the time of this writing, there are a number of templates from base to automated build configurations.
 
-The input rules are defined via a set of yaml files. At the time of this writing, there are a number of templates from base to automated build configurations.
+==== Where do I get the linter and how do I install it?
 
-==== Installing the linter
 There are two iterations of the linter.
 
 The CLI version of the project is available here:
@@ -699,52 +694,134 @@ link:https://github.com/projectatomic/dockerfile_lint[Dockerfile_lint]
 The online version of the project is available here:
 link:https://access.redhat.com/labs/linterfordockerfile/#/[Online linter]
 
-For the next section, we will assume that the linter will be installed manually via npm using the following commands:
+For the next section, we will assume that the CLI version of the linter will be installed manually via link:https://docs.npmjs.com/[npm] using the following commands:
 
 ```
 git clone https://github.com/projectatomic/dockerfile_lint/
 cd dockerfile_lint
 npm install
 ```
-==== Creating parsing rules
+==== Where do I get the templates?
 
+===== Built in Templates
 In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
 
-In the sample_rules directory, there are some included templates for openshift and an example base template. These are the rules we will be referencing below.
+* dockerfile_lint/config/default_rules.yaml
 
-==== Using the linter
+* dockerfile_lint/config/base_rules.yaml
 
-Upon evokation of the CLI version of the linter, some sample output may include:
+===== Addition Types of templates
+
+In the sample_rules directory there are some included templates for OpenShift and an example base template.
+
+* Basic rules - dockerfile_lint/sample_rules/basic_rules.yaml
+
+This set of rules is a basic catchall of your typical Dockerfile. Things such as yum cache clean up and command execution etiquette are checked. These are the rules we will be referencing below.
+
+* OpenShift Template - dockerfile_lint/sample_rules/openshift.yaml
+
+In addition to testing the semantics of the basic template from above, The OpenShift template checks for some link:https://docs.openshift.org/latest/creating_images/metadata.html#defining-image-metadata[required OpenShift labels] specific to its use.
+
+==== How do I read and customize the templates?
+
+The filename of the basic template is included in the command above: sample_rules/basic_rules.yaml
+
+The rules are implemented using regular expressions matched on instruction of the dockerfile. The rule file has 3 sections: *a profile section, a line rule section and a required instructions section.*
+
+===== Profile Section
+
+The profile section gives information about the rule file. This is the name identifier and description for the profile. This information should help users to identify an applicable template.
+```
+profile:
+  name: "Default"
+  description: "Default Profile. Checks basic syntax."
+  includes:
+    - recommended_label_rules.yaml
+```
+An excerpt from the rules shows how includes are defined:
 
 ```
--> bin/dockerfile_lint -f ~/Documents/manage-iq/Dockerfile.2 -r sample_rules/basic_rules.yaml
+includes:
+  - recommended_label_rules.yaml
 ```
-If you examine the command listed above you'll notice the inclusion of the yaml ruleset: sample_rules/basic_rules.yaml.
+The include section allows for chaining rulesets of multiple sources. In the above example the recommended_label_rules.yaml is processed in addition to its source.
 
-If you take a look inside this file you'll see various rules defined as such:
+===== Line Rule Section
+
+This section contains rules match on a given instruction in the dockerfile. The line rules do the bulk of the dockerfile parsing.
+
+The example below shows rules to run against the 'FROM' instruction.
+```
+  FROM registry.access.redhat.com/rhel7:latest
+```
+
+The excerpt below checks for the latest flag in the 'FROM' line.
 
 ```
----
-  profile:
-    name: "Default"
-    description: "Default Profile. Checks basic syntax."
-    includes:
-      - recommended_label_rules.yaml
-  line_rules:
+line_rules:
+  FROM:
+    paramSyntaxRegex: /^[a-z0-9./-]+(:[a-z0-9.]+)?$/
+      rules:
+        -
+          label: "is_latest_tag"
+          regex: /latest/
+          level: "error"
+          message: "base image uses 'latest' tag"
+          description: "using the 'latest' tag may cause unpredictable builds. It is recommended that a specific tag is used in the FROM line or *-released which is the latest supported release."
+          reference_url:
+            - "https://docs.docker.com/reference/builder/"
+            - "#from"
+```
+Here is another example that parses the 'RUN' line.
+```
+  RUN yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils && \
+    yum-config-manager --disable \* && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum clean all
+
+    RUN yum -y install file open-vm-tools perl open-vm-tools-deploypkg net-tools && \
+    yum clean all
+```
+
+The regex below checks to see if the yum command has been issued. If it has, check to see if yum clean all has been run as well.
+```
   RUN:
-  paramSyntaxRegex: /.+/
-  rules:
-  -
-   label: "no_yum_clean_all"  #This is a short description of the rule
-   regex: /yum(?!.+clean all|.+\.repo)/g  #regex the linter is attempting to match
-   level: "warn" # warn, error or info: These results will define how the linter exits
-   message: "yum clean all is not used" # Message to display
-   description: "the yum cache will remain in this layer making the layer unnecessarily large" # Longer message to display
-   reference_url:
-     - "http://docs.projectatomic.io/container-best-practices/#"
-     - "_clear_packaging_caches_and_temporary_package_downloads"
-    # Lastly, any best practice documentation that may be pertinent to the rule
+    paramSyntaxRegex: /.+/
+      rules:
+        -
+           label: "no_yum_clean_all"  #This is a short description of the rule
+           regex: /yum(?!.+clean all|.+\.repo)/g  #regex the linter is attempting to match
+           level: "warn" # warn, error or info: These results will define how the linter exits
+           message: "yum clean all is not used"
+           description: "the yum cache will remain in this layer making the layer unnecessarily large"
+           reference_url:
+             - "http://docs.projectatomic.io/container-best-practices/#"
+             - "_clear_packaging_caches_and_temporary_package_downloads"
+            # Lastly, any best practice documentation that may be pertinent to the rule
+```
+===== Required Instructions Section
 
+While the line rules section uses regex the required instructions looks for the instantiation of the instruction.
+
+```
+required_instructions:
+  -
+    instruction: "EXPOSE"
+    count: 1
+    level: "info"
+    message: "There is no 'EXPOSE' instruction"
+    description: "Without exposed ports how will the service of the container be accessed?"
+    reference_url:
+      - "https://docs.docker.com/reference/builder/"
+      - "#expose"
+```
+
+==== How do I use the linter?
+
+Execution of the CLI version of the linter may look like this:
+
+```
+dockerfile_lint -f /path/to/dockerfile -r sample_rules/basic_rules.yaml
 ```
 
 Here is some sample output from the command above:
@@ -755,35 +832,29 @@ Here is some sample output from the command above:
 ERROR: Maintainer is not defined. The MAINTAINER line is useful for identifying the author in the form of MAINTAINER Joe Smith <joe.smith@example.com>.
 Reference -> https://docs.docker.com/reference/builder/#maintainer
 
-
--------WARNINGS--------
-
-WARNING: No 'USER' instruction. The process(es) within the container may run as root and RUN instructions my be run as root.
-Reference -> https://docs.docker.com/reference/builder/#user
-
-
 --------INFO---------
 
 INFO: There is no 'ENTRYPOINT' instruction. None.
 Reference -> https://docs.docker.com/reference/builder/#entrypoint
 
 ```
-
-Let's revisit the rules example from above:
-
+By default, the linter runs in strict mode (errors and/or warnings result in non-zero return code). Run the command with '-p' or '--permissive to run in permissive mode:
 ```
-includes:
-  - recommended_label_rules.yaml
+dockerfile_lint  -p -f /path/to/dockerfile
 ```
-
-The include section would allow you to define your own yaml file and place it into the sample_rules directory. This would allow for execution of additional rules in addition to the file it was called from.
-
-In the example above, the basic_rules.yaml rules are processed in addition to recommended_label_rules.yaml.
+This allows for quick and automated testing as what is informational and what needs to be addressed immediately.
 
 
 === Dockerfiles
 
 ==== Location
+
+The Dockerfiles for many of the public images are hosted in git repositories where users can view
+them.  This also allows users to customize them as well.
+
+It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
+include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
+approach to make sure your Dockerfiles can be easily found.
 
 Upstream Dockerfiles should be hosted in a public GIT repository, for example https://github.com[GitHub]. Ideally, the repository should be created under the organization relevant to a particular project. For example, http://www.softwarecollections.org[Software Collections] Dockerfiles are available under the GitHub https://github.com/sclorg[sclorg] organization.
 
