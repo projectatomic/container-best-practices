@@ -14,3 +14,10 @@ The link:#build[*Build*] section discusses the importance of automation in build
 
 Finally, *Delivery* covers how to get images and updates to the end-users, whether that's inside an enterprise or public infrastructure. A key consideration is access control.
 
+=== Content of the Containers is Important
+
+When talking about containers, content is a very important thing. The content is important especially when we compare linux container technology with a classic virtual machine. Both is basically a kind of virtualization for isolating applications, but we cannot consider containers to be the same as virtual machines if it is related to security.
+
+The big difference between linux containers and a virtual machine is the guest's operating system, because all containers share the kernel with the host. That makes the containers much more efficient, but the fact that the kernel is shared with the host and other containers means, that some unfortunate security flaw in the host kernel creates potential door from the container, which may influence either other containers or the host itself.
+
+That all makes the content of the container very important, because running a malicious container is always a big risk for the host machine. Every container user is advised to pay attention at what containers are running in the infrastructure.
