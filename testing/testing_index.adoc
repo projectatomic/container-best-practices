@@ -9,7 +9,8 @@
 === What Should be Tested
 
 Container images generally consist of distribution packages and some scripts that help start the container properly. For example, a container with a MariaDB database typically consists of a set of RPMs, such as mariadb-server, that provides the main functionality and some scripts that handle initialization, setup, etc. A simplified example of MariaDB Dockerfile may look like this:
-```
+[source,Dockerfile]
+----
 FROM fedora:24
 
 RUN dnf install -y mariadb-server && \
@@ -23,7 +24,7 @@ VOLUME ["/var/lib/mysql/data"]
 USER 27
 
 CMD ["run-mysqld"]
-```
+----
 
 If we want to test the basic functionality of the container, we do not have to test the RPM functionality. The benefit of using the distribution packaging is that we know testing has already been done during the RPM develpment process. Instead, we need to focus on testing the added scripts instead and the API of the container. The goal is to determine if it works as described. For example, a MariaDB database container, we do not run the MariaDB unit tests in the container. Instead we focus on whether the database is initialized, configured, and responds to commands properly.
 
