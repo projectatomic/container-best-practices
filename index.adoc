@@ -34,6 +34,8 @@ include::creating/creating_index.adoc[]
 // Build and Test
 include::building/building_index.adoc[]
 
+include::testing/testing_index.adoc[]
+
 // Maintaining
 include::maintaining/maintaining_index.adoc[]
 
