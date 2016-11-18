@@ -6,8 +6,11 @@
 :toclevels: 5
 :sectnums:
 :homepage https://github.com/projectatomic/container-best-practices:
-//Audience
 
+// Preface
+include::preface.adoc[]
+
+//Audience
 == Audience
 
 This documentation has been written specifically for the developers who are writing

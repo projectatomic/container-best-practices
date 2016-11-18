@@ -1,0 +1,11 @@
+// vim: set syntax=asciidoc:
+[[Preface]]
+== Preface
+
+This Document describes a number of good practices regarding the creation
+and usage of Container Images.
+
+It is a continuously evolving work published on github.com. Technically speaking
+there will be editions, as git tags, so that referencing a section is simple.
+
+As of October 2016 we the Authors agreed to revisit major parts of this document.
