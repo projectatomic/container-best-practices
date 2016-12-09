@@ -3,7 +3,7 @@ ifneq ($(COMMIT_ID),)
 endif
 
 SHELL := /bin/bash
-LABS=index.adoc \
+LABS=README.adoc \
     overview/overview_index.adoc \
 	goals/goals_index.adoc \
     planning/planning_index.adoc \
@@ -17,31 +17,32 @@ ALL_ADOC_FILES := $(shell find . -type f -name '*.adoc')
 all: $(LABS) labs
 
 labs: $(LABS)
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css README.adoc
 	#a2x -fpdf -dbook --fop --no-xmllint -v labs.asciidoc
 	$(foreach lab,$(LABS), asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css $(lab);)
 
 html:
 	# asciidoctor can only put a single HTML output
 	# chunked output is close per upstream
-	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
+	asciidoctor -d book -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css README.adoc
 
 plain-html:
-	asciidoctor index.adoc
+	asciidoctor README.adoc
 
 publish: $(LABS)
 	git branch -D gh-pages
-	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css index.adoc
+	asciidoctor -a linkcss -a stylesheet=http://www.projectatomic.io/stylesheets/application.css README.adoc
+	mv README.html index.html
 	git checkout -b gh-pages
 	git commit index.html -m "Update"
 	git push origin gh-pages -f
 
-pdf: $(LABS) 
+pdf: $(LABS)
 	#a2x -fpdf -dbook --fop --no-xmllint -v index.adoc
-	asciidoctor -r asciidoctor-pdf -b pdf -o container_best_practices.pdf index.adoc
+	asciidoctor -r asciidoctor-pdf -b pdf -o container_best_practices.pdf README.adoc
 
 epub: $(LABS) $(SLIDES)
-	a2x -fepub -dbook --no-xmllint -v index.adoc
+	a2x -fepub -dbook --no-xmllint -v README.adoc
 
 check:
 	# Disabled for now
@@ -55,7 +56,7 @@ check:
 	echo "Disabled"
 
 toc:
-	asciidoctor index.adoc
+	asciidoctor README.adoc
 	python toc.py
 
 clean:
@@ -68,5 +69,4 @@ clean:
 
 review:
 	python mark_change.py ${ALL_ADOC_FILES} ${DO_COMMIT_ID}
-	cd output && asciidoctor index.adoc
-
+	cd output && asciidoctor README.adoc

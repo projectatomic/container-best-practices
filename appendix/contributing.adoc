@@ -1,0 +1,13 @@
+== Contributing
+
+After you have cloned your fork of https://github.com/projectatomic/container-best-practices please create a new feature branch. This feature branch will be the base for your pull request to the master branch of https://github.com/projectatomic/container-best-practices
+
+Please refer to the asciidoc user's guide: http://asciidoctor.org/docs/asciidoc-writers-guide/
+
+Before submitting a pull request:
+
+1. Compile the document, `make html`
+2. run `make check` to spellcheck the documents. Update personal dictionary file `containers.dict` with any non-English words.
+3. send the pull request
+
+Thanks!

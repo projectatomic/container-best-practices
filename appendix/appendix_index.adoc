@@ -9,3 +9,11 @@
 // Atomic
 === Atomic application
 include::atomic.adoc[]
+
+// Transformation
+=== Transforming Asciidoc to ...
+include::transform.adoc[]
+
+// Contributing
+=== Contributing to these Recommendations
+include::contributing.adoc[]

@@ -1,0 +1,30 @@
+
+
+[![Build Status](https://travis-ci.org/projectatomic/container-best-practices.svg?branch=master)](https://travis-ci.org/projectatomic/container-best-practices) [![Docs](https://img.shields.io/badge/docs-asciidoc-blue.svg)](http://docs.projectatomic.io/container-best-practices/)
+
+A collaborative project to document container-based application architecture, creation and management.  The built version of this source can be viewed at http://docs.projectatomic.io/container-best-practices/
+
+
+== Compile Asciidoc to HTML
+
+We are using a container to compile Asciidoc to HTML, using `sudo docker run --rm -it -v `pwd`:/documents/:Z asciidoctor/docker-asciidoctor make html` will create a file called README.html
+
+=== Spell check
+
+`aspell` is used to spell check the document. This is run in a [Travis job](https://travis-ci.org/projectatomic/container-best-practices) for all pull requests. Any non-English words should be added to `containers.dict` with your commit. Ensure `make check` passes.
+
+=== Clean up files
+
+```
+make clean
+```
+
+This removes all generated files.
+
+== Publish to github
+
+Github serves HTML documents from the `gh-pages` branch. This command will push to the branch.
+
+```
+make publish
+```
