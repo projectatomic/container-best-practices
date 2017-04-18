@@ -52,14 +52,14 @@ In your Dockerfile, this can be accomplished by adding the following to your RUN
 
 ==== Machine ID
 
-The _/etc/machine_id_ file is often used as an identifier for things like applications and logging.  Depending on your
+The _/etc/machine-id_ file is often used as an identifier for things like applications and logging.  Depending on your
 application, it might be beneficial to also bind mount the machine id of the host into the container.  For example.
 in many cases journald relies on the machine ID for identification.  The sosreport application also uses it.  To bind
 mount the machine ID of the host to the container, add something like the following to your RUN label.
 
 .Synchronizing the host machine ID with a container
 ```
--v /etc/machine_id:/etc/machine_id:ro
+-v /etc/machine-id:/etc/machine-id:ro
 ```
 
 === Considerations for images on Atomic Host and OpenShift
@@ -152,7 +152,7 @@ Docker defines link:https://docs.docker.com/engine/userguide/containers/dockervo
 However at present, the use of link:https://docs.docker.com/engine/userguide/containers/dockervolumes/#data-volumes[data volumes]
 is emerging to be the preferred storage option for users of Docker.  The docker website defines a data volume as
 _"a specially-designated directory within one or more containers that bypasses the Union File System."_ It has the distinct
-advantages that they can they can be shared and reused for one or more containers.  Moreover, a data volume will
+advantages that they can be shared and reused for one or more containers.  Moreover, a data volume will
 persist even if the associated container is deleted.
 
 Data volumes must be explicitly created and preferbaly should be named to provide it with a meaningful name.  You can
@@ -273,7 +273,7 @@ Storing sensitive data like credentials is a hot topic, especially because Docke
 
 Currently, a very popular way to pass credentials and secrets in a container is specifying them as **environment variables** at container runtime. You as a consumer of such an image don't expose any of your sensitive data publicly.
 
-However, this approach also has caveats: 
+However, this approach also has caveats:
 
 * If you commit such a container and push your changes to a registry, the final image will contain also all your sensitive data publicly.
 
