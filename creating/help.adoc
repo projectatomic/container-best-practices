@@ -20,27 +20,31 @@ The help file must be located in the images as /help.1 and in 'man' format.
 
 The following headings are strongly encouraged in the help file for an image.
 
+===== NAME
+Image name with short description.
+
 ===== DESCRIPTION
-Describe in greater detail the role or purpose of the image.  This can include more specifics about the
-packages that make up the image.  You can also describe whether image is meant to be interactive
-or more service oriented.
+Describe how image is used (user app, service, base image, builder image, etc.), the services or features it provides, and environment it is intended to run in (stand-alone docker, atomic super-privileged, oc multi-container app, etc.).
 
-==== USAGE
-Describe how to run the image as a container and what factors might influence the behaviour of the image
-itself.
+===== USAGE
+Describe how to run the image as a container and what factors might influence the behavior of the image itself. Provide specific command lines that are appropriate for how the container should be run.
 
-==== HISTORY
+===== ENVIROMENT VARIABLES
+Explain all environment variables available to run the image in different ways without the need of rebuilding the image.
+
+===== HISTORY
 Similar to a Changelog of sorts which can be as detailed as the maintainer desires.
 
 ==== Optional headings
 
 Use the following sections in your help file when applicable.
 
-===== Labels
-Describe the labels you use and why when applicable.  Specifically focus any action-oriented labels like RUN, INSTALL, and
-UNINSTALL.
+===== LABELS
+Describe LABEL settings (from the Dockerfile that created the image) that contains pertinent information.
+For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS. Others could
+include BZComponent, Name, Version, Release, and Architecture.
 
-===== Security Implications
+===== SECURITY IMPLICATIONS
 If you image uses any privileges that you want to make the user aware of, be sure to document which ones are used and optionally
 why.
 
@@ -53,47 +57,62 @@ in multiple ways.
 .Sample help template in markdown format
 [source, markdown]
 ----
-% IMAGE_NAME(1)
+% IMAGE_NAME (1) Container Image Pages
 % MAINTAINER
 % DATE
 
+# NAME
+Image_name - short description
 
 # DESCRIPTION
-Describe in greater detail the role or purpose of the image.  This can include more specifics about the
-packages that make up the image.  You can also describe whether image is meant to be interactive
-or more service oriented.
+Describe how image is used (user app, service, base image, builder image, etc.), the services or features it provides, and environment it is intended to run in (stand-alone docker, atomic super-privileged, oc multi-container app, etc.).
 
 # USAGE
-Describe how to run the image as a container and what factors might influence the behaviour of the image
-itself. For example:
+Describe how to run the image as a container and what factors might influence the behavior of the image itself. Provide specific command lines that are appropriate for how the container should be run. Here is an example for a container image meant to be run by the atomic command:
 
-To set up the host system for use by the XYZ container, run:
+To pull the container and set up the host system for use by the XYZ container, run:
 
-  atomic install XYZimage
+    # atomic install XYZimage
 
 To run the XYZ container (after it is installed), run:
 
-  atomic run XYZimage
+    # atomic run XYZimage
 
 To remove the XYZ container (not the image) from your system, run:
 
-  atomic uninstall XYZimage
+    # atomic uninstall XYZimage
 
-To upgrade the XYZ container from your system, run:
+Also, describe default configuration options (when defined): hostname, domainname, user ID run as, exposed ports, volumes, working directory, command run by default, etc.
 
-  atomic upgrade XYZimage
+# ENVIRONMENT VARIABLES
+Explain all environment variables available to run the image in different ways without the need of rebuilding the image. Change variables on the docker command line with -e option. For example:
+
+MYSQL_PASSWORD=mypass
+                The password set for the current MySQL user.
 
 # LABELS
 Describe LABEL settings (from the Dockerfile that created the image) that contains pertinent information.
 For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS. Others could
-include BZComponent, Name, Version, Release, and Architecture.
+include BZComponent, Name, Version, Release, and Architecture. This section is optional.
+
 
 # SECURITY IMPLICATIONS
-If you expose ports or run with privileges, it would be warranted to briefly note those and provide
-an explanation if needed.
+If you expose ports or run with privileges, note those and provide an explanation. For example:
+
+-d
+    Runs continuously as a daemon process in the background
+
+-p 3306:3306
+    Opens  container  port  3306  and  maps it to the same port on the Host.
+
 
 # HISTORY
 Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
+
+# SEE ALSO
+
+Does Red Hat provide MariaDB technical support on RHEL 7? https://access.redhat.com/solutions/1247193
+Install and Deploy a Mariadb Container Image https://access.redhat.com/documentation/en/red-hat-enterprise-linux-atomic-host/7/single/getting-started-guide/#install_and_deploy_a_mariadb_container
 ----
 
 ==== Example help file for the rsyslog container
