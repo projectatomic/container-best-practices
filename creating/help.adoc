@@ -24,12 +24,12 @@ The following headings are strongly encouraged in the help file for an image.
 Image name with short description.
 
 ===== DESCRIPTION
-Describe how image is used (user app, service, base image, builder image, etc.), the services or features it provides, and environment it is intended to run in (stand-alone docker, atomic super-privileged, oc multi-container app, etc.).
+Describe in greater detail the role or purpose of the image (application, service, base image, builder image, etc.).
 
 ===== USAGE
 Describe how to run the image as a container and what factors might influence the behavior of the image itself. Provide specific command lines that are appropriate for how the container should be run.
 
-===== ENVIROMENT VARIABLES
+===== ENVIRONMENT VARIABLES
 Explain all environment variables available to run the image in different ways without the need of rebuilding the image.
 
 ===== HISTORY
@@ -40,12 +40,12 @@ Similar to a Changelog of sorts which can be as detailed as the maintainer desir
 Use the following sections in your help file when applicable.
 
 ===== LABELS
-Describe LABEL settings (from the Dockerfile that created the image) that contains pertinent information.
-For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS. Others could
-include BZComponent, Name, Version, Release, and Architecture.
+Describe LABEL settings (from the Dockerfile that created the image) that contain pertinent information.
+For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS.
+For more information see https://github.com/projectatomic/ContainerApplicationGenericLabels/[Container Application Generic Labels].
 
 ===== SECURITY IMPLICATIONS
-If you image uses any privileges that you want to make the user aware of, be sure to document which ones are used and optionally
+If your image uses any privileges that you want to make the user aware of, be sure to document which ones are used and optionally
 why.
 
 
@@ -82,34 +82,39 @@ To remove the XYZ container (not the image) from your system, run:
 
     # atomic uninstall XYZimage
 
-Also, describe default configuration options (when defined): hostname, domainname, user ID run as, exposed ports, volumes, working directory, command run by default, etc.
+Also, describe the default configuration options (when defined): default user, exposed ports, volumes, working directory, default command, etc.
 
 # ENVIRONMENT VARIABLES
-Explain all environment variables available to run the image in different ways without the need of rebuilding the image. Change variables on the docker command line with -e option. For example:
+Explain all the environment variables available to run the image in different ways without the need of rebuilding the image. Change variables on the docker command line with -e option. For example:
 
 MYSQL_PASSWORD=mypass
                 The password set for the current MySQL user.
 
 # LABELS
 Describe LABEL settings (from the Dockerfile that created the image) that contains pertinent information.
-For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS. Others could
-include BZComponent, Name, Version, Release, and Architecture. This section is optional.
+For containers run by atomic, that could include INSTALL, RUN, UNINSTALL, and UPDATE LABELS.
 
 
 # SECURITY IMPLICATIONS
 If you expose ports or run with privileges, note those and provide an explanation. For example:
 
+Root privileges
+    Container is running as root. Explain why is it necessary.
+
 -d
-    Runs continuously as a daemon process in the background
+    Runs continuously as a daemon process in the background.
 
 -p 3306:3306
-    Opens  container  port  3306  and  maps it to the same port on the Host.
+    Opens container port 3306 and maps it to the same port on the Host.
 
+--net=host --cap_add=net_admin
+     Network devices of the host are visible inside the container and can be configured.
 
 # HISTORY
 Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
 
 # SEE ALSO
+Upstream repository: https://github.com/container-images/container-image-template
 
 Does Red Hat provide MariaDB technical support on RHEL 7? https://access.redhat.com/solutions/1247193
 Install and Deploy a Mariadb Container Image https://access.redhat.com/documentation/en/red-hat-enterprise-linux-atomic-host/7/single/getting-started-guide/#install_and_deploy_a_mariadb_container
