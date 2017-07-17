@@ -101,9 +101,6 @@ If you expose ports or run with privileges, note those and provide an explanatio
 Root privileges
     Container is running as root. Explain why is it necessary.
 
--d
-    Runs continuously as a daemon process in the background.
-
 -p 3306:3306
     Opens container port 3306 and maps it to the same port on the Host.
 
