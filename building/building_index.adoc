@@ -6,6 +6,44 @@
 
 
 === Simple build
+
+For building docker containers, we must first have the docker daemon installed and running:
+[source,shell]
+----
+#> yum install -y docker
+#> systemctl start docker
+----
+
+Then we can download some image, that we'll use as a base of our image. Let's use something we trust, for example Red Hat Enterprise Linux 7:
+[source,shell]
+----
+#> docker pull rhel7
+----
+
+Then, one way to create an image, is simply to run the container, do some reasonable work (like creating some content) and using `docker commit`:
+
+[source,shell]
+----
+#> docker run -ti --name mycont rhel7 bash
+[root@a1eefecdacfa /]# echo Hello Dojo > /root/greeting
+[root@a1eefecdacfa /]# exit
+#> docker commit mycont
+0bdcfc5ba0602197e2ac4609b8101dc8eaa0d8ab114f542ab6b2f15220d0ab22
+----
+
+However, once we'd decide to do something more complicated, we'd have troubles to make it again, so this way is not reproducible and thus is not encouraged. We should use the Dockerfiles instead.
+
+This following example results in the same output as the example before, except we can repeat it as many times we want and always get the same output. It also helps understanding the docker itself more as a packaging format, than just a virtualization technology:
+
+[source,shell]
+----
+#> cat Dockerfile
+FROM rhel7
+RUN echo Hello Dojo > /root/greeting
+
+#> docker build .
+----
+
 === Use a build service
 === Container Development Kit
 ==== OpenShift VM
