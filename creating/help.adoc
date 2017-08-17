@@ -129,7 +129,6 @@ Install and Deploy a Mariadb Container Image https://access.redhat.com/documenta
 rsyslog \- rsyslog container image
 
 # DESCRIPTION
-
 The rsyslog image provides a containerized packaging of the rsyslogd daemon. The rsyslogd daemon is a
 utility that supports system message logging. With the rsyslog container installed and running, you
 can configure the rsyslogd service directly on the host computer as you would if the daemon were
@@ -163,7 +162,7 @@ The container itself consists of:
 
 Files added to the container during docker build include: /bin/install.sh, /bin/rsyslog.sh, and /bin/uninstall.sh.
 
-# "USAGE"
+# USAGE
 To use the rsyslog container, you can run the atomic command with install, run, or uninstall options:
 
 To set up the host system for use by the rsyslog container, run:
@@ -214,7 +213,6 @@ That atomic command runs the docker command set in this label:
   (described later), mount a variety of host files and directories into the container, set the name of the container,
   set the container to restart automatically if it stops, and run the rsyslog.sh script.
 
-
 `UNINSTALL=`
 
   LABEL UNINSTALL="docker run --rm --privileged -v /:/host \
@@ -250,7 +248,7 @@ When the atomic command runs the rsyslog container, it reads the command line as
 from a LABEL set within the Docker container itself. It then runs that command. The following sections detail
 each option and associated LABEL:
 
-.SH "SECURITY IMPLICATIONS"
+# SECURITY IMPLICATIONS
 The rsyslog container is what is referred to as a super-privileged container. It is designed to have almost complete
 access to the host system as root user. The following docker command options open selected privileges to the host:
 
@@ -275,11 +273,10 @@ Allows processes run inside the container to see and work with all processes in 
 
 If the container should fail or otherwise stop, it would be restarted
 
-.SH "HISTORY"
+# HISTORY
 Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
 
-.SH "AUTHORS"
-
+# AUTHORS
 Stephen Tweedie
 ----
 
