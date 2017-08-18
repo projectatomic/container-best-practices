@@ -21,3 +21,13 @@ When talking about containers, content is a very important thing. The content is
 The big difference between linux containers and a virtual machine is the guest's operating system, because all containers share the kernel with the host. That makes the containers much more efficient, but the fact that the kernel is shared with the host and other containers means, that some unfortunate security flaw in the host kernel creates potential door from the container, which may influence either other containers or the host itself.
 
 That all makes the content of the container very important, because running a malicious container is always a big risk for the host machine. Every container user is advised to pay attention at what containers are running in the infrastructure.
+
+This documentation has been written specifically for the developers who are writing
+Dockerfiles to create images.  Dockerfiles can become rather complex depending on the
+application being containerized so we are passing on our experience with Dockerfiles
+through a series of best practices.
+
+This guide of best practices is not a reference guide of all the Dockerfile instructions.  There
+is plenty of documentation available on the link:https://www.docker.com/[Docker website] should
+you require that sort of content.
+

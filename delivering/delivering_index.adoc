@@ -1,8 +1,13 @@
 // vim: set syntax=asciidoc:
-[[image_naming]]
-= Image Naming
+[[delivering]]
+== Delivering Images
 :data-uri:
+:toc:
+:toclevels 4:
 :homepage https://github.com/projectatomic/container-best-practices:
+
+
+=== Image Naming
 
 This section describes the image naming standards for Docker images.
 

@@ -4,13 +4,14 @@ endif
 
 SHELL := /bin/bash
 LABS=index.adoc \
-    overview/overview_index.adoc \
-	goals/goals_index.adoc \
-    planning/planning_index.adoc \
+	overview/overview_index.adoc \
+	terminology/terminology_index.adoc \
+	planning/planning_index.adoc \
 	creating/creating_index.adoc \
 	building/building_index.adoc \
+	testing/testing_index.adoc \
 	maintaining/maintaining_index.adoc \
-	appendix/appendix_index.adoc
+	delivering/delivering_index.adoc
 
 ALL_ADOC_FILES := $(shell find . -type f -name '*.adoc')
 

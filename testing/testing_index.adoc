@@ -112,3 +112,6 @@ function create_container() {
 create_container test1
 test_image test1
 ----
+
+// === Build Testing
+// === Image Scanning

@@ -1,0 +1,23 @@
+// vim: set syntax=asciidoc:
+[[General Guidance]]
+== General Guidance
+:data-uri:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+=== Acceptance Criteria
+
+TBD
+
+// Here come the image acceptance criteria
+
+=== Flexible containers
+
+TBD
+
+// Consider moving elsewhere.
+
+=== Configuration
+
+TBD
+
+// Recommendations for orchestrated and standalone containers. Consider moving elsewhere.

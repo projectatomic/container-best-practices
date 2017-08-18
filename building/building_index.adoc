@@ -1,5 +1,5 @@
 // vim: set syntax=asciidoc:
-[[build]]
+[[Building]]
 == Building Applications
 :data-uri:
 :homepage https://github.com/projectatomic/container-best-practices:
@@ -216,11 +216,6 @@ A build environment that meets these requirements is difficult to create from sc
 
 //== Triggering Builds
 
-
-//== Build Testing
-
-
-//== Scanning
 
 
 

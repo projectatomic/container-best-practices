@@ -1,0 +1,21 @@
+// vim: set syntax=asciidoc:
+[[Terminology]]
+== Terminology
+:data-uri:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+=== Dictionary
+
+TBD
+
+=== Use cases
+
+TBD
+
+// Here come things like system containers, deployment types, etc
+
+=== Image types
+
+TBD
+
+// Here come things like base image, builder images, etc
