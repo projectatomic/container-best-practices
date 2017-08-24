@@ -4,30 +4,14 @@
 :data-uri:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-Container technology is a popular packaging method for developers and system administrators to build, ship and run distributed applications. Production use of image-based container technology requires a disciplined approach to development. This document provides guidance and recommendations for creating and managing images to control application lifecycle.
+=== Abstract
 
-In link:#plan[*Application Planning*] we discuss how to deconstruct applications into microservices, common types of images and how planning must consider the target deployment platforms.
+Container technology is a popular packaging method for developers and system administrators to build, ship and run distributed applications. Production use of image-based container technology requires a disciplined approach to development and writing Dockerfiles and defining containerized applications can become rather complex. Therefore, we're passing on our experience in this document, which aims to provide guidance and recommendations for creation, deployment and usage of containerized applications.
 
-link:#create[*Creating Images*] discusses the details about how to work with Dockerfiles, best practices, tips and tricks, and tools available to developers.
+This guide assumes the reader has at least basic knowledge of the containerization technologies. The document also isn't a reference guide of all the Dockerfile instructions. Should you require this kind of content, the documentation is available on the https://www.docker.com/[Docker website].
 
-The link:#build[*Build*] section discusses the importance of automation in building, testing and maintaining images. We discuss ideal workflows, how to plan a test environment, types of testing and image certification.
+// consider adding a references section linking important projects
 
-Finally, *Delivery* covers how to get images and updates to the end-users, whether that's inside an enterprise or public infrastructure. A key consideration is access control.
+=== Contributing
 
-=== Content of the Containers is Important
-
-When talking about containers, content is a very important thing. The content is important especially when we compare linux container technology with a classic virtual machine. Both is basically a kind of virtualization for isolating applications, but we cannot consider containers to be the same as virtual machines if it is related to security.
-
-The big difference between linux containers and a virtual machine is the guest's operating system, because all containers share the kernel with the host. That makes the containers much more efficient, but the fact that the kernel is shared with the host and other containers means, that some unfortunate security flaw in the host kernel creates potential door from the container, which may influence either other containers or the host itself.
-
-That all makes the content of the container very important, because running a malicious container is always a big risk for the host machine. Every container user is advised to pay attention at what containers are running in the infrastructure.
-
-This documentation has been written specifically for the developers who are writing
-Dockerfiles to create images.  Dockerfiles can become rather complex depending on the
-application being containerized so we are passing on our experience with Dockerfiles
-through a series of best practices.
-
-This guide of best practices is not a reference guide of all the Dockerfile instructions.  There
-is plenty of documentation available on the link:https://www.docker.com/[Docker website] should
-you require that sort of content.
-
+This is a continuously evolving work with the source files available on https://github.com/projectatomic/container-best-practices[GitHub]. If you find any inconsistencies, mistakes or typos, please use the https://github.com/projectatomic/container-best-practices/issues[issue tracker] to report them. If you wish to participate, feel free to open a https://github.com/projectatomic/container-best-practices/pulls[pull request].
