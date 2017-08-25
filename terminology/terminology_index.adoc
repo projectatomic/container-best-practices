@@ -6,27 +6,25 @@
 
 === Dictionary
 
-When discussing the containerization, it’s important to have a solid grasp on the
-related vocabulary. One of the challenges people have is that many of the following terms
+When discussing containerization, it’s important to have a solid grasp on the related vocabulary. One of the challenges people have is that many of the following terms
 are used interchangeably.It can be confusing, especially for newcomers.
 
 The goal of this section is to clarify these terms, so that we can speak the same language.
 
-==== Container
-
-Containers are an abstraction at the app layer that packages code and dependencies together.
-Multiple containers can run on the same machine and share the OS kernel with other containers, each running as isolated processes in user space.
-Containers take up less space than VMs (container images are typically tens of MBs in size), and start almost instantly.
-
 ==== Container Image
 
-Containers are based on the container images. Container image is a binary that includes all of the requirements for running a container,
-as well as metadata describing its needs and capabilities.  You can think of it as a packaging technology. Containers only have access to resources defined in the image,
+Container image is a binary that includes all of the requirements for running a container, as well as metadata describing its needs and capabilities. You can think of it as a packaging technology. Containers only have access to resources defined in the image,
 unless you give the container additional access when creating it.
+
+==== Container
+
+A container is an instance of an image. Containers are an abstraction at the application layer that packages code and dependencies together.
+Multiple containers can run on the same machine and share the OS kernel with other containers, each running as an isolated processes in the user space.
+Containers take up less space than VMs (container images are typically tens of MBs in size), and start almost instantly.
 
 ==== Repository
 
-When using the Docker command, a repository is what is specified on the command line, not an image. In the following command, “fedora” is the repository.
+When using the `docker` command, a repository is what is specified on the command line, not an image. In the following command, “fedora” is the repository.
 
 ```
 docker pull fedora
@@ -63,7 +61,7 @@ Repositories are often referred to as images or container images, but actually t
 Image layers in a repository are connected together in a parent-child relationship. Each image layer represents changes between itself and the parent layer.
 
 ==== Registry
-A registry server, is essentially a fancy file server that is used store Docker repositories.
+A registry server, is essentially a fancy file server that is used to store Docker repositories.
 Typically, the registry server is specified as a normal DNS name and optionally a port number to connect to.
 Much of the value in the Docker ecosystem comes from the ability to push and pull repositories from registry servers.
 
@@ -79,35 +77,34 @@ The simplicity with which Docker allows users to pull software makes it critical
 A namespace is a tool for separating groups of repositories.
 On the public DockerHub, the namespace is typically the username of the person sharing the image, but can also be a group name, or a logical name.
 
-=== Tag
+==== Tag
 
 When an image builder creates a new repository, they will typically label the best image layers to use.
 These are called tags and typically map to versions of software contained in the repository.
-In other words tags are how various images in a repository are distinguished from each other.
+In other words, tags are how various images in a repository are distinguished from each other.
 
 === Container Use Cases
-==== Overview
 
-There are many types of Container design patterns forming. Since containers are the run time version of a container image, the way it is built is tightly coupled to how it is run.
+There are many types of Container design patterns forming. Since containers are the runtime version of a container image, the way a container is built is tightly coupled to how it is run.
 
-Some Container Images are designed to be run without privilege while others are more specialized and require root-like privileges.
+Some Container Images are designed to be run without privileges while others are more specialized and require root-like privileges.
 There are many dimensions in which patterns can be evaluated and often users will see multiple patterns or use cases tackled together in one container image/container.
 
 This section will delve into some of the common use cases that users are tackling with containers.
 
 ==== Application Containers
 
-Applications containers are the most popular form of container. These are what developers and application owners care about.
-Application containers contain the code that developers work on. They also include things like MySQL, Apache, MongoDB, and or Node.js.
+Applications containers are the most popular form of containers. These are what developers and application owners care about.
+Application containers contain the code that developers work on. These include, for exmaple, MySQL, Apache, MongoDB, and Node.js.
 
 ==== Operating System Containers
 
-OS Containers are containers which are treated more like a full virtual operating system.
-OS Containers still share a host kernel, but run a full init system which allows them to easily run multiple processes.
-LXC and LXD are examples of OS Containers because they are treated much like a full virtual machine.
+Operating system containers are containers which are treated more like a full virtual operating system.
+OS containers still share a host kernel, but run a full init system which allows them to easily run multiple processes.
+LXC and LXD are examples of OS containers because they are treated much like a full virtual machine.
 
-It is also possible to approximate an OS Container with Docker/OCI based containers, but requires running systemd inside the container.
-This allows an end user to install software like they normally would and treat the container much more like a full operating system.
+It is also possible to approximate an OS container with Docker/OCI based containers, but requires running systemd inside the container.
+This allows the end user to install software like they normally would and treat the container much more like a full operating system.
 
 ```
 yum install mysql
@@ -129,14 +126,13 @@ and standard container hosts for infrastructure, but provide the flexibility of 
 
 ==== Super Privileged Containers
 
-When building container infrastructure on dedicated container hosts such as Red Hat Enterprise Linux Atomic Host, systems administrators still need to perform administrative tasks.
-Whether used with distributed systems, such as Kubernetes or OpenShift or standalone container hosts, Super Privileged Containers (SPC) are a powerful tool.
+When building container infrastructure on dedicated container hosts such as Atomic Host, system administrators still need to perform administrative tasks.
+Whether used with distributed systems, such as Kubernetes or OpenShift or standalone container hosts, Super Privileged Containers (SPCs) are a powerful tool.
 SPCs can even do things like load specialized kernel modules, such as with systemtap.
 In an infrastructure that is built to run containers, administrators will most likely need SPCs to do things like monitoring, backups, etc.
 It's important to realize that there is typically a tighter coupling between SPCs and the host kernel, so administrators need to choose a rock solid container host and standardize on it,
 especially in a large clustered/distributed environment where things are more difficult to troubleshoot.
 They then need to select a user space in the SPC that is compatible with the host kernel.
-
 
 === Image Types
 
@@ -144,8 +140,7 @@ They then need to select a user space in the SPC that is compatible with the hos
 
 A base image is one of the simplest types of images, but you will find a lot of definitions.
 Sometimes users will refer to corporate standard build, or even an application image as the “base image.”
-Technically, this is not a base image, these are Intermediate images.
-
+Technically, this is not a base image, these are link:#intermediate_images[Intermediate images].
 
 Simply put, a base image is an image that has no parent layer. Typically, a base image contains a fresh copy of an operating system.
 Base images normally include the tools (yum, rpm, apt-get, dnf, microdnf) necessary to install packages / make updates to the image over time.
@@ -158,7 +153,7 @@ FROM registry.fedoraproject.org/fedora
 
 ==== Builder Images
 
-These are a specialized form of container image which produce application container images as offspring.
+These are a specialized form of container images which produce application container images as offspring.
 They include everything but a developer's source code. Builder images include operating system libraries, language runtimes, middleware, and the source-to-image tooling.
 
 When a builder image is run, it injects the developers source code and produces a ready-to-run offspring application container image.
@@ -169,6 +164,7 @@ The developer passes the GitHub URL where the code is stored and the builder ima
 The output of a Builder container is an Application container image which includes Red Hat Enterprise Linux, PHP from Software Collections, and the developer’s code, all together, ready to run.
 Builder images provide a powerful way to go from code to container quickly and easily, building off of trusted components
 
+[[intermediate_images]]
 ==== Intermediate Images
 
 An Intermediate image is any container image which relies on a base image. Typically, core builds, middleware and language runtimes are built as layers on “top of” a base image.
@@ -186,24 +182,22 @@ Intermodal container images are images that have hybrid architectures. For examp
 First, they can be used as simple Application Containers running a fully contained Ruby on Rails and Apache server.
 
 Second, they can be used as Builder Images inside of OpenShift Container Platform.
-In this case, the output child images which contain Ruby on Rails, Apache, and the application code which the source to image process was pointed towards during the build phase.
+In this case, the output child images which contain Ruby on Rails, Apache, and the application code which the source-to-image process was pointed towards during the build phase.
 
 The intermodal pattern is becoming more and more common to solve two business problems with one container image.
-
 
 ==== Deployer Images
 
 A deployer image is a specialized kind of container which, when run, deploys or manages other containers.
 This pattern enables sophisticated deployment techniques such as mandating the start order of containers, or first run logic such as populating schema or data.
 
-As an example, the “image/container type” pattern is used to deploy the logging and metrics in OpenShift.Example.
-Deploying these components with a deployer container allows the OpenShift engineering team to control start order of the different components and make sure they are all up and running together.
+// TBD: Container patterns could nicely add to this
 
 ==== Containerized Components
 
 A container that is meant to be deployed as part of a larger software system, not on its own. Two major trends are driving this.
 
-First, microservices are driving the use of best of breed components - this is also driving the use of more components combined together to build a single application.
+First, microservices are driving the use of best-of-breed components - this is also driving the use of more components combined together to build a single application.
 Containerized components are meeting the need to deploy an expanding quantity of complex software more quickly and easily.
 
 Second, not all pieces of software are easy to deploy as containers. Sometimes, it makes sense to containerize only certain
@@ -211,12 +205,3 @@ components which are easier to move to containers or provide more value to the o
 
 It’s important to understand that containerized components are not designed to function on their own.
 They provide value to a larger piece of software, but provide very little value on their own.
-
-For example, when OpenShift Enterprise 3.0 was released, most of the core code was deployed using RPMs, but after installation administrators deployed the router and registry as containers.
- With the release of OpenShift 3.1 an option was added to the installer to deploy the master, node, openvswitch and etcd components as containers - after installation, administrators were given the option to deploy elasticsearch, fluentd, and kibana as containers.
-
-While the OpenShift installer still makes modifications to a server’s file system, all of the major software components can now be installed using container images.
-What makes these containerized components is that, for example, an instance of the etcd image built into OpenShift should and would never be used to store data for your customer facing application code, because it is a containerized component designed to be run as part of OpenShift Container Platform.
-
-With the latest releases of OpenShift, there is a trend towards more and more containerized components.
-The containerized component pattern is becoming more and more common and other software vendors are seeing an advantage to deploying as containerized components.
