@@ -1,6 +1,6 @@
 === Persistent Storage: Simple Database Server
 
-Introduce the basic environment and began to foreshadow the perceieved complications
+Although transience is the main benefit of containers, being able to preserve data after a container terminates is often an essential requirement for production environments. Below are outlined common complications the user can encounter and possible solutions.  
 
 ==== Traditional database server
 
@@ -17,7 +17,7 @@ the network.  The database is capable of connecting to the clients on the networ
 standard TCP/IP network stack and typically a combination of TCP socket and port.  In the case
 of posgres, the default port is 5432.
 
-More importantly, many database implementations store the database files on reliable, Enterprise
+More importantly, many database implementations store the database files on reliable, enterprise
 storage such as SANs or robust RAID arrays.  This is done to obviously protect the database
 from data loss. By default, containers have immutable storage; and therefore, if the container
 is deleted, your data will be lost. As a developer, you will need to understand and design
@@ -37,7 +37,7 @@ containerized topography of the same database from above.
 image::images/simple_db_containerized.png[]
 
 Note how the container host, like the traditional Linux deployment, has enterprise storage
-associated with it.  Through the use of a link:https://docs.docker.com/engine/userguide/containers/dockervolumes/[docker volumes],
+associated with it.  Through the use of link:https://docs.docker.com/engine/userguide/containers/dockervolumes/[docker volumes],
 we can assign storage to containers and those volumes will persist irregardless of the
 state of the container.
 
