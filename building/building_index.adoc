@@ -5,7 +5,7 @@
 :homepage https://github.com/projectatomic/container-best-practices:
 
 
-=== Simple build
+=== Simple Build
 
 For building docker containers, we must first have the docker daemon installed and running:
 [source,shell]
@@ -44,11 +44,8 @@ RUN echo Hello Dojo > /root/greeting
 #> docker build .
 ----
 
-=== Use a build service
-=== Container Development Kit
-==== OpenShift VM
-==== Kubernetes VM
-==== Eclipse/Docker VM
+//TBD: === Using a Build Service
+//TBD: === Build Strategies in OpenShift
 
 
 OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD

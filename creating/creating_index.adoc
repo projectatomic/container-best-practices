@@ -21,23 +21,19 @@ recommendations.
 
 ==== Choosing Base Image
 
-Images that have no parent are called base images. Docker image usually have their own root filesystem with an operating system installed. So when you want to create a new image, it either has to be based on an image that actually provides an operating system or you will need to create this layer in your image. The only difference to this are super minimal images that instead of an operating system provide only a single binary as described later in the text.
+Images that have no parent are called base images. Docker images usually have their own root filesystem with an operating system installed. So when you want to create a new image, it either has to be based on an image that actually provides an operating system or you will need to create this layer in your image. The only difference to this are super minimal images that instead of an operating system provide only a single binary as described later in the text.
 There is a wide variety of base images already available on Docker Hub, so the simplest solution is to use one from there. Here are a few things that should help you determine which base image will fit your needs:
 
-* Linux distribution - Your personal preference and perhaps experience is a reason why to choose a certain distribution rather than another one. However, you should definitely consider whether your containerized application requires specific libraries or tools from a specific system.
+* Linux distribution - Your personal preference and experience will play an important role in choosing one distribution over another. However, you should consider whether your containerized application requires specific libraries or tools from a specific system.
 
 * Image size - Base images usually contain a minimal operating system with a set of tools needed for basic operations. To preserve your environment small and efficient, size should also be taken into account when picking the right base image. The size varies; you can take advantage of super small base images, such as 2MB busybox, or use a standard minimal operating system, such as Fedora or CentOS that are up to 200MB in size.
 
 * Updates - Not all community images are necessarily rebuilt on a regular basis or when security vulnerabilities are addressed. You should therefore consider using base images from "official repositories" on Docker Hub, and confirm their update policy in advance.
 
-//==== RHEL base images
-
-// ==== BusyBox, the Minimalistic Operating System
-
 ==== Creating Base Image
 
 Once you've considered all options and decided to create your own base image, the process will mostly depend on the distribution you chose. Note that the major distributions have their source files available on GitHub so you still might want to consider creating an issue or opening a pull request to suggest a change in the feature set or any adjustment.
-https://docs.docker.com/engine/userguide/eng-image/baseimages/[Docker documentation] suggests two approaches to creating a base image, using tar and building an image "FROM scratch".
+https://docs.docker.com/engine/userguide/eng-image/baseimages/[Docker documentation] suggests two approaches to creating a base image: using tar and building an image "FROM scratch".
 
 ===== Using tar
 
@@ -49,7 +45,7 @@ Once you have your chroot directory ready, it is as simple as running:
 # tar -C <chroot_dir> -c . | docker import - <new_image_name>
 ```
 
-Note that docker provides a set of scripts for base image creation that take advantage of tar: https://github.com/docker/docker/tree/master/contrib[https://github.com/docker/docker/tree/master/contrib]. Well known distributions then use their own build systems that usually also utilizes tar. For example Fedora's https://fedoraproject.org/wiki/Koji/BuildingImages?rd=Koji/KojiLiveCDHowTo#Building_Disk_Images[koji].
+Note that docker provides a set of scripts for base image creation that take advantage of tar: https://github.com/docker/docker/tree/master/contrib[https://github.com/docker/docker/tree/master/contrib]. Popular distributions then use their own build systems that usually also utilizes tar. For example Fedora's https://fedoraproject.org/wiki/Koji/BuildingImages?rd=Koji/KojiLiveCDHowTo#Building_Disk_Images[koji].
 
 ===== FROM scratch
 
@@ -62,24 +58,77 @@ FROM scratch
 ADD <chroot_dir> /
 CMD ["/bin/bash"]
 ```
+// TBD: === Creating Layered Images
 
-=== Creating Layered Images
-
-==== Creating Component or Application Images
+// ==== Creating Component or Application Images
 
 [[creating_concise]]
-=== Create small and concise images
+=== Small and Concise Images
 
 It is preferable to create small and concise images whenever possible.  This can
 be highly dependent on the application you are containerizing, but there are
 techniques to help you accomplish this.  The following sections cover these
 techniques.
 
-==== Clear packaging caches and temporary package downloads
+==== Chaining Commands
+
+In general, having fewer layers improves readability. Commands that are chained together become a part of the
+same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large
+number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
+
+A new layer is created for every new instruction defined. This does not necessarily mean that one instruction
+should be associated with only one command or definition.
+
+Ensure transparency and provide a good overview of the content of each layer by grouping related operations
+together so that they together constitute a single layer. Consider this snippet:
+
+.Chained Dockerfile instruction
+```
+RUN yum install -y --setopt=tsflags=nodocs \
+    httpd vim && \
+    systemctl enable httpd && \
+    yum clean all
+```
+
+Each command that is related to the installation and configuration of `httpd` is grouped together
+as a part of the same layer. This meaningful grouping of operations keeps the number of layers low
+while keeping the easy legibility of the layers high.
+
+===== Using Double Ampersands (&&) vs Semi-colons (;)
+
+In the RUN instruction of Dockerfiles, it is common to string together multiple commands for efficiency.  Stringing
+commands together in the RUN instructions are typically done with ampersands or semi-colons. However, you should
+consider the implications of each and their usage.  The following examples illustrate the difference.
+
+.Using semi-colons as instruction conjunctions
+```
+RUN do_1; do_2
+```
+
+This sort of conjunction will be evaluated into do_1 and then do_2.  However, using the double
+ampersands results in a different evaluation.
+
+.Using double ampersands as conjunctions
+```
+RUN do_1 && do_2
+```
+
+The ampersands change the resulting evaluation into do_1 and then do_2 _only if do_1 was successful_.
+
+The use of the double ampersands as conjunctions is a better practice in Dockerfiles because
+it ensures that your instructions are completed or the build will fail.  If the build were to continue
+and you had not closely monitored the build (or its results), then the image may not be exactly
+as you desired.  This is particularly true with automated build systems where you will want any
+failure to result in the failure of the build itself.
+
+There are certainly use cases where semi-colons might be preferred and possibly should be used.
+Nevertheless, the possible result of an incomplete image should be carefully considered.
+
+==== Clearing Packaging Caches and Temporary Package Downloads
 
 Package managers can typically generate lots of metadata and also store downloaded content into a cache of
 sorts. To keep images and layers as small as possible, you should consider clearing out these caches of downloaded
-content.  Note how the following example ends with a _yum -y clean all_ which removes deletable yum content.
+content.  Note how the following example ends with _yum -y clean all_ which removes deletable yum content.
 
 .A singular RUN instruction performing multiple commands
 ```
@@ -91,7 +140,7 @@ RUN yum install -y epel-release && \
 ```
 
 There are several package managers beyond yum that should be of note: dnf, rvm, gems, cpan, pip. Most of these
-managers have some form of a clean up command that will handle excess cache created while performing their package management duties.
+managers have some form of a clean-up command that will handle excess cache created while performing their package management duties.
 
 Below are examples pictured for dnf and rvm:
 
@@ -100,10 +149,10 @@ Below are examples pictured for dnf and rvm:
 RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
     dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
     libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which && \
-    dnf clean all && \
+    dnf clean all \
 ```
 
-.Ruby(rvm) cleanup example
+.Ruby (rvm) cleanup example
 ```
 RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \
     /usr/bin/curl -sSL https://get.rvm.io | rvm_tar_command=tar bash -s stable && \
@@ -115,9 +164,9 @@ RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \
     rvm cleanup all && yum clean all && rvm disk-usage all"
 ```
 
-In the above example, notice the yum clean all called after rvm, this is because some package managers like rvm rely on others (like yum
+In the above example, notice the `yum clean all` command called after rvm; this is because some package managers like rvm rely on others (like yum
 in this case) to help perform their duties. Make sure to examine your container's layers sizes to help determine where you can
-eliminate excess size and keep it's footprint size to a minimum.
+eliminate excess size and keep its footprint size to a minimum.
 
 Here is a listing of some package managers and the applicable cleanup commands:
 
@@ -150,7 +199,7 @@ Here is a listing of some package managers and the applicable cleanup commands:
 
 |===
 
-===== Clearing package cache and squashing
+===== Clearing Package Cache and Squashing
 
 If you squash your images after manual building or as part of an automated build process, it is not necessary to clean cache in every single relevant instruction/layer as the intermediate layers affect the previous ones in this case.
 
@@ -170,7 +219,7 @@ FROM fedora
 RUN dnf install -y mariadb wordpress && dnf clean all
 
 ```
-However, without squashing, the first image would contain additional files and would be bigger than the second one.
+However, without squashing, the first image would contain additional files and would be bigger than the second one:
 
 .Size comparison
 ```
@@ -185,12 +234,12 @@ Therefore, it is a good practice to write Dockerfiles in a way so that others ca
 
 Read more about suqashing and its repercussions in the link:#squashing[Squashing layers] section.
 
-==== Remove unnecessary packages
+==== Removing Unnecessary Packages
 
 In some cases, your image can end up with several packages that are not necessary to support the runtime of your
 application.  A good example is when you actually build your application from source during the build of the image
 itself.  Typically, when you build an application, you will pull in development (-devel) packages as well as
-toolchain based packages like make and gcc.  Once your application is built, you may no longer need these packages
+toolchain-based packages like make and gcc.  Once your application is built, you may no longer need these packages
 for runtime depending on how your application links to libraries.
 
 Depending on your application and which packages you added to your image, you might need to iteratively attempt to
@@ -198,29 +247,26 @@ remove packages checking to make sure your application still works.  One suggest
 toolchain.  And then use your package manager's command to clean up unused packages.  In the case of _yum_, you can
 remove unneeded packages like so:
 
-.Removing unnecessary packages with yum
+.Removing unnecessary packages with dnf
 ```
-# yum autoremove
+# dnf autoremove
 ```
 
 You should run this command in an interactive shell (docker run -it --rm <image> /bin/bash) initially so you can
 get a feel for which packages will be removed.  One upside to doing so is that you can then test run your application
 from the interactive shell to make sure it still works.
 
-==== Installing Documentation
-It is generally considered good practice to keep your images as small as possible.  Above we have discussed that
-package manager caches should be cleared to reduce image sizes.  You can also reduce image size by limiting the
-documentation being installed.  If you package manager supports such a thing and then you have no expectations
-for users to use a shell to interact with your image, this might significantly reduce the size of your image.
+==== Removing Documentation
+Another technique for reducing the image size is by limiting the documentation being installed. If you package manager supports such a thing and you have no expectations for users to use a shell to interact with your image, this might significantly reduce the size of your image.
 
 Yum has an optional flag to not install documentation.  The following example shows how to set the flag.
+
 ----
 RUN yum install -y mysql --setopt=tsflags=nodocs
 ----
 
-Note that the **nodocs** flag is used in some base images, for example CentOS and Fedora, and this setting gets
-inherited by the child layers. This can cause problems in case you want to include documentation deliberately in your
- layered image.
+Note that the `nodocs` flag is used in some base images, for example CentOS and Fedora, and this setting gets
+inherited by the child layers. This can cause problems in case you decide to include the documentation in one of your layered images.
 
 In this case, if you wish to have the documentation installed for **packages from your single layer only**, you have to
 empty the **tsflags** option as follows:
@@ -246,7 +292,7 @@ RUN yum -y install <package>
 ----
 
 [[squashing]]
-==== Squashing layers
+==== Squashing Layers
 
 Each instruction you create in your Dockerfile results in a new image layer being created. Each layer brings additional
 data that are not always part of the resulting image. For example, if you add a file in one layer, but remove it in
@@ -264,9 +310,12 @@ from many layers. Squashing helps reduce the build time.
 However, Docker does not yet support squashing natively, so you will have to work around it by using alternative
 approaches, some of which are listed below.
 
+===== Experimental --squash Flag
+As of version 1.13, Docker supports the `--squash` flag that enabled the squashing functionality. This is currently only available in experimental mode.
+
 ===== docker save
 
-You can use _docker save_ to squash all the layers of your image into a single layer.  The _save_ command
+You can use `docker save` to squash all the layers of your image into a single layer.  The _save_ command
 was intended for this use, so this happens to be a side effect of the process. This approach,
 however, is not very practical for sharing as the user will be able to only download
 the whole content and cannot take advantage the caching. Note that the base image layer will be included
@@ -277,10 +326,10 @@ as well and might be several hundreds of megabytes in size.
 
 You will surely find a lot of utilities on the internet that facilitate layer squashing.
 We recommend taking advantage of Marek Goldmann's https://github.com/goldmann/docker-squash[docker-squash], which
-automates layer squashing and which is maintained and has been tested by the community.
+automates layer squashing, is kept up-to-date and has been tested by the community.
 
 
-===== Repercussions of squashing
+===== Repercussions of Squashing
 
 * When you squash an image, you will lose the history together with the metadata accompanying the layers.
 * Without the metadata, users building an image from a layered image that has been squashed are losing the idea that it happened.
@@ -294,7 +343,7 @@ REPOSITORY                               TAG                 IMAGE ID           
 docker.io/openshift/mongodb-24-centos7   latest              d7c0c18b0ae4        16 hours ago        593.3 MB
 ```
 
-Without squashing, you can see complete history and how each of the layers occupies space.
+Without squashing, you can see the complete history and how each of the layers occupies space.
 
 ```
 # docker history docker.io/openshift/mongodb-24-centos7:latest
@@ -330,76 +379,15 @@ IMAGE               CREATED             CREATED BY          SIZE                
 * One of the biggest benefits of using layers is the posibility to reuse them. Images are usually squashed into a single big layer, which does not allow for pushing partial updates in individual layers; instead, the whole image needs to be pushed into the registry upon a change. The same applies to pulling the image from the registry.
 * Some users might rely on suqashing when it comes to sensitive data. Be cautios because squashing is not meant to "hide" content. Even though squashing removes intermediate layers from the final image, information about secrets used in those layers will stay in the build cache.
 
-==== Chaining Commands
-
-In general, having fewer layers improves readability. Commands that are chained together become a part of the
-same layer. To reduce the number of layers, chain commands together. Find a balance, though, between a large
-number of layers (and a great many commands), and a small number of layers (and obscurity caused by brevity).
-
-A new layer is created for every new instruction defined. This does not necessarily mean that one instruction
-should be associated with only one command or definition.
-
-Ensure transparency and provide a good overview of the content of each layer by grouping related operations
-together so that they together constitute a single layer. Consider this snippet:
-
-.Chained Dockerfile instruction
-```
-RUN yum install -y --setopt=tsflags=nodocs \
-    httpd vim && \
-    systemctl enable httpd &&
-    yum clean all
-```
-
-Each command that is related to the installation and configuration of `httpd` is grouped together
-as a part of the same layer. This meaningful grouping of operations keeps the number of layers low
-while keeping the easy legibility of the layers high.
-
-===== Using semi-colons (;) vs double ampersands (&&)
-
-In the RUN instruction of Dockerfiles, it is common to string together multiple commands for efficiency.  Stringing
-commands together in the RUN instructions are typically done with ampersands or semi-colons. However, you should
-consider the implications of each and their usage.  The following examples illustrate the difference.
-
-.Using semi-colons as instruction conjunctions
-```
-RUN do_1; do_2
-```
-
-This sort of conjunction will be evaluated into do_1 and then do_2.  However, using the double
-ampersands results in a different evaluation.
-
-.Using double ampersands as conjunctions
-```
-RUN do_1 && do_2
-```
-
-The ampersands change the resulting evaluation into do_1 and then do_2 _only if do_1 was successful_.
-
-The use of the double ampersands as conjunctions is probably a better practice in Dockerfiles because
-it ensures that your instructions are completed or the build will fail.  If the build were to continue
-and you had not closely monitored the build (or its results), then the image may not be exactly
-as you desired.  This is particularly true with automated build systems where you will want any
-failure to result in the failure of the build itself.
-
-There are certainly use cases where semi-colons might be preferred and possibly should be used.
-Nevertheless, the possible result of an incomplete image should be carefully considered.
-
-
-==== Locales
-
 === Labels
 
 Labels in Dockerfiles serve as a useful way to organize and document metadata used to describe an image.  Some labels are only descriptive
-by nature, like  _Name_ whereas others, like _RUN_ can be used to describe action-oriented metadata.  Labels are often leveraged by applications, like
-https://github.com/projectatomic/atomic[atomic], to help the image run as the author intended.  They can also for purely descriptive
-purposed and can viewed manually with the _docker inspect <image_name>_ command.
+by nature, like  _name_ whereas others, like _RUN_ can be used to describe action-oriented metadata.  Labels are often leveraged by applications, like
+https://github.com/projectatomic/atomic[atomic] or https://github.com/openshift[OpenShift], to help the image run as the author intended. Labels are primarily intended for descriptive purposes and can be viewed manually with the `docker inspect <image_name>` command.
 
-The authoritative source for labels
-is the  https://github.com/projectatomic/ContainerApplicationGenericLabels[Container Application Generic Labels] git repository.
+==== When are Labels Required?
 
-==== When are they required?
-
-Labels are never required per-se unless your build system or lifecycle management process requires them.
+Labels are never required per se unless your build system or lifecycle management process requires them.
 However, the use of labels is highly recommended for a number of reasons:
 
 * As mentioned above, many container related tools can use the label metadata in meaningful ways often
@@ -408,7 +396,7 @@ contributing to a better user experience.
 metadata even if their tooling does not make specific use of it.  For example, the RUN label basically
 documents how you, as the author of the Dockerfile, expect this image to be run.
 
-==== Descriptive labels
+==== Descriptive Labels
 
 The descriptive labels usually are alpha-numeric strings used to describe some aspect of the image itself.  Examples, might be
 the version and release labels which could theoretically just be integer based.
@@ -435,7 +423,7 @@ The following table describes labels that are meant to be purely descriptive in 
 | changelog-url | URL of a page containing release notes for the image| _TBD_
 |===============================================
 
-==== Action-oriented labels
+==== Action-Oriented Labels
 [[label_action]]
 Most action-oriented labels will be a used in the context of a docker command in order for the container to behave in a desired
 way.  The following table describes the defined action-oriented labels.
@@ -452,7 +440,7 @@ way.  The following table describes the defined action-oriented labels.
 | debug | Command to run the image with debugging turned on | _tbd_
 |===============================================
 
-==== Recommended labels for your project
+==== Recommended Labels for your Project
 
 Labels are critical to properly identifying your image and influencing how it runs.  For the purposes of
 identification, we recommend that you at least use the following labels:
@@ -475,11 +463,11 @@ tools developed to read and act upon this meta data will work correctly.
 In the case that you provide a help file that does not follow the standard of a man page, then the HELP label would also
 be prudent.
 
-==== Recommended labels for your OpenShift project
+==== Recommended Labels for your OpenShift Project
 
 Images that are meant to be run in OpenShift are recommended to contain a set of labels as seen in the https://docs.openshift.org/latest/creating_images/metadata.html[OpenShift Origin documentation]. The labels are namespaced in compliance with the https://docs.docker.com/engine/userguide/labels-custom-metadata/[Docker format]; that is _io.openshift_ for OpenShift and _io.k8s_ for Kubernetes.
 
-See the following example snippet from the https://github.com/openshift/s2i-ruby/blob/master/2.2/Dockerfile#L12[sti-ruby] image:
+See the following example snippet from the https://github.com/openshift/s2i-ruby/blob/master/2.2/Dockerfile[s2i-ruby] image:
 
 ```
 LABEL io.k8s.description="Platform for building and running Ruby 2.2 applications" \
@@ -489,18 +477,20 @@ LABEL io.k8s.description="Platform for building and running Ruby 2.2 application
 
 ```
 
+For a comprenehsive list of recommended labels you might want to consider for your projects, see the https://github.com/projectatomic/ContainerApplicationGenericLabels[Container Application Generic Labels] git repository.
+
 === Template
-// Should we create a default template of sorts
+// Link to https://github.com/container-images/container-image-template and https://github.com/devexp-db/distgen/
 
 
-=== Starting your application
+=== Starting your Application
 
 Generally the CMD instruction in the Dockerfile is used by docker to start your application
 when the image or container is started.  In the planning section, we provided some reasoning
 for choosing how to  *_xref:planning_starting_application[start your application]_*.  The following
 subsections will show how to implement each choice in your Dockerfile.
 
-==== Calling the binary directly
+==== Calling the Binary Directly
 Being the simplest of the choices, you simply need to call the binary using the CMD instruction or
 define an ENTRYPOINT in your Dockerfile.
 
@@ -514,16 +504,11 @@ If there is no ENTRYPOINT in the Dockerfile, the value of CMD is the command run
 container image. If there is an ENTRYPOINT in the Dockerfile, the ENTRYPOINT value is run as the command instead,
 with the value of CMD used as options to the ENTRYPOINT command.
 
-The CMD instruction can be overridden when you run the image. So, notice the different results from running
-mycmd in two different ways:
-
-Any time you add an argument to the end of a docker run command, the CMD instruction inside the container is ignored.
-So the second example opens a bash shell instead of running the cat command. If you want to assign a command that
-is not overridden by options at the end of a docker run command, use the ENTRYPOINT instruction.
+The CMD instruction can be overridden when you run the image. Any time you add an argument to the end of a docker run command, the CMD instruction inside the container is ignored. For example, when running `docker run -it myimage bash`, whatever command is set in the CMD instruction in your Dockerfile will be overrriden and _bash_ will be run instead.
 
 ===== Using the ENTRYPOINT Instruction
-Like CMD, the ENTRYPOINT instruction lets you define the command executed when you run the container image but it
-cannot be overridden by arguments you put at the end of a docker run line. If your Dockerfile includes an
+Like CMD, the ENTRYPOINT instruction lets you define the command executed when you run the container image, but it
+cannot be overridden by arguments you put at the end of the `docker run` command. If your Dockerfile includes an
 ENTRYPOINT instruction and there is also a CMD instruction, any arguments on the CMD instruction line are passed to
 the command defined in the ENTRYPOINT line.
 
@@ -531,12 +516,12 @@ This is the distinct advantage of the ENTRYPOINT instruction over the CMD instru
 is not overridden but it can be subsidized.  Suppose you have an ENTRYPOINT instruction that displays two files.
 You could easily add an additional file to be displayed by adding it to the docker run command.
 
-You can override the ENTRYPOINT command by defining a new entrypoint with the --entrypoint="" option on the docker
+You can override the ENTRYPOINT command by defining a new entrypoint with the `--entrypoint=""` option on the docker
 command line.
 
 [[creating_using_a_script]]
 
-==== Using a script
+==== Using a Script
 Using a script to start an application is very similar to calling the binary directly. Again, you
 use the CMD instruction but instead of pointing at the binary you point at your script that was
 injected into the image.  The _registry.access.redhat.com/rhel7/rsyslog_ image uses a script
@@ -568,7 +553,7 @@ CMD [ "/bin/rsyslog.sh" ]
 ```
 
 [[creating_using_systemd]]
-==== Using systemd "inside the container"
+==== Using systemd Inside the Container
 
 Extending our example from link:#creating_using_a_script[starting an application with a script], the rsyslog
 image was started with a script.  We could easily use systemd to start the application.  To use systemd
@@ -586,7 +571,7 @@ And then we need to change the CMD instruction to call _/usr/sbin/init_ to let s
 RUN /usr/sbin/init
 ```
 
-==== Using systemd to control containers
+==== Using Systemd to Control Containers
 
 The control mechanism for most docker functions is done via the docker commands or something like
 the atomic application which simplifies the management of containers and images for users.  But in
@@ -596,7 +581,7 @@ boot-up.  Or perhaps you wish to be able to restart (or recycle) a container bec
 its configuration file.
 
 There are several approaches to these sorts of function.  You can make sure a specific container
-always starts on boot-up using the --restart switch with the docker command line when you initially
+always starts on boot-up using the `--restart` switch with the docker command line when you initially
 run the image.  There are also orchestration platforms like Kubernetes that will allow you to determine the
 start up order of containers even when they are distributed.  But in the case where all the containers
 reside on a single node, systemd might just be exactly the solution.  Like with traditional services,
@@ -665,15 +650,12 @@ with systemd, then systemd will use _/etc/sysconfig/<service_name>_ within the i
 For more information on writing unit files see link:https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/System_Administrators_Guide/sect-Managing_Services_with_systemd-Unit_Files.html[Managing Systemd unit files].
 
 // Help section
-=== Creating a Help file
+=== Creating a Help File
 include::help.adoc[]
 
+=== The Dockerfile Linter
 
-=== Creating a Changelog
-
-=== The Dockerfile linter
-
-==== What is the linter?
+==== What Is the Linter?
 
 The Dockerfile-lint is a rule based link:https://en.wikipedia.org/wiki/Lint_(software)['linter'] for verifying Dockerfiles. The rules are used to check file syntax and best practice options for things such as:
 
@@ -684,14 +666,13 @@ These are determined by the rules author and are typically defined by best pract
 
 At the time of this writing, there are a number of templates from base to automated build configurations.
 
-==== Where do I get the linter and how do I install it?
+==== Where do I Get the Linter and How do I Install it?
 
 There are two iterations of the linter.
 
-The CLI version of the project is available here:
+* The CLI version of the project is available here:
 link:https://github.com/projectatomic/dockerfile_lint[Dockerfile_lint]
-
-The online version of the project is available here:
+* The online version of the project is available here:
 link:https://access.redhat.com/labs/linterfordockerfile/#/[Online linter]
 
 For the next section, we will assume that the CLI version of the linter will be installed manually via link:https://docs.npmjs.com/[npm] using the following commands:
@@ -701,16 +682,16 @@ git clone https://github.com/projectatomic/dockerfile_lint/
 cd dockerfile_lint
 npm install
 ```
-==== Where do I get the templates?
+==== Where do I Get the Templates?
 
-===== Built in Templates
+===== Built-in Templates
 In the config directory, there are two base ruleset files. If the dockerfile_lint is executed without -r these are the base rules used.
 
 * dockerfile_lint/config/default_rules.yaml
 
 * dockerfile_lint/config/base_rules.yaml
 
-===== Addition Types of templates
+===== Additional Types of Templates
 
 In the sample_rules directory there are some included templates for OpenShift and an example base template.
 
@@ -722,11 +703,11 @@ This set of rules is a basic catchall of your typical Dockerfile. Things such as
 
 In addition to testing the semantics of the basic template from above, The OpenShift template checks for some link:https://docs.openshift.org/latest/creating_images/metadata.html#defining-image-metadata[required OpenShift labels] specific to its use.
 
-==== How do I read and customize the templates?
+==== How do I Read and Customize the Templates?
 
 The filename of the basic template is included in the command above: sample_rules/basic_rules.yaml
 
-The rules are implemented using regular expressions matched on instruction of the dockerfile. The rule file has 3 sections: *a profile section, a line rule section and a required instructions section.*
+The rules are implemented using regular expressions matched on instruction of the Dockerfile. The rule file has 3 sections: a *profile* section, a *line rule* section and a *required instructions* section.
 
 ===== Profile Section
 
@@ -748,7 +729,7 @@ The include section allows for chaining rulesets of multiple sources. In the abo
 
 ===== Line Rule Section
 
-This section contains rules match on a given instruction in the dockerfile. The line rules do the bulk of the dockerfile parsing.
+This section contains rules match on a given instruction in the Dockerfile. The line rules do the bulk of the dockerfile parsing.
 
 The example below shows rules to run against the 'FROM' instruction.
 ```
@@ -783,7 +764,7 @@ Here is another example that parses the 'RUN' line.
     yum clean all
 ```
 
-The regex below checks to see if the yum command has been issued. If it has, check to see if yum clean all has been run as well.
+The regex below checks to see if the yum command has been issued. If it has, check to see if _yum clean all_ has been run as well.
 ```
   RUN:
     paramSyntaxRegex: /.+/
@@ -801,7 +782,7 @@ The regex below checks to see if the yum command has been issued. If it has, che
 ```
 ===== Required Instructions Section
 
-While the line rules section uses regex the required instructions looks for the instantiation of the instruction.
+While the line rules section uses regex, the required instructions looks for the instantiation of the instruction.
 
 ```
 required_instructions:
@@ -816,7 +797,7 @@ required_instructions:
       - "#expose"
 ```
 
-==== How do I use the linter?
+==== How do I use the Linter?
 
 Execution of the CLI version of the linter may look like this:
 
@@ -843,76 +824,3 @@ By default, the linter runs in strict mode (errors and/or warnings result in non
 dockerfile_lint  -p -f /path/to/dockerfile
 ```
 This allows for quick and automated testing as what is informational and what needs to be addressed immediately.
-
-
-=== Dockerfiles
-
-==== Location
-
-The Dockerfiles for many of the public images are hosted in git repositories where users can view
-them.  This also allows users to customize them as well.
-
-It is also good practice to include the Dockerfile in the image itself.  Some distributions have begun to
-include an image's Dockerfile in the directory _/root/buildinfo_.  Consider following the same
-approach to make sure your Dockerfiles can be easily found.
-
-Upstream Dockerfiles should be hosted in a public GIT repository, for example https://github.com[GitHub]. Ideally, the repository should be created under the organization relevant to a particular project. For example, http://www.softwarecollections.org[Software Collections] Dockerfiles are available under the GitHub https://github.com/sclorg[sclorg] organization.
-
-==== Images
-
-Upstream Docker images, such as CentOS and Fedora base images and layered images based on these, should be publicly available on https://registry.hub.docker.com/[Docker Hub].
-
-For details on using the Docker Hub registry, see https://docs.docker.com/userguide/dockerimages/[Docker User Guide].
-
-==== Content
-
-Docker is a platform that enables applications to be quickly assembled from components. When creating Docker images, think about the added value you can provide potential users with. The intention should always be bringing some added functionality on top of plain package installation.
-
-As an example, take this https://github.com/docker-library/wordpress/blob/618490d4bdff6c5774b84b717979bfe3d6ba8ad1/apache/Dockerfile[Word Press Dockerfile]. After running the image and linking it with a database image such as mysql, you will get a fully operational Word Press instance. In addition, you can also specify an external database.
-
-This exactly is the purpose of using Docker images; instead of laborious installation and configuration of separate components, you simply pull an image from a registry, acquiring a set of tools ready to be used right out-of-the-box.
-
-==== Enabling Necessary Repositories
-
-TBD
-
-// maybe move somewhere RHEL-specific
-
-
-==== Users
-TBD
-
-==== Working Directory
-TBD
-
-==== Exposing Ports
-
-The +EXPOSE+ instruction declares the ports on which a container will listen for incoming connections. You should specify ports your application commonly uses; for example, as seen in this https://github.com/openshift/mysql/blob/master/5.5/Dockerfile[mysql] example:
-
-----
-EXPOSE 3306
-----
-
-IMPORTANT: The TCP/IP port numbers below 1024 are special in that normal users are not allowed to bind on them.
-
-Therefore, for example for Apache server, ports 8080 or 8433 (HTTP or HTTPS) should be exposed. Otherwise, only the root user will be allowed to run Apache server inside a container.
-
-
-// For information on exposing ports in Software Collection images, see the xref:software_collections[Software Collections] chapter.
-
-==== Logging
-TBD
-
-...
-
-
-
-=== References
-
-// References to external sites and project-specific guidelines.
-
-Please see the following resources for more information on the Docker container technology and project-specific guidelines.
-
-http://docs.docker.com/[Docker Documentation] -- Detailed information about the Docker platform.
-
-https://github.com/openshift/openshift-docs/blob/master/creating_images/guidelines.adoc#openshift-specific-guidelines[OpenShift Guidelines] -- Guidelines for creating images specific to the OpenShift project.
