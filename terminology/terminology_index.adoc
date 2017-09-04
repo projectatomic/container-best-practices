@@ -7,20 +7,19 @@
 === Dictionary
 
 When discussing containerization, it’s important to have a solid grasp on the related vocabulary. One of the challenges people have is that many of the following terms
-are used interchangeably.It can be confusing, especially for newcomers.
+are used interchangeably. It can be confusing, especially for newcomers.
 
 The goal of this section is to clarify these terms, so that we can speak the same language.
 
 ==== Container Image
 
-Container image is a binary that includes all of the requirements for running a container, as well as metadata describing its needs and capabilities. You can think of it as a packaging technology. Containers only have access to resources defined in the image,
-unless you give the container additional access when creating it.
+Container image is a filesystem tree that includes all of the requirements for running a container, as well as metadata describing the content. You can think of it as a packaging technology.
 
 ==== Container
 
-A container is an instance of an image. Containers are an abstraction at the application layer that packages code and dependencies together.
+A container is composed of two things: a writable filesystem layer on top of a container image, and a tradiional linux process.
 Multiple containers can run on the same machine and share the OS kernel with other containers, each running as an isolated processes in the user space.
-Containers take up less space than VMs (container images are typically tens of MBs in size), and start almost instantly.
+Containers take up less space than VMs (application container images are typically tens of MBs in size), and start almost instantly.
 
 ==== Repository
 
@@ -38,9 +37,9 @@ docker pull docker.io/library/fedora:latest
 
 This can be confusing, and many people refer to this as an image or a container image. In fact, the docker images sub-command is what is used to list the locally available repositories. Conceptually, these repositories can be thought about as container images, but it’s important to realize that these repositories are actually made up of layers.
 
-When we specify the repository on the command line, the Docker daemon is doing some extra work for you. The Docker daemon (not the client tool) is configured with a list of servers to search. In our example above, the damone will search for the “fedora” repository on each of the configured servers.
+When we specify the repository on the command line, the Docker daemon is doing some extra work for you. The Docker daemon (not the client tool) is configured with a list of servers to search. In our example above, the daemon will search for the “fedora” repository on each of the configured servers.
 
-In the above command, only the repository name was specified, but it’s also possible to specify a full URL with the Docker client. To highlight this, let’s start with dissecting a full URL.
+In the above command, only the repository name was specified, but it’s also possible to specify a full URL address with the Docker client. To highlight this, let’s start with dissecting a full address.
 
 ```
 REGISTRY[:PORT]/NAMESPACE/REPOSITORY[:TAG]
@@ -58,7 +57,7 @@ docker pull fedora
 ==== Image Layer
 
 Repositories are often referred to as images or container images, but actually they are made up of one or more layers.
-Image layers in a repository are connected together in a parent-child relationship. Each image layer represents changes between itself and the parent layer.
+Image layers in a repository are connected together in a parent-child relationship. Each image layer represents some pieces of the final container image.
 
 ==== Registry
 A registry server, is essentially a fancy file server that is used to store Docker repositories.
@@ -97,39 +96,17 @@ This section will delve into some of the common use cases that users are tacklin
 Applications containers are the most popular form of containers. These are what developers and application owners care about.
 Application containers contain the code that developers work on. These include, for exmaple, MySQL, Apache, MongoDB, and Node.js.
 
-==== Operating System Containers
+==== Cattle vs Pet Containers
 
-Operating system containers are containers which are treated more like a full virtual operating system.
-OS containers still share a host kernel, but run a full init system which allows them to easily run multiple processes.
-LXC and LXD are examples of OS containers because they are treated much like a full virtual machine.
-
-It is also possible to approximate an OS container with Docker/OCI based containers, but requires running systemd inside the container.
-This allows the end user to install software like they normally would and treat the container much more like a full operating system.
-
-```
-yum install mysql
-systemctl enable mysql
-```
-
-This makes it easier to migrate existing applications.
-
-
-==== Pet Containers
-
-This is a common pattern, that not many people talk about publicly.
-The Pet Container use case is common when starting out, when developing tools,
-and even when integrating into an existing production environment where the end users do not want to change their workflow.
-
-Pet containers provide users with the portability and convenience of a standardized container infrastructure relying on registry servers, container images,
-and standard container hosts for infrastructure, but provide the flexibility of a traditional environment.
-
+Containers are usually perceived as a technology that serves for deploying applications that are immutable and can be therefore redeployed or killed any time without severe consequences. As an analogy, these are often referred to as "cattle". Containers in this development environment don't have "identity", the user doesn't need to care where the contianers live in the cluster, the containers are automatically recovered after failures and can be scaled up or down as needed.
+In contrast, when a pet container fails, the running application will be directly affected and might fail as well. Similarly as pets, pet containers require user's closer attention and management and are usually accompanied with regular health checks. A typical example would be a containerized database.
 
 ==== Super Privileged Containers
 
 When building container infrastructure on dedicated container hosts such as Atomic Host, system administrators still need to perform administrative tasks.
 Whether used with distributed systems, such as Kubernetes or OpenShift or standalone container hosts, Super Privileged Containers (SPCs) are a powerful tool.
 SPCs can even do things like load specialized kernel modules, such as with systemtap.
-In an infrastructure that is built to run containers, administrators will most likely need SPCs to do things like monitoring, backups, etc.
+In an infrastructure that is built to run containers, administrators will most likely need SPCs to do things like management, monitoring, backups, etc.
 It's important to realize that there is typically a tighter coupling between SPCs and the host kernel, so administrators need to choose a rock solid container host and standardize on it,
 especially in a large clustered/distributed environment where things are more difficult to troubleshoot.
 They then need to select a user space in the SPC that is compatible with the host kernel.
@@ -139,11 +116,11 @@ They then need to select a user space in the SPC that is compatible with the hos
 ==== Base Images
 
 A base image is one of the simplest types of images, but you will find a lot of definitions.
-Sometimes users will refer to corporate standard build, or even an application image as the “base image.”
-Technically, this is not a base image, these are link:#intermediate_images[Intermediate images].
+Sometimes users will also refer an application image as the “base image.”
+However, technically, this is not a base image, these are link:#intermediate_images[Intermediate images].
 
 Simply put, a base image is an image that has no parent layer. Typically, a base image contains a fresh copy of an operating system.
-Base images normally include the tools (yum, rpm, apt-get, dnf, microdnf) necessary to install packages / make updates to the image over time.
+Base images normally include core system tools, such as bash or coreutils and tools necessary to install packages and make updates to the image over time (yum, rpm, apt-get, dnf, microdnf...)
 While base images can be “hand crafted”, in practice they are typically produced and published by open source projects (like Debian, Fedora or CentOS) and vendors (like Red Hat).
 The provenance of base images is critical for security. In short, the sole purpose of a base image is to provide a starting place for creating your derivative images.
 When using a Dockerfile, the choice of which base image you are using is explicit:
@@ -162,7 +139,7 @@ This newly created application container image can then be run in development or
 For example, if a developer has PHP code and they want to run it in a container, they can use a PHP builder image to produce a ready to run application container image.
 The developer passes the GitHub URL where the code is stored and the builder image does the rest of the work for them.
 The output of a Builder container is an Application container image which includes Red Hat Enterprise Linux, PHP from Software Collections, and the developer’s code, all together, ready to run.
-Builder images provide a powerful way to go from code to container quickly and easily, building off of trusted components
+Builder images provide a powerful way to go from code to container quickly and easily, building off of trusted components.
 
 [[intermediate_images]]
 ==== Intermediate Images

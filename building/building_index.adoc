@@ -4,23 +4,22 @@
 :data-uri:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-
 === Simple Build
 
-For building docker containers, we must first have the docker daemon installed and running:
+For building docker images, we must first have the docker daemon installed and running:
 [source,shell]
 ----
-#> yum install -y docker
+#> dnf install -y docker
 #> systemctl start docker
 ----
 
-Then we can download some image, that we'll use as a base of our image. Let's use something we trust, for example Red Hat Enterprise Linux 7:
+Then we can download an image that we'll use as a base of our image. Let's use something we trust, for example Red Hat Enterprise Linux 7:
 [source,shell]
 ----
 #> docker pull rhel7
 ----
 
-Then, one way to create an image, is simply to run the container, do some reasonable work (like creating some content) and using `docker commit`:
+Then, one way to create an image, is to simply layer your content on top of the running container. Run the container, make your changes and use `docker commit` to "commit" your changes:
 
 [source,shell]
 ----
@@ -31,9 +30,9 @@ Then, one way to create an image, is simply to run the container, do some reason
 0bdcfc5ba0602197e2ac4609b8101dc8eaa0d8ab114f542ab6b2f15220d0ab22
 ----
 
-However, once we'd decide to do something more complicated, we'd have troubles to make it again, so this way is not reproducible and thus is not encouraged. We should use the Dockerfiles instead.
+However, this approach is not easily reproducible and is not ideal for more complicated scenarios. To ensure the build can be reproduce, use the Dockerfile instead.
 
-This following example results in the same output as the example before, except we can repeat it as many times we want and always get the same output. It also helps understanding the docker itself more as a packaging format, than just a virtualization technology:
+The following example results in the same output as the example before, except we can repeat it as many times we want and always get the same output. It also helps understanding the Docker itself more as a packaging format, than just a virtualization technology:
 
 [source,shell]
 ----
@@ -46,153 +45,6 @@ RUN echo Hello Dojo > /root/greeting
 
 //TBD: === Using a Build Service
 //TBD: === Build Strategies in OpenShift
-
-
-OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD OLD - OLD - OLD -OLD - OLD - OLD -OLD OLD OLD
-Building a single Docker image once is a simple matter.
-
-----
-sudo docker build -t <registry_URL>/some/image .
-----
-
-This will build the image which could then be pushed to a registry location. Done. However, this immutable image will need to be updated. And this image depends on other images which will be updated, which means this image will need to be rebuilt. If this image is part of a microservice application it is just one of several images that work together as integrated services that comprise an application. Do you really want a developer to build production services from their laptop?
-
-Serious work with container technology should automate builds. While there are some unique challenges specific to container automation, generally following continuous integration and delivery best practices is recommended.
-
-==== Building a system container
-
-The need for a container service to be started promptly before the Docker service starts supplies the requirements of a system container. The Open-vm-tools container is a system container utilizing runc as the runtime engine.
-
-A system container normally starts as a regular Docker container:
-[source,shell]
-----
-FROM rhel7:7.4-ondeck
-
-LABEL summary="The open-vm-tools guest agent" \
-      io.k8s.description="The open-vm-tools agent is providing information about the virtual machine and allows to restart / shutdown the machine via VMware products. This image is intended to be used with virtual machines running Red Hat Enterprise Linux Atomic Host." \
-      name="rhel/open-vm-tools" \
-      version="7.4" \
-      com.redhat.component="open-vm-tools-docker" \
-      maintainer="davis phillips <dphillip@redhat.com>"
-
-ENV SYSTEMD_IGNORE_CHROOT=1
-
-RUN yum-config-manager --enable rhel-7-server-rpms || :
-RUN yum -y --setopt=tsflags=nodocs install file open-vm-tools perl net-tools iproute systemd
-RUN yum clean all
-
-COPY tmpfiles.template service.template config.json.template /exports/
-COPY init.sh /usr/bin/
-
-LABEL run="docker run  --privileged -v /proc/:/hostproc/ -v /sys/fs/cgroup:/sys/fs/cgroup  -v /var/log:/var/log -v /run/systemd:/run/systemd -v /sysroot:/sysroot -v=/var/lib/sss/pipes/:/var/lib/sss/pipes/:rw -v /etc/passwd:/etc/passwd -v /etc/shadow:/etc/shadow -v /tmp:/tmp:rw -v /etc/sysconfig:/etc/sysconfig:rw -v /etc/resolv.conf:/etc/resolv.conf:rw -v /etc/nsswitch.conf:/etc/nsswitch.conf:rw -v /etc/hosts:/etc/hosts:rw -v /etc/hostname:/etc/hostname:rw -v /etc/localtime:/etc/localtime:rw -v /etc/adjtime:/etc/adjtime --env container=docker --net=host  --pid=host IMAGE"
-
-CMD /usr/bin/vmtoolsd
-----
-
-Note, the following line:
-
-[source,shell]
-----
-COPY tmpfiles.template service.template config.json.template /exports/
-----
-
-This line sets up to stage the systems container. The important components for this are service.template and config.json.template. The service.template is the systemd unit template for when the systems container is installed via atomic install.
-
-[source,shell]
-----
-[Unit]
-Description=Service for virtual machines hosted on VMware
-Documentation=http://github.com/vmware/open-vm-tools
-ConditionVirtualization=vmware
-
-[Service]
-ExecStartPre=/bin/bash -c 'systemctl import-environment'
-ExecStartPre=/bin/bash -c 'export -p > /tmp/open-vm-tools-bash-env'
-ExecStart=$EXEC_START
-ExecStop=$EXEC_STOP
-WorkingDirectory=$DESTDIR
-
-[Install]
-WantedBy=multi-user.target
-----
-
-The config.json.template is similar to the Docker run label or line. Below shows the environment variables, bind mounts and the command to execute "/usr/bin/init.sh"
-
-[source,shell]
-----
-{
-    "ociVersion": "1.0.0",
-    "platform": {
-        "os": "linux",
-        "arch": "amd64"
-    },
-    "process": {
-        "terminal": false,
-        "user": {},
-        "args": [
-            "/usr/bin/init.sh"
-        ],
-        "env": [
-            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-            "TERM=xterm",
-            "NAME=open-vm-tools",
-            "SYSTEMD_IGNORE_CHROOT=1"
-        ],
-...
-omitted
-    "mounts": [
-            {
-            "destination": "/run/systemd",
-            "type": "bind",
-            "source": "/run/systemd",
-            "options": [
-                "rw",
-                "rbind",
-                "rprivate"
-            ]
-        },
-...
-omitted
-----
-
-Often times, executing a single command via the container is not enough. The above command init.sh stages the container environment and ensures both VGAuthService and vmtoolsd is executed inside the container.
-
-[source,shell]
-----
-#!/bin/sh
-source /tmp/open-vm-tools-bash-env
-
-COMMAND=/usr/local/bin/vmware-toolbox-cmd
-if [ ! -e $COMMAND ]
-  then
-    echo 'runc exec -t open-vm-tools vmware-toolbox-cmd "$@"' > /usr/local/bin/vmware-toolbox-cmd
-    chmod +x /usr/local/bin/vmware-toolbox-cmd
-fi
-exec /usr/bin/VGAuthService -s &
-exec /usr/bin/vmtoolsd 
-----
-
-Here are the commands to execute via the atomic CLI to install and convert a system container. Provided we have already built the open-vm-tools container from the Dockerfile listed above. 
-
-[source,shell]
-----
-atomic pull --storage=ostree docker:open-vm-tools
-atomic install --system open-vm-tools
-systemctl start open-vm-tools
-----
-
-Similarly, we can pull this container from the Red Hat registry and install it in the same fashion.
-[source,shell]
-----
-atomic pull --storage ostree registry.access.redhat.com/rhel7/open-vm-tools
-atomic install --system registry.access.redhat.com/rhel7/open-vm-tools
-systemctl start open-vm-tools 
-----
-
-The atomic install command installs the systemd unit file from the container from its /exports/ directory and sets the service to enable. The systemctl command below that starts the service immediately instead of awaiting a reboot. 
-
-More examples of system containers can be found https://github.com/projectatomic/atomic-system-containers[here]. This includes the open-vm-tools example for CentOS. 
-
 
 === Build Environment
 A build environment should have the following characteristics
@@ -211,7 +63,7 @@ A build environment should have the following characteristics
 
 A build environment that meets these requirements is difficult to create from scratch. An automation engine like Jenkins is essential to managing a complex pipeline. While a virtual machine-based solution could be created, it is recommended that a dedicated, purpose-built platform such as OpenShift be used.
 
-//== Triggering Builds
+//TBD: === Triggering Builds
 
 
 

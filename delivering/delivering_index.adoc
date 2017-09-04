@@ -32,5 +32,6 @@ Here we see a search that shows an image name in the REGISTRY/USER/REPO format i
   
   $ sudo docker search zdover23
   INDEX       NAME                               DESCRIPTION   STARS     OFFICIAL   AUTOMATED
-  docker.io   docker.io/zdover23/fed20publican                 0                    
+  docker.io   docker.io/zdover23/fed20publican                 0         
 
+For more information on naming recommendations, see https://github.com/projectatomic/ContainerApplicationGenericLabels/blob/master/vendor/redhat/names.md[this document].

@@ -10,8 +10,7 @@ LABS=index.adoc \
 	creating/creating_index.adoc \
 	building/building_index.adoc \
 	testing/testing_index.adoc \
-	delivering/delivering_index.adoc \
-	maintaining/maintaining_index.adoc
+	delivering/delivering_index.adoc
 
 ALL_ADOC_FILES := $(shell find . -type f -name '*.adoc')
 

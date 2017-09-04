@@ -29,6 +29,6 @@ include::testing/testing_index.adoc[]
 include::delivering/delivering_index.adoc[]
 
 // Maintaining
-include::maintaining/maintaining_index.adoc[]
+//include::maintaining/maintaining_index.adoc[]
 
 
