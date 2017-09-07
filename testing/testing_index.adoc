@@ -8,7 +8,7 @@
 
 === What Should be Tested
 
-Container images generally consist of distribution packages and some scripts that help start the container properly. For example, a container with a MariaDB database typically consists of a set of RPMs, such as mariadb-server, that provides the main functionality and some scripts that handle initialization, setup, etc. A simplified example of MariaDB Dockerfile may look like this:
+Container images generally consist of distribution packages and some scripts that help start the container properly. For example, a container with a MariaDB database typically consists of a set of RPMs, such as mariadb-server, that provides the main functionality, and scripts that handle initialization, setup, etc. A simplified example of MariaDB Dockerfile may look like this:
 [source,Dockerfile]
 ----
 FROM fedora:24
@@ -26,20 +26,20 @@ USER 27
 CMD ["run-mysqld"]
 ----
 
-If we want to test the basic functionality of the container, we do not have to test the RPM functionality. The benefit of using the distribution packaging is that we know testing has already been done during the RPM develpment process. Instead, we need to focus on testing the added scripts instead and the API of the container. The goal is to determine if it works as described. For example, a MariaDB database container, we do not run the MariaDB unit tests in the container. Instead we focus on whether the database is initialized, configured, and responds to commands properly.
+If we want to test the basic functionality of the container, we do not have to test the RPM functionality. The benefit of using the distribution packaging is that we know testing has already been done during the RPM develpment process. Instead, we need to focus on testing of the added scripts instead and the API of the container. The goal is to determine if it works as described. For example, for the MariaDB database container, we do not run the MariaDB unit tests in the container. Instead we focus on whether the database is initialized, configured, and responds to commands properly.
 
 === Conventions for Test Scripts
 
 It is good practice to keep the basic sanity tests for the image together with the image sources. For example test/run might be a script, that tests the image specified by the IMAGE_NAME environment variable, so users may specify an image which should be tested.
 
-=== Examples of test scripts
+=== Examples of Test Scripts
 
 These examples of test scripts can be found in the container images for Software Collections:
 
 * https://github.com/sclorg/postgresql-container/blob/master/9.5/test/run
 * https://github.com/sclorg/s2i-python-container/blob/master/3.5/test/run
 
-A minimal script that verifies a container image by running it as daemon and then running a script that checks the proper functionality, is shown below. It stores the IDs of the containers created during the test in a temporary directory. This makes it easy to clean up those containers after the test finishes.
+A minimal script that verifies a container image by running it as a daemon and then running a script that checks the proper functionality, is shown below. It stores the IDs of the containers created during the test in a temporary directory. This makes it easy to clean up those containers after the test finishes.
 
 [source,bash]
 ----
@@ -112,3 +112,6 @@ function create_container() {
 create_container test1
 test_image test1
 ----
+
+// === Build Testing
+// === Image Scanning

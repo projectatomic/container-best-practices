@@ -7,26 +7,11 @@
 :sectnums:
 :homepage https://github.com/projectatomic/container-best-practices:
 
-// Preface
-include::preface.adoc[]
-
-//Audience
-== Audience
-
-This documentation has been written specifically for the developers who are writing
-Dockerfiles to create images.  Dockerfiles can become rather complex depending on the
-application being containerized so we are passing on our experience with Dockerfiles
-through a series of best practices.
-
-This guide of best practices is not a reference guide of all the Dockerfile instructions.  There
-is plenty of documentation available on the link:https://www.docker.com/[Docker website] should
-you require that sort of content.
-
 // Overview
 include::overview/overview_index.adoc[]
 
-// Goals
-include::goals/goals_index.adoc[]
+// Terminology
+include::terminology/terminology_index.adoc[]
 
 // Planning
 include::planning/planning_index.adoc[]
@@ -34,16 +19,16 @@ include::planning/planning_index.adoc[]
 // Creating
 include::creating/creating_index.adoc[]
 
-// Build and Test
+// Building
 include::building/building_index.adoc[]
 
+// Testing
 include::testing/testing_index.adoc[]
 
+// Delivering
+include::delivering/delivering_index.adoc[]
+
 // Maintaining
-include::maintaining/maintaining_index.adoc[]
+//include::maintaining/maintaining_index.adoc[]
 
-// Appendix
-include::appendix/appendix_index.adoc[]
 
-// Deliver
-//include::deliver/image_naming.adoc[]

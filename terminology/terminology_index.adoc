@@ -1,0 +1,184 @@
+// vim: set syntax=asciidoc:
+[[Terminology]]
+== Terminology
+:data-uri:
+:homepage https://github.com/projectatomic/container-best-practices:
+
+=== Dictionary
+
+When discussing containerization, it’s important to have a solid grasp on the related vocabulary. One of the challenges people have is that many of the following terms
+are used interchangeably. It can be confusing, especially for newcomers.
+
+The goal of this section is to clarify these terms, so that we can speak the same language.
+
+==== Container Image
+
+Container image is a filesystem tree that includes all of the requirements for running a container, as well as metadata describing the content. You can think of it as a packaging technology.
+
+==== Container
+
+A container is composed of two things: a writable filesystem layer on top of a container image, and a tradiional linux process.
+Multiple containers can run on the same machine and share the OS kernel with other containers, each running as an isolated processes in the user space.
+Containers take up less space than VMs (application container images are typically tens of MBs in size), and start almost instantly.
+
+==== Repository
+
+When using the `docker` command, a repository is what is specified on the command line, not an image. In the following command, “fedora” is the repository.
+
+```
+docker pull fedora
+```
+
+This is actually expanded automatically to:
+
+```
+docker pull docker.io/library/fedora:latest
+```
+
+This can be confusing, and many people refer to this as an image or a container image. In fact, the docker images sub-command is what is used to list the locally available repositories. Conceptually, these repositories can be thought about as container images, but it’s important to realize that these repositories are actually made up of layers.
+
+When we specify the repository on the command line, the Docker daemon is doing some extra work for you. The Docker daemon (not the client tool) is configured with a list of servers to search. In our example above, the daemon will search for the “fedora” repository on each of the configured servers.
+
+In the above command, only the repository name was specified, but it’s also possible to specify a full URL address with the Docker client. To highlight this, let’s start with dissecting a full address.
+
+```
+REGISTRY[:PORT]/NAMESPACE/REPOSITORY[:TAG]
+```
+
+The full URL is made up of a standard server name, a namespace, and optionally a tag. There are actually many permutations of how to specify a URL and as you explore the Docker ecosystem, you will find that many pieces are optional. The following commands are all valid and all pull some permutation of the same repository:
+
+```
+docker pull docker.io/library/fedora:latest
+docker pull docker.io/library/fedora
+docker pull library/fedora
+docker pull fedora
+```
+
+==== Image Layer
+
+Repositories are often referred to as images or container images, but actually they are made up of one or more layers.
+Image layers in a repository are connected together in a parent-child relationship. Each image layer represents some pieces of the final container image.
+
+==== Registry
+A registry server, is essentially a fancy file server that is used to store Docker repositories.
+Typically, the registry server is specified as a normal DNS name and optionally a port number to connect to.
+Much of the value in the Docker ecosystem comes from the ability to push and pull repositories from registry servers.
+
+When a Docker daemon does not have a locally cached copy of a repository, it will automatically pull it from a registry server.
+Usually the default registry is set to docker.io (Docker Hub). It is important to stress, that there is implicit trust in the registry server.
+
+You must determine how much you trust the content provided by the registry and you may want to allow or block certain registries.
+In addition to security, there are other concerns such as users having access to licensed software and compliance issues.
+The simplicity with which Docker allows users to pull software makes it critical that you trust upstream content.
+
+==== Namespace
+
+A namespace is a tool for separating groups of repositories.
+On the public DockerHub, the namespace is typically the username of the person sharing the image, but can also be a group name, or a logical name.
+
+==== Tag
+
+When an image builder creates a new repository, they will typically label the best image layers to use.
+These are called tags and typically map to versions of software contained in the repository.
+In other words, tags are how various images in a repository are distinguished from each other.
+
+=== Container Use Cases
+
+There are many types of Container design patterns forming. Since containers are the runtime version of a container image, the way a container is built is tightly coupled to how it is run.
+
+Some Container Images are designed to be run without privileges while others are more specialized and require root-like privileges.
+There are many dimensions in which patterns can be evaluated and often users will see multiple patterns or use cases tackled together in one container image/container.
+
+This section will delve into some of the common use cases that users are tackling with containers.
+
+==== Application Containers
+
+Applications containers are the most popular form of containers. These are what developers and application owners care about.
+Application containers contain the code that developers work on. These include, for exmaple, MySQL, Apache, MongoDB, and Node.js.
+
+==== Cattle vs Pet Containers
+
+Containers are usually perceived as a technology that serves for deploying applications that are immutable and can be therefore redeployed or killed any time without severe consequences. As an analogy, these are often referred to as "cattle". Containers in this development environment don't have "identity", the user doesn't need to care where the contianers live in the cluster, the containers are automatically recovered after failures and can be scaled up or down as needed.
+In contrast, when a pet container fails, the running application will be directly affected and might fail as well. Similarly as pets, pet containers require user's closer attention and management and are usually accompanied with regular health checks. A typical example would be a containerized database.
+
+==== Super Privileged Containers
+
+When building container infrastructure on dedicated container hosts such as Atomic Host, system administrators still need to perform administrative tasks.
+Whether used with distributed systems, such as Kubernetes or OpenShift or standalone container hosts, Super Privileged Containers (SPCs) are a powerful tool.
+SPCs can even do things like load specialized kernel modules, such as with systemtap.
+In an infrastructure that is built to run containers, administrators will most likely need SPCs to do things like management, monitoring, backups, etc.
+It's important to realize that there is typically a tighter coupling between SPCs and the host kernel, so administrators need to choose a rock solid container host and standardize on it,
+especially in a large clustered/distributed environment where things are more difficult to troubleshoot.
+They then need to select a user space in the SPC that is compatible with the host kernel.
+
+=== Image Types
+
+==== Base Images
+
+A base image is one of the simplest types of images, but you will find a lot of definitions.
+Sometimes users will also refer an application image as the “base image.”
+However, technically, this is not a base image, these are link:#intermediate_images[Intermediate images].
+
+Simply put, a base image is an image that has no parent layer. Typically, a base image contains a fresh copy of an operating system.
+Base images normally include core system tools, such as bash or coreutils and tools necessary to install packages and make updates to the image over time (yum, rpm, apt-get, dnf, microdnf...)
+While base images can be “hand crafted”, in practice they are typically produced and published by open source projects (like Debian, Fedora or CentOS) and vendors (like Red Hat).
+The provenance of base images is critical for security. In short, the sole purpose of a base image is to provide a starting place for creating your derivative images.
+When using a Dockerfile, the choice of which base image you are using is explicit:
+```
+FROM registry.fedoraproject.org/fedora
+```
+
+==== Builder Images
+
+These are a specialized form of container images which produce application container images as offspring.
+They include everything but a developer's source code. Builder images include operating system libraries, language runtimes, middleware, and the source-to-image tooling.
+
+When a builder image is run, it injects the developers source code and produces a ready-to-run offspring application container image.
+This newly created application container image can then be run in development or production.
+
+For example, if a developer has PHP code and they want to run it in a container, they can use a PHP builder image to produce a ready to run application container image.
+The developer passes the GitHub URL where the code is stored and the builder image does the rest of the work for them.
+The output of a Builder container is an Application container image which includes Red Hat Enterprise Linux, PHP from Software Collections, and the developer’s code, all together, ready to run.
+Builder images provide a powerful way to go from code to container quickly and easily, building off of trusted components.
+
+[[intermediate_images]]
+==== Intermediate Images
+
+An Intermediate image is any container image which relies on a base image. Typically, core builds, middleware and language runtimes are built as layers on “top of” a base image.
+These images are then referenced in the FROM directive of another image. These images are not used on their own, they are typically used as a building block to build a standalone image.
+
+It is common to have different teams of specialists own different layers of an image.
+Systems administrators may own the core build layer, while “developer experience” may own the middleware layer.
+Intermediate Images are built to be consumed by other teams building images, but can sometimes be ran standalone too, especially for testing.
+
+
+==== Intermodal Images
+
+Intermodal container images are images that have hybrid architectures. For example, many Red Hat Software Collections images can be used in two ways.
+
+First, they can be used as simple Application Containers running a fully contained Ruby on Rails and Apache server.
+
+Second, they can be used as Builder Images inside of OpenShift Container Platform.
+In this case, the output child images which contain Ruby on Rails, Apache, and the application code which the source-to-image process was pointed towards during the build phase.
+
+The intermodal pattern is becoming more and more common to solve two business problems with one container image.
+
+==== Deployer Images
+
+A deployer image is a specialized kind of container which, when run, deploys or manages other containers.
+This pattern enables sophisticated deployment techniques such as mandating the start order of containers, or first run logic such as populating schema or data.
+
+// TBD: Container patterns could nicely add to this
+
+==== Containerized Components
+
+A container that is meant to be deployed as part of a larger software system, not on its own. Two major trends are driving this.
+
+First, microservices are driving the use of best-of-breed components - this is also driving the use of more components combined together to build a single application.
+Containerized components are meeting the need to deploy an expanding quantity of complex software more quickly and easily.
+
+Second, not all pieces of software are easy to deploy as containers. Sometimes, it makes sense to containerize only certain
+components which are easier to move to containers or provide more value to the overall project. With multi-service application, some services may be deployed as containers, while others may be deployed through traditional a traditional methodology such as an RPM or installer script.
+
+It’s important to understand that containerized components are not designed to function on their own.
+They provide value to a larger piece of software, but provide very little value on their own.

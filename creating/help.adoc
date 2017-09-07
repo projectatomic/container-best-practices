@@ -1,20 +1,19 @@
-You can now provide a man-like help file with your images that allow for users to have a deeper understanding of your
-image.  This function now allows you to provide a:
+You can provide a man-like help file with your images that allows for users to have a deeper understanding of your
+image. This function now allows you to provide a:
 
 - more verbose description of the what the image is and does
 - understanding of how the image should be run
 - description of the security implications inherent in running the image
 - requirement if the image needs to be installed
 
-The atomic application will allow you to display this help file trivially like so:
+You can use the atomic application to display this help file trivially like so:
 [source, none]
 ----
 # atomic help <image or container name>
 ----
 
 ==== Location
-The help file must be located in the images as /help.1 and in 'man' format.
-
+For the `atomic` tool to be able to parse your help file, it must be located in the image as `/help.1` and in the 'man' format.
 
 ==== Required headings
 
@@ -35,7 +34,7 @@ Explain all environment variables available to run the image in different ways w
 ===== HISTORY
 Similar to a Changelog of sorts which can be as detailed as the maintainer desires.
 
-==== Optional headings
+==== Optional Headings
 
 Use the following sections in your help file when applicable.
 
@@ -48,11 +47,10 @@ For more information see https://github.com/projectatomic/ContainerApplicationGe
 If your image uses any privileges that you want to make the user aware of, be sure to document which ones are used and optionally
 why.
 
-
-==== Sample template
+==== Sample Template
 We recommend writing the help file in the https://help.github.com/articles/markdown-basics/[markdown] language and then
-converting it to the man format.  This is handy because github can natively display markdown so the help file can be used
-in multiple ways.
+converting it to the man format.  This is handy because github can natively display markdown, so the help file can be used
+in multiple ways. For a template, see the example help file below and the template markdown file that can also be obtained at https://github.com/container-images/container-image-template/blob/master/help/help.md[here].
 
 .Sample help template in markdown format
 [source, markdown]
@@ -111,13 +109,13 @@ Root privileges
 Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
 
 # SEE ALSO
-Upstream repository: https://github.com/container-images/container-image-template
+References to documenation or other sources. For example:
 
 Does Red Hat provide MariaDB technical support on RHEL 7? https://access.redhat.com/solutions/1247193
 Install and Deploy a Mariadb Container Image https://access.redhat.com/documentation/en/red-hat-enterprise-linux-atomic-host/7/single/getting-started-guide/#install_and_deploy_a_mariadb_container
 ----
 
-==== Example help file for the rsyslog container
+==== Example Help File for the rsyslog Container
 
 [source, markdown]
 ----
@@ -280,12 +278,11 @@ Similar to a Changelog of sorts which can be as detailed as the maintainer wishe
 Stephen Tweedie
 ----
 
-
-==== Converting markdown to man format
-There are several methods for converting markdown format to man format.  One prevalent method is to use go-md2man supplied
-by the golang-github-cpuguy83-go-md2man package.  To convert from markdown to man using this utility, you do as follows:
+==== Converting Markdown to man Format
+There are several methods for converting markdown format to man format.  One prevalent method is to use `go-md2man` supplied
+by the golang-github-cpuguy83-go-md2man package. To convert from markdown to man using this utility, you do as follows:
 
 [source, none]
 ----
-# go-md2man -in path_to_man_file -out output_file
+go-md2man -in path_to_man_file -out output_file
 ----

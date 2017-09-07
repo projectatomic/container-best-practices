@@ -11,9 +11,8 @@ how to start the application, to network considerations, to making sure your ima
 can run in multiple environments like Atomic Host or OpenShift.
 
 The very act of containerizing any application presents a few hurdles that are perhaps considered
-defacto in a traditional Linux environment.  The following sections highlight these hurdles and
+defacto in a traditional Linux environment. The following sections highlight these hurdles and
 offer solutions which would be typical in a containerized environment.
-
 
 //Simple database
 include::planning_scenarios_simple_db.adoc[]
@@ -40,10 +39,10 @@ a log server.  The log timestamps and information would almost be entirely usele
 time than the host.
 
 The best way to synchronize the time between a container and its host is through the use of bind mounts.  You simply need
-to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.  We use the _ro_ flag to ensure the container
+to bind mount the host's _/etc/localtime_ with the container's _/etc/localtime_.  We use the `ro` flag to ensure the container
 can't modify the host's time zone by default.
 
-In your Dockerfile, this can be accomplished by adding the following to your RUN label.
+In your Dockerfile, this can be accomplished by adding the following to your RUN label:
 
 .Synchronizing the timezone of the host to the container.
 ```
@@ -53,26 +52,24 @@ In your Dockerfile, this can be accomplished by adding the following to your RUN
 ==== Machine ID
 
 The _/etc/machine-id_ file is often used as an identifier for things like applications and logging.  Depending on your
-application, it might be beneficial to also bind mount the machine id of the host into the container.  For example.
-in many cases journald relies on the machine ID for identification.  The sosreport application also uses it.  To bind
-mount the machine ID of the host to the container, add something like the following to your RUN label.
+application, it might be beneficial to also bind-mount the machine ID of the host into the container.  For example, in many cases journald relies on the machine ID for identification. The sosreport application also uses it.  To bind-mount the machine ID of the host to the container, specify the following when running your container or add the following line to your atomic `RUN` label so `atomic` can utilize it:
 
 .Synchronizing the host machine ID with a container
 ```
 -v /etc/machine-id:/etc/machine-id:ro
 ```
 
-=== Considerations for images on Atomic Host and OpenShift
+// === Considerations for images on Atomic Host and OpenShift
 
-=== Where to store related components
+// TBD: === Where to store related components
 
-==== scripts
+// ==== scripts
 
-==== tar files
+// ==== tar files
 
-==== help files
+// ==== help files
 
-==== Dockerfiles
+// ==== Dockerfiles
 
 [[planning_starting_application]]
 === Starting your applications within a container
@@ -87,13 +84,13 @@ For the most part, there is no single right answer on which method should be use
 some softer decision points that might help you decide which would be easiest for you as the
 Dockerfile owner.
 
-==== Calling the binary directly
+==== Calling the Binary Directly
 If your application is not service-oriented, calling the binary directly might be the simplest and most
 straight-forward method to start a container.  There is no memory overhead and no additional packages
 are needed (like systemd and its dependencies).  However, it is more difficult to deal with
 setting environment variables.
 
-==== Using a script
+==== Using a Script
 Using a special script to start your application in a container can be a handy way to deal with slightly
 more complex applications.  One upside is that it is generally trivial to set environment variables.  This
 method is also good when you need to call more than a single binary to start the application correctly.
@@ -101,7 +98,7 @@ One downside is that you now have to maintain the script and ensure it is always
 
 [[planning_use_systemd]]
 ==== Use systemd
-Using systemd to start your application is a great if your application is service-oriented (like httpd).
+Using systemd to start your application is great if your application is service-oriented (like httpd).
 It can benefit from leveraging well tested unit files generally delivered with the applications
 themselves and therefore can make complex applications that require environment variables easy to work
 with.  One disadvantage is that systemd will increase the size of your image and there is a small
@@ -112,20 +109,28 @@ within a container.
 
 You can implement using link:#creating_using_systemd[systemd fairly simply in your Dockerfile].
 
-=== Techniques for deploying or starting images from a host
-==== host systemd considerations
-==== native docker (ah) unit file
-===== example unit file - atomic create unit file
-==== openshift driven
+//TBD: === Techniques for deploying or starting images from a host
+// ==== host systemd considerations
+// ==== native docker (ah) unit file
+// ===== example unit file - atomic create unit file
+// ==== openshift driven
 
 [[planning_network]]
 === Network Considerations
 
-==== single host
+==== Single Host
 
-==== multi-host
+==== Multi Host
 
-==== AEP / OSE / Docker considerations
+==== Networking in OpenShift
+
+Establishing network connection between containers in OpenShift is different from the standard Docker container linking approach. OpenShift uses a built-in DNS so that services can be reached by the service DNS and service IP address.
+In other words, applications running in a container can connect to another container using the service name. For example, if a container running the MySQL database is a **database** service endpoint, **database** will be used as a hostname to connect to it from another container.
+In addition to DNS record, you can also use the environment variables with IP address of the service which are provided for every container running in the same project as the service. However, if the IP address (environment variable) changes, you will need to redeploy the container. Using service names is therefore recommended.
+
+For details, see https://docs.openshift.org/latest/architecture/additional_concepts/networking.html[OpenShift Documentation].
+
+//==== AEP / OSE / Docker considerations
 
 [[planning_storage]]
 === Storage Considerations
@@ -136,42 +141,42 @@ considering how you deal with storage needs.
 
 By nature, the storage for containers is ephemeral.  This makes sense because one of the attractions of containers
 is that they can be easily created, deleted, replicated, and so on.  If no consideration to storage is given, the
-container will only have access to its own filesystem.  This means if the container is deleted, whatever information
-whether it is logs or data will be lost.  For some applications, this is perfectly acceptable if not preferred.
+container will only have access to its own filesystem.  This means if the container is deleted, whatever information,
+whether it is logs or data, will be lost. For some applications, this is perfectly acceptable if not preferred.
 
 However, if your application generates important data that should be retained or perhaps could be shared amongst
-multiple containers, you will need to ensure that this storage is setup for the user.
+multiple containers, you will need to ensure that this storage is set up for the user.
 
-==== Persistent storage for containers: Data Volumes
+==== Persistent Storage for Containers: Data Volumes
 
-Docker defines link:https://docs.docker.com/engine/userguide/containers/dockervolumes/[persistent storage] in two ways.
+Docker defines link:https://docs.docker.com/engine/admin/volumes/volumes/[persistent storage] in two ways.
 
 . Data volumes
 . Data volume containers
 
-However at present, the use of link:https://docs.docker.com/engine/userguide/containers/dockervolumes/#data-volumes[data volumes]
-is emerging to be the preferred storage option for users of Docker.  The docker website defines a data volume as
+However at present, the use of data volumes
+is emerging to be the preferred storage option for users of Docker.  The Docker website defines a data volume as
 _"a specially-designated directory within one or more containers that bypasses the Union File System."_ It has the distinct
 advantages that they can be shared and reused for one or more containers.  Moreover, a data volume will
 persist even if the associated container is deleted.
 
 Data volumes must be explicitly created and preferbaly should be named to provide it with a meaningful name.  You can
-manually create a data volume with the _docker volume create_ command.
+manually create a data volume with the `docker volume create` command.
 
 .Creating a data volume for persistent storage
 ```
 $ docker volume create <image_name>
 ```
 
-NOTE: You can also specify a driver name with the -d option
+NOTE: You can also specify a driver name with the `-d` option
 
-===== Using data volumes in a Dockerfile
+===== Using Data Volumes in a Dockerfile
 
 For developers whose applications require persistent storage, the trick will be instantiating the data volume
 prior to running the image.  This, however, can be achieved leveraging the link:#label_action[LABEL metadata]
 and applications like atomic.
 
-We recommend that the data volume be created through the use of the INSTALL label.  If you recall, the INSTALL label
+We recommend that the data volume be created through the use of the INSTALL label.  The INSTALL label
 is meant to identify a script that should be run prior to ever running the image. In that install script, adding
 something like the following can be used to create the data volume.
 
@@ -188,7 +193,7 @@ RUN label would bind mount the data volume by name:
 -v <data_volume_name>:/<mount_path_inside_container>
 ```
 
-==== Persistent storage for containers: Mounting a directory from the host
+==== Persistent Storage for Containers: Mounting a Directory from the Host
 You can also leverage the host filesystem for persistent storage through the use of bind mounts.  The basic idea for this
 is to use a directory on the host filesystem that will be bind mounted into the container at runtime.  This can be simply
 used by adding a bind mount to your RUN label:
@@ -201,13 +206,13 @@ used by adding a bind mount to your RUN label:
 One downside to this approach is that anyone with privileges to that directory on the host will be able to view and
 possibly alter the content.
 
-==== OpenShift persistent storage
-==== Storage backends for persistent storage
+==== OpenShift Persistent Storage
+==== Storage Backends for Persistent Storage
 
 === Logging
 
 If your application logs actions, errors, and warnings to some sort of log mechanism, you will want to consider how
-to allows users to obtain, review, and possible retain those logs.  The flexibility of a container environment
+to allows users to obtain, review, and possibly retain those logs.  The flexibility of a container environment
 can however present some challenges when it comes to logging because typically your containers are separated
 by namespace and cannot leverage the system logging without some explicit action by the users.  There are also
 several solutions for logging containers like:
@@ -217,13 +222,13 @@ several solutions for logging containers like:
 * logging to a file shared with the host (bind mounting)
 
 As a developer, if your application uses logging of some manner, you should be thinking about how you will
-handle your log files.  Each of aforementioned solutions has its pros and cons.
+handle your log files.  Each of the aforementioned solutions has its pros and cons.
 
 [[logging_use_service]]
-==== Using a logging service
+==== Using a Logging Service
 
 Most traditional Linux systems use a logging service like link:http://www.rsyslog.com/[rsyslog] to collect and store
-its log files.  Often the logging service will coordinate logging with journald but nevertheless it too is a service
+its log files.  Often the logging service will coordinate logging with journald but nevertheless it too is a service and
 will accept log input.
 
 If your application uses a logger and you want to take advantage of the host's logger, you can bind mount _/dev/log_
@@ -233,10 +238,10 @@ between the host and container as part of the RUN label like so:
 -v /dev/log:/dev/log
 ```
 
-Depending on the host distribution, log messages will now be in the host's journald and subsequently into
+Depending on the host distribution, log messages will now be in the host's journald and subsequently in
 _/var/log/messages_ assumming the host is using something like rsyslog.
 
-==== Setting the log driver for docker daemon
+==== Setting the Log Driver for docker Daemon
 
 Docker has the ability to link:https://docs.docker.com/engine/admin/logging/overview/[configure a logging driver].  When
 implemented, it will impact all containers on the system.  This is only useful when you can ensure that the
@@ -244,13 +249,13 @@ host will only be running your application as this might impact other containers
 usefulness unless you can ensure the final runtime environment.
 
 [[logging_host_shared_storage]]
-==== Using shared storage with the host
+==== Using Shared Storage with the Host
 
 The use of xref:planning_storage[persistent storage] can be another effective way to deal with log files whether
 you choose to perform a simple bind mount with the host or data volumes.  Like  using a logging service, it has the
 advantage that the logs can be preserved irregardless of the state of the container.  Shared storage also reduces
 the potential to chew up filesystem space assigned to the container itself.  You can bind mount either a file or
-directory between host and container using the _-v_ flag in your RUN label.
+directory between host and container using the `-v` flag in your RUN label.
 
 ```
 -v <host_dir|file>:<image_dir|file>
@@ -258,16 +263,15 @@ directory between host and container using the _-v_ flag in your RUN label.
 
 ==== Logging in OpenShift
 
-OpenShift automatically collects logs of image builds and processes running inside containers. The recommended way to log for containers running in OpenShift is to send the logs to standard output or standard error rather than storing it in a file. This way, OpenShift can catch the logs and output them directly in the console or on the command line (_oc logs_).
+OpenShift automatically collects logs of image builds and processes running inside containers. The recommended way to log for containers running in OpenShift is to send the logs to standard output or standard error rather than storing it in a file. This way, OpenShift can catch the logs and output them directly in the console, as seen in the picture below, or on the command line (_oc logs_).
 
 image::planning/openshift_logs.png[]
 
-
 For details on logs aggregation, see the https://docs.openshift.org/latest/install_config/aggregate_logging.html[OpenShift docuemntation].
 
-=== Security and User considerations
+=== Security and User Considerations
 
-==== Passing credentials and secrets
+==== Passing Credentials and Secrets
 
 Storing sensitive data like credentials is a hot topic, especially because Docker does not provide a designated option for storing and passing secret values to containers.
 
@@ -305,24 +309,24 @@ There are a couple of things to keep in mind when operating with secrets:
 
 ===== Handling Secrets in Kubernetes
 
-Containers running through Kubernetes can take advantage of the **secret** resource type to store sensitive data such as passwords or tokens. kubernetes uses tmpfs volumes for storing secrets. To learn how to create and access these, refer to the http://kubernetes.io/docs/user-guide/secrets/[Kubernetes User Guide].
+Containers running through Kubernetes can take advantage of the **secret** resource type to store sensitive data such as passwords or tokens. Kubernetes uses tmpfs volumes for storing secrets. To learn how to create and access these, refer to the http://kubernetes.io/docs/user-guide/secrets/[Kubernetes User Guide].
 
 
 ===== Other Projects Facilitating Secret Management
 
 **Custodia**
 
-Custodia is an open-source project that defines an API for storing and sharing secrets such as passwords and certificates in a way that keeps data secure, manageable and audiatable. Custodia uses the HTTP protocol and a RESTful API as an IPC mechanism over a local Unix Socket. Custodia is fully modular and usrs can control how authentication, authorization and API plugins are combined and exposed. You can learn more details on the project's https://github.com/latchset/custodia[github repository] or https://github.com/latchset/custodia/wiki[wiki page].
+Custodia is an open-source project that defines an API for storing and sharing secrets such as passwords and certificates in a way that keeps data secure, manageable and audiatable. Custodia uses the HTTP protocol and a RESTful API as an IPC mechanism over a local Unix Socket. Custodia is fully modular and users can control how authentication, authorization and API plugins are combined and exposed. You can learn more details on the project's https://github.com/latchset/custodia[github repository] or https://github.com/latchset/custodia/wiki[wiki page].
 
 **Vault**
 
 Another open-source project that aims to handle secure accessing and storing of secrets is Vault. Detailed information about the tool and use cases can be found on the https://www.vaultproject.io/intro/index.html[Vault project website].
 
-
+//TBD:
 ==== User NameSpace Mapping (docker-1.10 feature)
 ==== https://www.openshift.com/promotions/docker-security.html
 
-=== Preventing your image users from filling the filesystem
+=== Preventing Your Image Users from Filling the Filesystem
 
 Most default docker deployments only set aside about 20GB of storage for each container.  For many applications, that
 amount of storage is more than enough.  But if your containerized application produces significant log output,
@@ -336,10 +340,10 @@ can be used by you to manage the container filesystem size.
 
 
 
-==== Ask for a larger storage space on run
+==== Ask for a Larger Storage Space on Run
 
 One solution to dealing with filesystem space could be to increase the amount of storage allocated to the container when
-your image is run.  This can be achieved with the following switch to _docker run_.
+your image is run.  This can be achieved with the following switch to `docker run`.
 
 .Increase the container storage space to 60GB
 ```
@@ -349,7 +353,7 @@ your image is run.  This can be achieved with the following switch to _docker ru
 If you are using a defined RUN label in your Dockerfile, you could add the switch to that label.  However,
 abuse of this switch could lead to irking users and you should be prudent in using it.
 
-==== Space considerations for logging
+==== Space Considerations for Logging
 
 Logging can sometimes unknowingly consume disk space, particularily when a service or daemon has
 failed.  If your application performs logging, or more specifically verbose logging, consider the
@@ -359,10 +363,6 @@ following approaches to help keep filesystem usage down:
 * Mount your logs to a link:#logging_host_shared_storage[shared host filesystem]
 * link:#logging_use_service[Use a logging service or the host's journalctl (/dev/log)]
 
-
-=== Image naming
-https://github.com/projectatomic/ContainerApplicationGenericLabels/blob/master/vendor/redhat/names.md
-
 === Deployment Considerations
 
 Preparing applications for production distribution and deployment must carefully consider the supported
@@ -370,6 +370,8 @@ deployment platforms. Production services require high uptime, injection of priv
 storage integration and configuration control. The deployment platform determines methods for load balancing,
 scheduling and upgrading. A platform that does not provide these services requires additional work when
 developing the container packaging.
+
+//TBD: flexible contianers
 
 ==== Platform
 ==== Lifecycle

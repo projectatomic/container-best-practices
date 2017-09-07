@@ -2,7 +2,7 @@
 
 A truly stateless application component acquires all configuration information via combination of discovery or injection via a cloud, container or configuration management framework. It assumes that all local storage is ephemeral and that any data that requires persistence beyond a shutdown, reboot or termination must be stored elsewhere.
 
-In practice, many applications are not truly stateless in the sense defined above. Instead they require at least some element of persistent state or storage to be made available or "attached" to the component at the time it is launched. Frequently, this storage must be initialized the first time the application is run.
+In practice, many applications are not truly stateless in the sense defined above. Instead, they require at least some element of persistent state or storage to be made available or "attached" to the component at the time it is launched. Frequently, this storage must be initialized the first time the application is run.
 
 ==== Examples
 
@@ -18,7 +18,7 @@ In practice, many applications are not truly stateless in the sense defined abov
 
 - If data is persistent beyond termination of the component, re-associating the persistent storage with a freshly launched instance of the component (be it a VM or a container)
 
-- If data is persistent across restarts _and_ updates to an underlying container image, ensuring that the “old” persistent data is still .  (Brent notes that our users have expectations in this area based on RPM behavior.)
+- If data is persistent across restarts _and_ updates to an underlying container image, ensuring that the “old” persistent data is still available. Users might expect behavior similar to RPMs in this area.
 
 ==== General Approaches and Patterns - Containers
 
@@ -32,8 +32,8 @@ Two common patterns have emerged to address components that require one time dat
 
 Docker containers provide persistence a few different ways.  Changes to the local file system of a running container persist across starts and stops but are lost if the container is ever removed.  If a user requires persistence beyond removal, Docker provides the concept of "Volumes" which are available in two flavors.
 
-- "Data Volumes" are directories that exist outside of the container file system and whose contents persist even after a container is terminated.
-- "Bind Mounts" are host directories can also be directly mounted into a running container.
+- "Data volumes" are directories that exist outside of the container file system and whose contents persist even after a container is terminated.
+- "Bind mounts" are host directories that can also be directly mounted into a running container.
 
 For more details on Docker storage configurations see the xref:planning_storage[storage considerations] section of this guide.
 
@@ -42,10 +42,10 @@ For more details on Docker storage configurations see the xref:planning_storage[
 
 This is an area of active development within the various container management frameworks and there is no silver bullet. 
 
-Generally speaking, if an application component does not provide some mechanism for automatic initialization it falls to the user to identify and perform perform any expected explicit storage initialization.  It is also the user's responsibility to track the resulting persistent storage objects during the removal/termination/restart of a container or an update to the underlying container image.
+Generally speaking, if an application component does not provide some mechanism for automatic initialization it falls to the user to identify and perform any expected explicit storage initialization. It is also the user's responsibility to track the resulting persistent storage objects during the removal/termination/restart of a container or an update to the underlying container image.
 
 ===== Explicit Initialization - Atomic CLI
 
 The one exception is the Atomic CLI (aka "atomic run") which provides support within its metadata format for encoding any required explicit initialization steps.
 
-(Brief example and then reference to atomic CLI docs.)
+// TBD: (Brief example and then reference to atomic CLI docs.)

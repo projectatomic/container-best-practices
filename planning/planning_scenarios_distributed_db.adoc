@@ -4,15 +4,14 @@ By definition, distributed application components need to communicate with one a
 Container technologies encourage developers to make these interconnection points explicit and 
 provide a number of mechanisms to coordinate or otherwise enable communication between containers.
 
-==== Traditional Database server/environment
+==== Traditional Database Server/Environment
 
 Consider the database example in the previous section.  Once we have established persistent 
 storage for the database server, we also need to consider how database clients will connect to it.
-In nearly all cases these connections will occur through a socket, ever over the network or locally
+In nearly all cases these connections will occur through a socket, over the network or locally
 via UNIX domain socket special file.
 
-(Diagram placeholder - Block for running container, inset for listening port on top of container 
-block, distinct block outside of container showing shared/mapped directories for UNIX sockets.)
+// TBD: (Diagram placeholder - Block for running container, inset for listening port on top of container block, distinct block outside of container showing shared/mapped directories for UNIX sockets.)
 
 Simple non-distributed applications may assume that a database is co-located on the same server 
 and use an established port number, or UNIX domain socket path, as their default access mechanism.
@@ -24,7 +23,7 @@ aware of its location, either via explicit configuration or a service discovery 
 .Traditional DB environment using both socket and TCP/IP connections
 image::images/interconnect_single.png[]
 
-==== Container environment - Docker
+==== Container Environment - Docker
 
 The previous example shows a traditional database where a single node allows both socket
 and port (TCP/IP) connections.  If we were to "containerize" the database server and
@@ -44,20 +43,24 @@ that service containers are properly configured to allow access to these connect
 Some container coordination frameworks, such as Kubernetes, attempt to simplify this use case for
 containers co-located on a single node by sharing the network port space between node-local containers.
 
-Further details and examples of networking interconnect options for various contaner frameworks and
+Further details and examples of networking interconnect options for various container frameworks and
 scenarios can be found in the xref:planning_network[network considerations] section of this document.
 
 For non-network connections between containers on a single node, shared filesystem locations, either for
 domain sockets or actual filesystem content, must be set up at the time the containers are launched.  
-Docker, for example, allow mapping a host directory to a container directory by adding the following 
+Docker, for example, allows mapping a host directory to a container directory by adding the following 
 argument to the run command:
 
+```
 -v <host_directory>:<container_directory>
+```
 
 In our DB server example, assuming the database maintains a listening UNIX domain socket in 
-"/var/run/postgres" we could launch both our server and client with the following argument included:
+`/var/run/postgres` we could launch both our server and client with the following argument included:
 
+```
 -v /var/run/postgres:/var/run/postgres
+```
 
 This will ensure that both the server and client see the same directory content, exported from the host, 
 allowing the client to connect using the expected/default location.
@@ -79,15 +82,8 @@ For network connections, Docker provides a simple directive in the Dockerfile to
 running container.  For example, to create a Postgres DB server container that listens on the default
 Postgres port, you would add the following line:
 
+```
 EXPOSE 5432
+```
 
-You then also need to ensure that you perform the port mapping when the container runs using either the -P or -p
-flags.
-
-==== Networking in OpenShift
-
-Establishing network connection between containers in OpenShift is different from the standard Docker container linking approach. OpenShift uses a built-in DNS so that services can be reached by the service DNS and service IP address.
-In other words, applications running in a container can connect to another container using the service name. For example, if a container running the MySQL database is a **database** service endpoint, **database** will be used as a hostname to connect to it from another container.
-In addition to DNS record, you can also use the environment variables with IP address of the service which are provided for every container running in the same project as the service. However, if the IP address (environment variable) changes, you will need to redeploy the container. Using service names is therefore recommended.
-
-For details, see https://docs.openshift.org/latest/architecture/additional_concepts/networking.html[OpenShift Documentation].
+You then also need to ensure that you perform the port mapping when the container runs using either the `-P` or `-p` flags.
