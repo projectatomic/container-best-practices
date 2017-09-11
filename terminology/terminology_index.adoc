@@ -17,7 +17,7 @@ Container image is a filesystem tree that includes all of the requirements for r
 
 ==== Container
 
-A container is composed of two things: a writable filesystem layer on top of a container image, and a tradiional linux process.
+A container is composed of two things: a writable filesystem layer on top of a container image, and a traditional linux process.
 Multiple containers can run on the same machine and share the OS kernel with other containers, each running as an isolated processes in the user space.
 Containers take up less space than VMs (application container images are typically tens of MBs in size), and start almost instantly.
 
@@ -94,7 +94,7 @@ This section will delve into some of the common use cases that users are tacklin
 ==== Application Containers
 
 Applications containers are the most popular form of containers. These are what developers and application owners care about.
-Application containers contain the code that developers work on. These include, for exmaple, MySQL, Apache, MongoDB, and Node.js.
+Application containers contain the code that developers work on. These include, for example, MySQL, Apache, MongoDB, and Node.js.
 
 ==== Cattle vs Pet Containers
 

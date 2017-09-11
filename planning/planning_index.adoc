@@ -160,7 +160,7 @@ _"a specially-designated directory within one or more containers that bypasses t
 advantages that they can be shared and reused for one or more containers.  Moreover, a data volume will
 persist even if the associated container is deleted.
 
-Data volumes must be explicitly created and preferbaly should be named to provide it with a meaningful name.  You can
+Data volumes must be explicitly created and preferably should be named to provide it with a meaningful name.  You can
 manually create a data volume with the `docker volume create` command.
 
 .Creating a data volume for persistent storage
