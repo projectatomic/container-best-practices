@@ -141,6 +141,9 @@ The developer passes the GitHub URL where the code is stored and the builder ima
 The output of a Builder container is an Application container image which includes Red Hat Enterprise Linux, PHP from Software Collections, and the developer’s code, all together, ready to run.
 Builder images provide a powerful way to go from code to container quickly and easily, building off of trusted components.
 
+Some Builder images are created in a way that allows developers to not only provide their source code, but also custom configuration for software built into the image.
+One such example is the https://github.com/openshift/source-to-image/tree/master/examples/nginx-centos7#configuring-nginx[Nginx Builder image] in the source-to-image upstream repository.
+
 [[intermediate_images]]
 ==== Intermediate Images
 
