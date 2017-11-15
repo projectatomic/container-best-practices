@@ -613,10 +613,6 @@ LABEL io.k8s.description="Platform for building and running Ruby 2.2 application
 
 For a comprenehsive list of recommended labels you might want to consider for your projects, see the https://github.com/projectatomic/ContainerApplicationGenericLabels[Container Application Generic Labels] git repository.
 
-=== Template
-// Link to https://github.com/container-images/container-image-template and https://github.com/devexp-db/distgen/
-
-
 === Starting your Application
 
 Generally the CMD instruction in the Dockerfile is used by docker to start your application
@@ -814,6 +810,15 @@ For more information on writing unit files see link:https://access.redhat.com/do
 [[creating_help_file]]
 === Creating a Help File
 include::help.adoc[]
+
+=== Templated Dockerfile Creation
+
+Once you're a familiar with the essentials of Dockerfile creation, you might want to take advantage of existing templates so you don't have to write the files from scratch all over again. The following templates will aid you in the process:
+
+* link:https://github.com/container-images/container-image-template[Generic image template]
+* link:https://github.com/container-images/s2i-container-image-template[Template for creation of s2i builder images]. Read more about source-to-image link:#Builder_images[here]. 
+
+If one of your goals is to have containers built on top of multiple different base images, instead of duplicating work on your Dockerfiles, you can use link:https://github.com/devexp-db/distgen/[Distgen], a tool that allows portable scripting for different Linux distributions.
 
 === The Dockerfile Linter
 
