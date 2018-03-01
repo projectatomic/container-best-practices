@@ -249,7 +249,7 @@ Therefore, an improved snipped would look like
 ```
 RUN true \
     && dnf install -y --setopt=tsflags=nodocs \
-    httpd vim \
+        httpd vim \
     && systemctl enable httpd \
     && dnf clean all \
     && true
@@ -305,7 +305,7 @@ RUN true \
     && yum install -y epel-release \
     && rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 \
     && yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
-    v8314 mongodb24-mongodb mongodb24 \
+        v8314 mongodb24-mongodb mongodb24 \
     && yum -y clean all \
     && true
 ```
@@ -320,7 +320,7 @@ Below are examples pictured for dnf and rvm:
 RUN true \
     &&  rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
     && dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
-    libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which \
+        libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which \
     && dnf clean all \
     && true
 ```
@@ -963,13 +963,17 @@ line_rules:
 ```
 Here is another example that parses the 'RUN' line.
 ```
-  RUN yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils && \
-    yum-config-manager --disable \* && \
-    yum-config-manager --enable rhel-7-server-rpms && \
-    yum clean all
+  RUN true \
+    && yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils \
+    && yum-config-manager --disable \* \
+    && yum-config-manager --enable rhel-7-server-rpms \
+    && yum clean all \
+    && true
 
-    RUN yum -y install file open-vm-tools perl open-vm-tools-deploypkg net-tools && \
-    yum clean all
+  RUN true \
+    && yum -y install file open-vm-tools perl open-vm-tools-deploypkg net-tools \
+    && yum clean all \
+    && true
 ```
 
 The regex below checks to see if the yum command has been issued. If it has, check to see if _yum clean all_ has been run as well.

@@ -13,12 +13,14 @@ Container images generally consist of distribution packages and some scripts tha
 ----
 FROM fedora:24
 
-RUN dnf install -y mariadb-server && \
-    dnf clean all && \
-    /usr/libexec/container-setup
+RUN true \
+    && dnf install -y mariadb-server \
+    && dnf clean all \
+    && /usr/libexec/container-setup \
+    && true
 
-ADD run-mysqld /usr/bin/
-ADD container-setup /usr/libexec/
+COPY run-mysqld /usr/bin/
+COPY container-setup /usr/libexec/
 
 VOLUME ["/var/lib/mysql/data"]
 USER 27
