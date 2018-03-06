@@ -216,7 +216,6 @@ should be associated with only one command or definition.
 Ensure transparency and provide a good overview of the content of each layer by grouping related operations
 together so that they together constitute a single layer. Consider this snippet:
 
-.Chained Dockerfile instruction
 ```
 RUN dnf install -y --setopt=tsflags=nodocs \
     httpd vim && \
@@ -228,11 +227,47 @@ Each command that is related to the installation and configuration of `httpd` is
 as a part of the same layer. This meaningful grouping of operations keeps the number of layers low
 while keeping the easy legibility of the layers high.
 
+However, even this snippet can be improved.
+Can you spot which issues does it suffer from?
+
+- Although most commands will span only one line, the `dnf` command spans two lines, so it is difficult to spot where it starts and where it ends.
++
+This can be mitigated by ensuring that every new command begins with `&&` at the beginning.
+As of year 2018, the trend of breaking lines before the binary operator is slowly gaining ground, as https://www.python.org/dev/peps/pep-0008/#should-a-line-break-before-or-after-a-binary-operator[PEP8] has recently adopted this policy.
+
+- The first and last commands of the block are special.
++
+If you would like to prepend or append a one-line command to the block, you will have to edit two lines - one that you are adding and the first or last commands.
+The first command is on the same line as the `RUN` directive, whereas the last command lacks the trailing backslash.
++
+Editing a line with a command that that you don't want to change presents a risk of introducing a bug, and you also obscure the line's history.
+This can be mitigated by having both the first and last commands `true` - they don't do anything.
+
+Therefore, an improved snipped would look like
+
+.Chained Dockerfile instruction
+```
+RUN true \
+    && dnf install -y --setopt=tsflags=nodocs \
+        httpd vim \
+    && systemctl enable httpd \
+    && dnf clean all \
+    && true
+```
+
+Additional benefits include easy split and merge of multiple `RUN` sections.
+If such section installs build dependencies of a package, clones source code, configures it, compiles it and finally installs it, it may be a time-consuming operation.
+And if the compilation fails at a late stage due to bad configuration, you may want to quickly iterate between the configuration and compilation phase.
+
+Therefore, you will want to split the `RUN` section in two - the dependency installation and source clone in one layer, and the rest (starting with configuration) in another layer.
+If you adhere to the style proposed here, you will split a section by inserting two lines right before the configuration step.
+After you get the configuration right, you remove those lines without any hassle.
+
 ===== Using Double Ampersands (&&) vs Semi-colons (;)
 
 In the RUN instruction of Dockerfiles, it is common to string together multiple commands for efficiency.  Stringing
 commands together in the RUN instructions are typically done with ampersands or semi-colons. However, you should
-consider the implications of each and their usage.  The following examples illustrate the difference.
+consider the implications of each and their usage.  The following examples illustrate the difference between those two https://unix.stackexchange.com/questions/88850/precedence-of-the-shell-logical-operators[patterns known to shell programmers].
 
 .Using semi-colons as instruction conjunctions
 ```
@@ -266,11 +301,13 @@ content.  Note how the following example ends with _yum -y clean all_ which remo
 
 .A singular RUN instruction performing multiple commands
 ```
-RUN yum install -y epel-release && \
-    rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
-    yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
-    v8314 mongodb24-mongodb mongodb24 && \
-    yum -y clean all
+RUN true \
+    && yum install -y epel-release \
+    && rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 \
+    && yum install -y --setopt=tsflags=nodocs bind-utils gettext iproute\
+        v8314 mongodb24-mongodb mongodb24 \
+    && yum -y clean all \
+    && true
 ```
 
 There are several package managers beyond yum that should be of note: dnf, rvm, gems, cpan, pip. Most of these
@@ -280,22 +317,26 @@ Below are examples pictured for dnf and rvm:
 
 .dnf cleanup example
 ```
-RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
-    dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
-    libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which && \
-    dnf clean all \
+RUN true \
+    &&  rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+    && dnf -y install nodejs tar sudo git-all memcached postgresql-devel postgresql-server \
+        libxml2-devel libxslt-devel patch gcc-c++ openssl-devel gnupg curl which \
+    && dnf clean all \
+    && true
 ```
 
 .Ruby (rvm) cleanup example
 ```
-RUN /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - && \
-    /usr/bin/curl -sSL https://get.rvm.io | rvm_tar_command=tar bash -s stable && \
-    source /etc/profile.d/rvm.sh && \
-    echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc && \
-    /bin/bash -l -c "rvm requirements && rvm install ruby 2.2.4 && rvm use 2.2.4 --default && \
-    gem install bundler rake && \
-    gem install nokogiri --use-system-libraries && \
-    rvm cleanup all && yum clean all && rvm disk-usage all"
+RUN true \
+    && /usr/bin/curl -sSL https://rvm.io/mpapis.asc | gpg2 --import - \
+    && /usr/bin/curl -sSL https://get.rvm.io | rvm_tar_command=tar bash -s stable \
+    && source /etc/profile.d/rvm.sh \
+    && echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc \
+    && /bin/bash -l -c "rvm requirements && rvm install ruby 2.2.4 && rvm use 2.2.4 --default \
+    && gem install bundler rake \
+    && gem install nokogiri --use-system-libraries \
+    && rvm cleanup all && yum clean all && rvm disk-usage all" \
+    && true
 ```
 
 In the above example, notice the `yum clean all` command called after rvm; this is because some package managers like rvm rely on others (like yum
@@ -922,13 +963,17 @@ line_rules:
 ```
 Here is another example that parses the 'RUN' line.
 ```
-  RUN yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils && \
-    yum-config-manager --disable \* && \
-    yum-config-manager --enable rhel-7-server-rpms && \
-    yum clean all
+  RUN true \
+    && yum -y --disablerepo=\* --enablerepo=rhel-7-server-rpms install yum-utils \
+    && yum-config-manager --disable \* \
+    && yum-config-manager --enable rhel-7-server-rpms \
+    && yum clean all \
+    && true
 
-    RUN yum -y install file open-vm-tools perl open-vm-tools-deploypkg net-tools && \
-    yum clean all
+  RUN true \
+    && yum -y install file open-vm-tools perl open-vm-tools-deploypkg net-tools \
+    && yum clean all \
+    && true
 ```
 
 The regex below checks to see if the yum command has been issued. If it has, check to see if _yum clean all_ has been run as well.
