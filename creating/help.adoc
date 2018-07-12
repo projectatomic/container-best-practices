@@ -109,7 +109,7 @@ Root privileges
 Similar to a Changelog of sorts which can be as detailed as the maintainer wishes.
 
 # SEE ALSO
-References to documenation or other sources. For example:
+References to documentation or other sources. For example:
 
 Does Red Hat provide MariaDB technical support on RHEL 7? https://access.redhat.com/solutions/1247193
 Install and Deploy a Mariadb Container Image https://access.redhat.com/documentation/en/red-hat-enterprise-linux-atomic-host/7/single/getting-started-guide/#install_and_deploy_a_mariadb_container
